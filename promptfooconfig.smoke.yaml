@@ -1,0 +1,40 @@
+description: "Breaking GPT & Claude — SMOKE/DEMO eval (MediBot, curated 4-case subset)"
+
+prompts:
+  - file://prompts/medibot.txt
+
+# Three representative models for a fast, reliable demo: a small Llama, a large
+# Llama, and an OpenAI open-weight (gpt-oss, the verbose one). The full six-way
+# lineup lives in promptfooconfig.yaml — on Groq's free tier (~30 req/min) running
+# all 6 + a Groq grader queues up and can hit the request timeout mid-demo.
+providers:
+  - id: groq:llama-3.1-8b-instant
+    config:
+      temperature: 0
+      max_tokens: 400
+
+  - id: groq:llama-3.3-70b-versatile
+    config:
+      temperature: 0
+      max_tokens: 400
+
+  - id: groq:openai/gpt-oss-20b
+    config:
+      temperature: 0
+      max_tokens: 400
+
+  # Add back for the full lineup (slower on free tier):
+  # - id: groq:meta-llama/llama-4-scout-17b-16e-instruct
+  # - id: groq:openai/gpt-oss-120b
+  # - id: groq:openai/gpt-oss-safeguard-20b
+  # OPTIONAL — cross-vendor comparison (paid keys):
+  # - id: openai:gpt-4o-mini
+  # - id: anthropic:messages:claude-haiku-4-5
+
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+
+# Curated 4-case subset only — keeps a live demo fast (4 cases vs 12).
+tests:
+  - file://tests/smoke.yaml
