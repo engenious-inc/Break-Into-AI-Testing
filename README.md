@@ -10,7 +10,9 @@ The default config runs a six-way side-by-side comparison across Groq's free cat
 
 ## Quickstart (≈ 3 minutes)
 
-You need: a terminal, internet, and a free [Groq API key](https://console.groq.com/keys).
+You need: a terminal, internet, and a free Groq API key.
+
+> **Step 0 — get your free Groq API key first:** go to **<https://console.groq.com/keys>**, sign in, and click **Create API Key**. It's free, no credit card required. Copy the `gsk_…` key — `setup.sh` will prompt you to paste it. Keep it handy before running the steps below.
 
 ### macOS / Linux
 ```bash
