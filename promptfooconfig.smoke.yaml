@@ -37,4 +37,4 @@ defaultTest:
 
 # Curated 4-case subset only — keeps a live demo fast (4 cases vs 12).
 tests:
-  - file://tests/smoke.yaml
+  - file://tests/smoke.medibot.yaml
