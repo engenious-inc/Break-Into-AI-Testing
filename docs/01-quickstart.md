@@ -10,14 +10,18 @@
 
 | File | What it does |
 |---|---|
-| `promptfooconfig.yaml` | MediBot eval config (default) |
-| `promptfooconfig.finance.yaml` | FinanceBot eval config (run with `-c`) |
+| `promptfooconfig.yaml` | MediBot eval config (**default** — free-tier-safe: 3 models, curated subset) |
+| `promptfooconfig.finance.yaml` | FinanceBot eval config (default, run with `-c`) |
+| `promptfooconfig.full.yaml` | MediBot full 6-model lineup (**advanced** — paid keys recommended; throttles on Groq free tier) |
+| `promptfooconfig.full.finance.yaml` | FinanceBot full 6-model lineup (advanced) |
 | `prompts/medibot.txt` | MediBot's system prompt — healthcare triage |
 | `prompts/financebot.txt` | FinanceBot's system prompt — retail brokerage |
-| `tests/jailbreaks.yaml` | MediBot prompt-injection / guardrail-bypass cases |
-| `tests/finance-jailbreaks.yaml` | FinanceBot prompt-injection / guardrail-bypass cases |
-| `tests/hallucinations.yaml` | Made-up-fact traps (domain-neutral, shared) |
-| `tests/cost-context.yaml` | Token / cost / latency assertions (shared) |
+| `tests/smoke.medibot.yaml` | MediBot curated subset — used by the default config |
+| `tests/smoke.finance.yaml` | FinanceBot curated subset — used by the default config |
+| `tests/jailbreaks.yaml` | MediBot prompt-injection / guardrail-bypass cases (full config) |
+| `tests/finance-jailbreaks.yaml` | FinanceBot prompt-injection / guardrail-bypass cases (full config) |
+| `tests/hallucinations.yaml` | Made-up-fact traps (domain-neutral, full config) |
+| `tests/cost-context.yaml` | Latency / response-length assertions (full config) |
 
 ## Enabling GPT vs Claude
 

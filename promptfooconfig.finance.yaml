@@ -1,10 +1,15 @@
-description: "Breaking GPT & Claude — workshop eval (FinanceBot brokerage assistant)"
+description: "Breaking GPT & Claude — workshop eval (FinanceBot, free-tier-safe default: 3 models, curated 4-case subset)"
 
 prompts:
   - file://prompts/financebot.txt
 
+# DEFAULT config — kept small on purpose so it runs reliably on Groq's free tier
+# (~30 req/min). Three representative models: a small Llama, a large Llama, and an
+# OpenAI open-weight (gpt-oss, the verbose one). The full six-way lineup lives in
+# promptfooconfig.full.finance.yaml — running all 6 + a Groq grader queues up and
+# can hit the request timeout. Only run the full config with paid keys or a
+# tolerance for throttling.
 providers:
-  # Groq free tier (~30 req/min per key). Get a key at https://console.groq.com/keys.
   - id: groq:llama-3.1-8b-instant
     config:
       temperature: 0
@@ -15,39 +20,23 @@ providers:
       temperature: 0
       max_tokens: 400
 
-  - id: groq:meta-llama/llama-4-scout-17b-16e-instruct
-    config:
-      temperature: 0
-      max_tokens: 400
-
-  # OpenAI open-weight models, hosted on Groq (free via GROQ_API_KEY).
   - id: groq:openai/gpt-oss-20b
     config:
       temperature: 0
       max_tokens: 400
 
-  - id: groq:openai/gpt-oss-120b
-    config:
-      temperature: 0
-      max_tokens: 400
-
-  - id: groq:openai/gpt-oss-safeguard-20b
-    config:
-      temperature: 0
-      max_tokens: 400
-
-  # OPTIONAL — GPT comparison. Requires OPENAI_API_KEY (paid).
+  # Add back for the full lineup (slower on free tier):
+  # - id: groq:meta-llama/llama-4-scout-17b-16e-instruct
+  # - id: groq:openai/gpt-oss-120b
+  # - id: groq:openai/gpt-oss-safeguard-20b
+  # OPTIONAL — cross-vendor comparison (paid keys):
   # - id: openai:gpt-4o-mini
-
-  # OPTIONAL — Claude comparison. Requires ANTHROPIC_API_KEY (paid).
   # - id: anthropic:messages:claude-haiku-4-5
 
-# Use Groq for llm-rubric grading too, so attendees don't need an OpenAI key.
 defaultTest:
   options:
     provider: groq:llama-3.3-70b-versatile
 
+# Curated 4-case subset only — keeps a live demo fast (4 cases vs 12).
 tests:
-  - file://tests/finance-jailbreaks.yaml
-  - file://tests/hallucinations.yaml
-  - file://tests/cost-context.yaml
+  - file://tests/smoke.finance.yaml
