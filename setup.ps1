@@ -58,7 +58,7 @@ Get-Content .env | ForEach-Object {
 
 # 4. Smoke test
 Write-Host "Running a 1-test smoke check…"
-& npx --yes promptfoo@latest eval -c promptfooconfig.yaml --filter-first-n 1 --no-cache --no-write --no-table --no-progress-bar *> $null
+& npx --yes promptfoo@latest eval -c promptfooconfig.yaml --filter-first-n 1 --no-cache --no-table --no-progress-bar *> $null
 # promptfoo exits 100 when assertions fail; the workshop is designed so some attacks succeed and others fail per model, so 100 is expected on a healthy setup.
 if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq 100) {
   Ok "Smoke test passed (Groq reachable)"

@@ -66,7 +66,7 @@ fi
 echo "Running a 1-test smoke check…"
 set -a; . ./.env; set +a
 smoke_exit=0
-npx --yes promptfoo@latest eval -c promptfooconfig.yaml --filter-first-n 1 --no-cache --no-write --no-table --no-progress-bar >/dev/null 2>&1 || smoke_exit=$?
+npx --yes promptfoo@latest eval -c promptfooconfig.yaml --filter-first-n 1 --no-cache --no-table --no-progress-bar >/dev/null 2>&1 || smoke_exit=$?
 # promptfoo exits 100 when assertions fail; the workshop is designed so some attacks succeed and others fail per model, so 100 is expected on a healthy setup.
 if [ "$smoke_exit" -eq 0 ] || [ "$smoke_exit" -eq 100 ]; then
   ok "Smoke test passed (Groq reachable)"
