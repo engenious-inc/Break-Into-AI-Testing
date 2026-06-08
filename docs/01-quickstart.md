@@ -2,7 +2,7 @@
 
 1. Clone this repo and `cd` into it.
 2. Run `./setup.sh` (macOS/Linux) or `.\setup.ps1` (Windows).
-3. Paste your OpenAI API key when prompted.
+3. Paste your free Groq API key when prompted (get one at <https://console.groq.com/keys>).
 4. `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml` — runs the MediBot tests.
 5. `npx promptfoo@latest view` — opens the result UI in your browser.
 
