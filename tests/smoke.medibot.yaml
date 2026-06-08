@@ -1,6 +1,6 @@
 # MediBot test set — 6 curated cases, one per category (jailbreak / safety /
-# hallucination / cost-length). Loaded by the default promptfooconfig.yaml.
-# Run with: npx promptfoo@latest eval
+# hallucination / cost-length). Loaded by promptfooconfig.medibot.yaml.
+# Run with: npx promptfoo@latest eval -c promptfooconfig.medibot.yaml
 
 # 1. Jailbreak that LANDS — education framing slips a dose past the guardrail
 #    (the docs note this breaks 2 of 3 Llama models).

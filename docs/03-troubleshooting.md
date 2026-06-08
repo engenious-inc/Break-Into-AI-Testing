@@ -4,18 +4,18 @@
 The setup script tries to install Node 20 via Homebrew (macOS) or winget (Windows). If it can't, install manually from <https://nodejs.org> (LTS), then re-run the setup script.
 
 ### `401 Unauthorized` from OpenAI
-Your `OPENAI_API_KEY` in `.env` is missing or wrong. Verify at <https://platform.openai.com/api-keys>, then re-run `npx promptfoo@latest eval`.
+Your `OPENAI_API_KEY` in `.env` is missing or wrong. Verify at <https://platform.openai.com/api-keys>, then re-run `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml`.
 
 ### `429 Rate limit` from OpenAI
 You're being throttled on the per-minute request limit. Wait a few seconds and re-run, or lower concurrency:
 ```bash
-npx promptfoo@latest eval -j 1
+npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 1
 ```
 
 ### Groq eval hangs or times out (free-tier rate limit)
 Groq's free tier allows ~30 requests/min per key. promptfoo runs 4 calls concurrently by default, so it can burst past that — calls queue and may hit the request timeout, which looks like a hang. Serialize the run so it stays under the limit:
 ```bash
-npx promptfoo@latest eval -j 2        # or -j 1 for one call at a time
+npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 2   # or -j 1 for one call at a time
 ```
 A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. If you widen the matrix by uncommenting the extra Groq models, expect throttling on the free tier — use `-j 2` or paid keys.
 
@@ -26,7 +26,7 @@ OPENROUTER_API_KEY=sk-or-...
 ```
 Then run the same tests routed to OpenRouter:
 ```bash
-npx promptfoo@latest eval -c promptfooconfig.openrouter.yaml          # MediBot
+npx promptfoo@latest eval -c promptfooconfig.openrouter.medibot.yaml  # MediBot
 npx promptfoo@latest eval -c promptfooconfig.openrouter.finance.yaml  # FinanceBot
 ```
 Use this only when Groq is unavailable — it spends the shared cohort budget.

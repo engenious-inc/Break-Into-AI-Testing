@@ -7,7 +7,7 @@ prompts:
 # Use only when Groq's free tier is unavailable or throttling. Requires a paid
 # OPENROUTER_API_KEY in .env (your instructor shares the cohort key — it is NOT in
 # this repo). Mirrors the default 3-model shape; the 70B doubles as the grader.
-# Run with: npx promptfoo@latest eval -c promptfooconfig.openrouter.yaml
+# Run with: npx promptfoo@latest eval -c promptfooconfig.openrouter.medibot.yaml
 providers:
   - id: openrouter:meta-llama/llama-3.1-8b-instruct
     config:

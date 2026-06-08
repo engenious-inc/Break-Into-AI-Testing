@@ -58,7 +58,7 @@ Get-Content .env | ForEach-Object {
 
 # 4. Smoke test
 Write-Host "Running a 1-test smoke check…"
-& npx --yes promptfoo@latest eval -c promptfooconfig.yaml --filter-first-n 1 --no-cache --no-table --no-progress-bar *> $null
+& npx --yes promptfoo@latest eval -c promptfooconfig.medibot.yaml --filter-first-n 1 --no-cache --no-table --no-progress-bar *> $null
 # promptfoo exits 100 when assertions fail; the workshop is designed so some attacks succeed and others fail per model, so 100 is expected on a healthy setup.
 if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq 100) {
   Ok "Smoke test passed (Groq reachable)"
@@ -70,5 +70,6 @@ if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq 100) {
 Write-Host ""
 Ok "Setup complete."
 Write-Host "Next:"
-Write-Host "  npx promptfoo@latest eval     # run the workshop eval (free-tier-safe)"
+Write-Host "  npx promptfoo@latest eval -c promptfooconfig.medibot.yaml     # MediBot (free-tier-safe)"
+Write-Host "  npx promptfoo@latest eval -c promptfooconfig.finance.yaml     # FinanceBot"
 Write-Host "  npx promptfoo@latest view     # open the web UI"
