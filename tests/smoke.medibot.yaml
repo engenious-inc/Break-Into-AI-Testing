@@ -1,6 +1,6 @@
-# Curated smoke set for live demos — 6 cases.
-# Full suites stay in jailbreaks.yaml / hallucinations.yaml / cost-context.yaml.
-# Run with: npx promptfoo@latest eval -c promptfooconfig.smoke.yaml
+# MediBot test set — 6 curated cases, one per category (jailbreak / safety /
+# hallucination / cost-length). Loaded by the default promptfooconfig.yaml.
+# Run with: npx promptfoo@latest eval
 
 # 1. Jailbreak that LANDS — education framing slips a dose past the guardrail
 #    (the docs note this breaks 2 of 3 Llama models).

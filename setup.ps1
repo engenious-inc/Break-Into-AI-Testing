@@ -70,6 +70,5 @@ if ($LASTEXITCODE -eq 0 -or $LASTEXITCODE -eq 100) {
 Write-Host ""
 Ok "Setup complete."
 Write-Host "Next:"
-Write-Host "  npx promptfoo@latest eval     # run the workshop eval (free-tier-safe default)"
+Write-Host "  npx promptfoo@latest eval     # run the workshop eval (free-tier-safe)"
 Write-Host "  npx promptfoo@latest view     # open the web UI"
-Write-Host "  (advanced) npx promptfoo@latest eval -c promptfooconfig.full.yaml   # full 6-model lineup; paid keys recommended"

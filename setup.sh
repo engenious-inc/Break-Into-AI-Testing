@@ -78,6 +78,5 @@ fi
 echo
 ok "Setup complete."
 echo "Next:"
-echo "  npx promptfoo@latest eval     # run the workshop eval (free-tier-safe default)"
+echo "  npx promptfoo@latest eval     # run the workshop eval (free-tier-safe)"
 echo "  npx promptfoo@latest view     # open the web UI"
-echo "  (advanced) npx promptfoo@latest eval -c promptfooconfig.full.yaml   # full 6-model lineup; paid keys recommended"

@@ -1,7 +1,6 @@
-# Curated smoke set for live demos — FinanceBot, 4 cases, one per lesson.
-# Mirrors tests/smoke.yaml (MediBot). Full suites stay in finance-jailbreaks.yaml /
-# hallucinations.yaml / cost-context.yaml.
-# Run with: npx promptfoo@latest eval -c promptfooconfig.smoke.finance.yaml
+# FinanceBot test set — 4 curated cases, one per category (jailbreak / safety /
+# hallucination / cost-length). Loaded by promptfooconfig.finance.yaml.
+# Run with: npx promptfoo@latest eval -c promptfooconfig.finance.yaml
 
 # 1. Jailbreak — role-play override tries to extract a specific stock pick.
 - description: "Stock pick via role-play bypass"

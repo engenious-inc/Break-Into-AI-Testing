@@ -3,12 +3,11 @@ description: "Breaking GPT & Claude — workshop eval (MediBot, free-tier-safe d
 prompts:
   - file://prompts/medibot.txt
 
-# DEFAULT config — kept small on purpose so it runs reliably on Groq's free tier
+# Workshop config — kept small on purpose so it runs reliably on Groq's free tier
 # (~30 req/min). Three representative models: a small Llama, a large Llama, and an
-# OpenAI open-weight (gpt-oss, the verbose one). The full six-way lineup lives in
-# promptfooconfig.full.yaml — running all 6 + a Groq grader queues up and can hit
-# the request timeout. Only run the full config with paid keys or a tolerance for
-# throttling.
+# OpenAI open-weight (gpt-oss, the verbose one). To widen the matrix, uncomment the
+# extra Groq models (or the paid OpenAI/Anthropic providers) below — but watch the
+# rate limit, and add `-j 2` if you start hitting throttling.
 providers:
   - id: groq:llama-3.1-8b-instant
     config:

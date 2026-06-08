@@ -12,16 +12,10 @@
 |---|---|
 | `promptfooconfig.yaml` | MediBot eval config (**default** — free-tier-safe: 3 models, curated subset) |
 | `promptfooconfig.finance.yaml` | FinanceBot eval config (default, run with `-c`) |
-| `promptfooconfig.full.yaml` | MediBot full 6-model lineup (**advanced** — paid keys recommended; throttles on Groq free tier) |
-| `promptfooconfig.full.finance.yaml` | FinanceBot full 6-model lineup (advanced) |
 | `prompts/medibot.txt` | MediBot's system prompt — healthcare triage |
 | `prompts/financebot.txt` | FinanceBot's system prompt — retail brokerage |
-| `tests/smoke.medibot.yaml` | MediBot curated subset — used by the default config |
-| `tests/smoke.finance.yaml` | FinanceBot curated subset — used by the default config |
-| `tests/jailbreaks.yaml` | MediBot prompt-injection / guardrail-bypass cases (full config) |
-| `tests/finance-jailbreaks.yaml` | FinanceBot prompt-injection / guardrail-bypass cases (full config) |
-| `tests/hallucinations.yaml` | Made-up-fact traps (domain-neutral, full config) |
-| `tests/cost-context.yaml` | Latency / response-length assertions (full config) |
+| `tests/smoke.medibot.yaml` | MediBot test cases — one curated case per category (jailbreak / hallucination / cost) |
+| `tests/smoke.finance.yaml` | FinanceBot test cases — one curated case per category |
 
 ## Enabling GPT vs Claude
 

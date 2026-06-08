@@ -17,7 +17,7 @@ Groq's free tier allows ~30 requests/min per key. promptfoo runs 4 calls concurr
 ```bash
 npx promptfoo@latest eval -j 2        # or -j 1 for one call at a time
 ```
-A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. Avoid the `*.full.yaml` configs on the free tier (6 models + grader overwhelm the limit).
+A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. If you widen the matrix by uncommenting the extra Groq models, expect throttling on the free tier — use `-j 2` or paid keys.
 
 ### `429 insufficient_quota` from OpenAI
 Different from rate-limit. Your account has no credit balance, or your monthly cap is hit. Fix at <https://platform.openai.com/settings/organization/billing> (add a payment method or top up). Then re-run — no other change needed.
