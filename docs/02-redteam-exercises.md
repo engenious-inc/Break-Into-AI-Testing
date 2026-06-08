@@ -59,6 +59,9 @@ The default config already runs three Groq models — Llama 3.1 8B, Llama 3.3 70
 ### One model judges another
 The default grader is `groq:llama-3.3-70b-versatile`. Set the `llm-rubric` provider (`defaultTest.options.provider`) to `anthropic:messages:claude-haiku-4-5` to have Claude grade the open-model outputs instead. See [Promptfoo docs: model-graded metrics](https://www.promptfoo.dev/docs/configuration/expected-outputs/model-graded/).
 
+### OpenRouter fallback (if Groq is down)
+If Groq is unavailable or throttled mid-session, a ready-made fallback runs the same curated tests on OpenRouter instead: put the cohort `OPENROUTER_API_KEY` (your instructor shares it) in `.env`, then `npx promptfoo@latest eval -c promptfooconfig.openrouter.yaml` (FinanceBot: `promptfooconfig.openrouter.finance.yaml`). It uses paid OpenRouter models on a shared budget — reach for it only when Groq won't cooperate.
+
 ### Exploring more models post-workshop (OpenRouter)
 OpenRouter routes 200+ models through one OpenAI-compatible API. Promptfoo supports it via `openrouter:<vendor>/<model>` — e.g. `openrouter:openai/gpt-oss-120b:free`, `openrouter:z-ai/glm-4.5-air:free`. Free tier shares a pool across all OpenRouter users (workshop-unfriendly), but a $5 prepay unlocks reliable paid routing.
 

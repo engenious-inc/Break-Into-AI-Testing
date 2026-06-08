@@ -19,6 +19,18 @@ npx promptfoo@latest eval -j 2        # or -j 1 for one call at a time
 ```
 A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. If you widen the matrix by uncommenting the extra Groq models, expect throttling on the free tier — use `-j 2` or paid keys.
 
+### Groq is down or your key is fully exhausted — use the OpenRouter fallback
+If serializing with `-j 2` still fails (Groq outage, or daily quota gone), switch to the OpenRouter fallback config. Put the cohort key your instructor shares into `.env`:
+```bash
+OPENROUTER_API_KEY=sk-or-...
+```
+Then run the same tests routed to OpenRouter:
+```bash
+npx promptfoo@latest eval -c promptfooconfig.openrouter.yaml          # MediBot
+npx promptfoo@latest eval -c promptfooconfig.openrouter.finance.yaml  # FinanceBot
+```
+Use this only when Groq is unavailable — it spends the shared cohort budget.
+
 ### `429 insufficient_quota` from OpenAI
 Different from rate-limit. Your account has no credit balance, or your monthly cap is hit. Fix at <https://platform.openai.com/settings/organization/billing> (add a payment method or top up). Then re-run — no other change needed.
 
