@@ -12,6 +12,13 @@ You're being throttled on the per-minute request limit. Wait a few seconds and r
 npx promptfoo@latest eval -j 1
 ```
 
+### Groq eval hangs or times out (free-tier rate limit)
+Groq's free tier allows ~30 requests/min per key. promptfoo runs 4 calls concurrently by default, so it can burst past that — calls queue and may hit the request timeout, which looks like a hang. Serialize the run so it stays under the limit:
+```bash
+npx promptfoo@latest eval -j 2        # or -j 1 for one call at a time
+```
+A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. Avoid the `*.full.yaml` configs on the free tier (6 models + grader overwhelm the limit).
+
 ### `429 insufficient_quota` from OpenAI
 Different from rate-limit. Your account has no credit balance, or your monthly cap is hit. Fix at <https://platform.openai.com/settings/organization/billing> (add a payment method or top up). Then re-run — no other change needed.
 

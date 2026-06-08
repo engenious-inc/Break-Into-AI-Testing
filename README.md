@@ -2,7 +2,7 @@
 
 Hands-on AI bug-bounty workshop. You'll red-team two chatbots — **MediBot** (healthcare triage) and **FinanceBot** (retail brokerage) — using [Promptfoo](https://www.promptfoo.dev). Both are built the way most production AI assistants are built: an open-weight LLM + a guardrail system prompt, served via Groq's free tier. Same attack surface, different domain rules.
 
-The default config is **free-tier-safe**: a curated subset (4 cases) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). The full six-model lineup lives in `promptfooconfig.full.yaml` — run it only with paid keys or a tolerance for throttling. Optionally add the paid `openai:gpt-4o-mini` or `anthropic:claude-haiku-4-5` for cross-vendor comparison.
+The default config is **free-tier-safe**: a curated subset (4–6 cases) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). The full six-model lineup lives in `promptfooconfig.full.yaml` — run it only with paid keys or a tolerance for throttling. Optionally add the paid `openai:gpt-4o-mini` or `anthropic:claude-haiku-4-5` for cross-vendor comparison.
 
 <p align="center">
   <img src="docs/qr.png" alt="Scan to clone" width="220" />
@@ -44,6 +44,8 @@ npx promptfoo@latest eval -c promptfooconfig.full.yaml          # MediBot, all 6
 npx promptfoo@latest eval -c promptfooconfig.full.finance.yaml  # FinanceBot, all 6 models
 ```
 
+> **Hitting Groq throttling?** promptfoo runs 4 calls at once by default, which can burst past Groq's ~30 req/min limit (especially on a reused key). Add `-j 2` (or `-j 1`) to serialize: `npx promptfoo@latest eval -j 2`.
+
 ## What you'll do
 
 1. **Prompt-injection / jailbreaks** — try to bypass system-prompt guardrails (`tests/jailbreaks.yaml`)
@@ -53,7 +55,7 @@ npx promptfoo@latest eval -c promptfooconfig.full.finance.yaml  # FinanceBot, al
 
 ### Notes on the default lineup
 
-- The default configs run **three** providers over a curated 4-case subset, so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in seconds. The six-model lineup (`promptfooconfig.full.yaml` / `.full.finance.yaml`) queues behind the shared Groq grader and can hit request timeouts on the free tier — use paid keys for it.
+- The default configs run **three** providers over a curated subset (MediBot 6 cases, FinanceBot 4), so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in seconds. The six-model lineup (`promptfooconfig.full.yaml` / `.full.finance.yaml`) queues behind the shared Groq grader and can hit request timeouts on the free tier — use paid keys for it.
 - gpt-oss models emit hidden reasoning tokens, so they spend ~2× the tokens of the Llama models per response. The `javascript` length assertion (≤ 40 words) in `tests/cost-context.yaml` can fail for the more verbose gpt-oss models — that's intentional, it's a signal you're meant to spot. (Note: `cost` assertions were removed — Groq's free tier returns no cost field, which makes them *error* rather than pass.)
 - The grader (judge LLM for `llm-rubric` assertions) is `groq:llama-3.3-70b-versatile`, set via `defaultTest.options.provider`. Workshop attendees don't need an OpenAI key for grading.
 

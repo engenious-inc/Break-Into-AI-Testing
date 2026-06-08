@@ -1,4 +1,4 @@
-description: "Breaking GPT & Claude — workshop eval (MediBot, free-tier-safe default: 3 models, curated 4-case subset)"
+description: "Breaking GPT & Claude — workshop eval (MediBot, free-tier-safe default: 3 models, curated 6-case subset)"
 
 prompts:
   - file://prompts/medibot.txt
@@ -37,6 +37,6 @@ defaultTest:
   options:
     provider: groq:llama-3.3-70b-versatile
 
-# Curated 4-case subset only — keeps a live demo fast (4 cases vs 12).
+# Curated 6-case subset only — keeps a run fast (6 cases vs 12 in the full suite).
 tests:
   - file://tests/smoke.medibot.yaml
