@@ -45,6 +45,17 @@ if (-not (Test-Path .env)) {
   } else {
     Warn "No key entered — edit .env manually before running eval"
   }
+
+  Write-Host ""
+  Write-Host "(Optional) OpenRouter fallback key — only needed if Groq is down and your instructor gives you one."
+  $orKey = Read-Host "Paste your OpenRouter API key (sk-or-…), or press Enter to skip"
+  if ($orKey) {
+    # .env.example ships OPENROUTER_API_KEY commented; uncomment and set it.
+    (Get-Content .env) -replace '^# OPENROUTER_API_KEY=.*', "OPENROUTER_API_KEY=$orKey" | Set-Content .env
+    Ok "Wrote OPENROUTER_API_KEY to .env"
+  } else {
+    Ok "Skipped OpenRouter key (add it later only if you need the fallback)"
+  }
 } else {
   Ok ".env already exists"
 }

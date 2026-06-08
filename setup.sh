@@ -58,6 +58,21 @@ if [ ! -f .env ]; then
   else
     warn "No key entered — edit .env manually before running eval"
   fi
+
+  echo
+  echo "(Optional) OpenRouter fallback key — only needed if Groq is down and your instructor gives you one."
+  read -r -p "Paste your OpenRouter API key (sk-or-…), or press Enter to skip: " openrouter_key
+  if [ -n "$openrouter_key" ]; then
+    # .env.example ships OPENROUTER_API_KEY commented; uncomment and set it.
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+      sed -i '' "s|^# OPENROUTER_API_KEY=.*|OPENROUTER_API_KEY=${openrouter_key}|" .env
+    else
+      sed -i "s|^# OPENROUTER_API_KEY=.*|OPENROUTER_API_KEY=${openrouter_key}|" .env
+    fi
+    ok "Wrote OPENROUTER_API_KEY to .env"
+  else
+    ok "Skipped OpenRouter key (add it later only if you need the fallback)"
+  fi
 else
   ok ".env already exists"
 fi
