@@ -96,3 +96,6 @@ echo "Next:"
 echo "  npx promptfoo@latest eval -c promptfooconfig.medibot.yaml     # MediBot (free-tier-safe)"
 echo "  npx promptfoo@latest eval -c promptfooconfig.finance.yaml     # FinanceBot"
 echo "  npx promptfoo@latest view     # open the web UI"
+echo
+echo "Before the workshop, re-check you're ready anytime with:"
+echo "  ./preflight.sh"

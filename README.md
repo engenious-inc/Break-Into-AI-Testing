@@ -44,6 +44,18 @@ npx promptfoo@latest view                                   # opens the web UI
 
 > **Groq down entirely?** Use the OpenRouter fallback. Put the cohort `OPENROUTER_API_KEY` (your instructor shares it) in `.env`, then run `npx promptfoo@latest eval -c promptfooconfig.openrouter.medibot.yaml` (or `promptfooconfig.openrouter.finance.yaml`). Same tests, routed to OpenRouter instead of Groq.
 
+## Check you're ready
+
+Anytime before the workshop (especially the morning of), run the read-only readiness probe:
+
+```bash
+./preflight.sh        # macOS / Linux
+.\preflight.ps1       # Windows (PowerShell)
+```
+
+It changes nothing and re-runs safely. On a problem it names the exact fix — a bad or
+missing key, a rate-limit throttle, or an environment that needs `./setup.sh` again.
+
 ## What you'll do
 
 1. **Prompt-injection / jailbreaks** — try to bypass system-prompt guardrails
