@@ -32,6 +32,8 @@ powershell -ExecutionPolicy Bypass -File .\setup.ps1
 
 The script will: check Node ≥ 20, install Promptfoo, prompt for your Groq key (and optionally an OpenRouter fallback key — press Enter to skip), write `.env`, and run a smoke test.
 
+> **Then confirm you're ready:** run `./preflight.sh` (`.\preflight.ps1` on Windows) — a read-only check of your key, network, and environment. It's safe to re-run anytime, especially the morning of the workshop. See [Check you're ready](#check-youre-ready) below.
+
 ## Run the workshop eval
 
 ```bash
