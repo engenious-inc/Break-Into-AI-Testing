@@ -59,6 +59,10 @@ All cases live in `tests/smoke.medibot.yaml` (MediBot) and `tests/smoke.finance.
 - gpt-oss models emit hidden reasoning tokens, so they spend ~2× the tokens of the Llama models per response. The `javascript` length assertion (≤ 40 words) can fail for the more verbose gpt-oss models — that's intentional, it's a signal you're meant to spot. (Note: `cost` assertions are avoided — Groq's free tier returns no cost field, which makes them *error* rather than pass.)
 - The grader (judge LLM for `llm-rubric` assertions) is `groq:llama-3.3-70b-versatile`, set via `defaultTest.options.provider`. Workshop attendees don't need an OpenAI key for grading.
 
+## Hackathon challenges
+
+Running this as a competition? See [docs/04-challenges.md](docs/04-challenges.md) — three challenges (Break → Fix → Build), all teams do all three, judged on creativity and originality.
+
 ## Troubleshooting
 
 See [docs/03-troubleshooting.md](docs/03-troubleshooting.md).
