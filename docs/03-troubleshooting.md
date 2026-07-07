@@ -54,3 +54,15 @@ Make sure you opened a **new** PowerShell window after Node was installed — th
 rm -rf .env .promptfoo node_modules
 ./setup.sh
 ```
+
+### `preflight.sh` (or `preflight.ps1`) says NOT READY
+
+Fix the item(s) marked `✗`:
+
+- **GROQ_API_KEY not set / still the placeholder** — run `./setup.sh`, or paste your key into `.env`. Get one free at https://console.groq.com/keys.
+- **Groq rejected your key (401)** — the key is wrong or expired. Regenerate it and update `.env`.
+- **Currently throttled (429)** — transient; wait the reported seconds and add `-j 2` to your evals. Your setup is fine.
+- **Couldn't reach api.groq.com** — check your network / VPN; if Groq is down, use the OpenRouter fallback (see the section above).
+- **Node / Promptfoo / .env missing** — run `./setup.sh` again.
+- **Missing starter files** — restore with the `git checkout -- <file>` command preflight prints.
+
