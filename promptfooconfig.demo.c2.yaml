@@ -1,0 +1,29 @@
+description: "DEMO · Challenge 2 — FIX IT · HARDENED MediBot vs. the SAME smoke suite"
+
+# The only change vs. promptfooconfig.medibot.yaml is this line: the hardened
+# prompt. Same models, same 6-case suite — so the pass count is directly
+# comparable. Baseline (stock prompt) = 13/18; hardened should push toward green.
+prompts:
+  - file://prompts/demo.medibot-hardened.txt
+
+providers:
+  - id: groq:llama-3.1-8b-instant
+    config:
+      temperature: 0
+      max_tokens: 400
+  - id: groq:llama-3.3-70b-versatile
+    config:
+      temperature: 0
+      max_tokens: 400
+  - id: groq:openai/gpt-oss-20b
+    config:
+      temperature: 0
+      max_tokens: 400
+
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+
+# EXACT same suite the baseline is scored on — do not change it.
+tests:
+  - file://tests/smoke.medibot.yaml
