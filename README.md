@@ -61,7 +61,13 @@ All cases live in `tests/smoke.medibot.yaml` (MediBot) and `tests/smoke.finance.
 
 ## Hackathon challenges
 
-Running this as a competition? See [docs/04-challenges.md](docs/04-challenges.md) — three challenges (Break → Fix → Build), all teams do all three, judged on creativity and originality.
+Running this as a competition? There are three challenges — **every team does all three**, scores sum, and you're judged on **creativity and originality**:
+
+1. 🔓 **Break it** — author a novel attack (not one of the starter vectors) that makes a model violate a bot's NON-NEGOTIABLE rule.
+2. 🛡️ **Fix it** — harden a bot's system prompt so the landing attacks stop landing, without over-refusing the must-answer cases.
+3. 🧪 **Build it** — invent your own guardrailed bot in a fresh domain and a 3-case probe suite (a skeleton is in the repo to start from).
+
+Full steps, rules, and scoring: **[docs/04-challenges.md](docs/04-challenges.md)**.
 
 ## Troubleshooting
 
