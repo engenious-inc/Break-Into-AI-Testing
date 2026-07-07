@@ -13,7 +13,7 @@ key_ok=0      # set to 1 when a usable key is present (drives Phase 2 in Task 2)
 
 echo "-- Promptfoo Red-Team Workshop . preflight --"
 
-# ── Phase 1 — environment (read-only, no network) ────────────────────────────
+# ── Phase 1 — environment (read-only; no writes) ────────────────────────────
 
 # 1. Node >= 20
 if command -v node >/dev/null 2>&1; then
@@ -53,16 +53,16 @@ else
 fi
 
 # 5. Starter files intact
-missing=""
+missing=()
 for f in promptfooconfig.medibot.yaml prompts/medibot.txt tests/smoke.medibot.yaml \
          promptfooconfig.mybot.yaml prompts/mybot.txt tests/mybot.yaml; do
-  [ -f "$f" ] || missing="$missing $f"
+  [ -f "$f" ] || missing+=("$f")
 done
-if [ -z "$missing" ]; then
+if [ "${#missing[@]}" -eq 0 ]; then
   ok "Starter files intact"
 else
-  bad "Missing starter files:$missing"; fail=1
-  for f in $missing; do echo "    restore with: git checkout -- $f"; done
+  bad "Missing starter files: ${missing[*]}"; fail=1
+  for f in "${missing[@]}"; do echo "    restore with: git checkout -- $f"; done
 fi
 
 # ── Phase 2 inserted here in Task 2 ──────────────────────────────────────────
