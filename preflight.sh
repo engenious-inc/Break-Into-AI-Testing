@@ -34,10 +34,21 @@ else
   bad "Promptfoo not available — run ./setup.sh"; fail=1
 fi
 
-# 3. .env exists — load it if so (does not create or modify it)
+# 3. .env exists — parse it if so (does not source or modify it)
 if [ -f .env ]; then
   ok ".env present"
-  set -a; . ./.env; set +a
+  # Parse (do NOT source) .env — reading it must never execute its contents.
+  gk="$(grep -E '^[[:space:]]*GROQ_API_KEY[[:space:]]*=' .env | tail -n1)"
+  if [ -n "$gk" ]; then
+    gk="${gk#*=}"                          # value after first '='
+    gk="${gk#"${gk%%[![:space:]]*}"}"      # ltrim whitespace
+    gk="${gk%"${gk##*[![:space:]]}"}"      # rtrim whitespace
+    case "$gk" in
+      \"*\") gk="${gk#\"}"; gk="${gk%\"}" ;;   # strip surrounding double quotes
+      \'*\') gk="${gk#\'}"; gk="${gk%\'}" ;;   # strip surrounding single quotes
+    esac
+    GROQ_API_KEY="$gk"
+  fi
 else
   bad ".env missing — run ./setup.sh"; fail=1
 fi

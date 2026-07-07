@@ -25,16 +25,20 @@ if ($node) {
 if ($LASTEXITCODE -eq 0) { Ok "Promptfoo ready" }
 else { Bad "Promptfoo not available — run .\setup.ps1"; $fail = $true }
 
-# 3. .env exists — load it if so (does not create or modify it)
+# 3. .env exists — parse it if so (does not source or modify it)
 $key = $null
 if (Test-Path .env) {
   Ok ".env present"
-  Get-Content .env | ForEach-Object {
-    if ($_ -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') {
-      Set-Item -Path "Env:$($Matches[1])" -Value $Matches[2].Trim()
+  foreach ($line in Get-Content .env) {
+    if ($line -match '^\s*GROQ_API_KEY\s*=\s*(.*)$') {
+      $v = $Matches[1].Trim()
+      if ($v.Length -ge 2 -and
+          ((($v[0] -eq '"') -and ($v[-1] -eq '"')) -or (($v[0] -eq "'") -and ($v[-1] -eq "'")))) {
+        $v = $v.Substring(1, $v.Length - 2)
+      }
+      $key = $v
     }
   }
-  $key = $env:GROQ_API_KEY
 } else { Bad ".env missing — run .\setup.ps1"; $fail = $true }
 
 # 4. GROQ_API_KEY sanity (never printed)
@@ -64,8 +68,9 @@ if ($keyOk) {
       200 {
         $rem = $resp.Headers['x-ratelimit-remaining-requests']
         if ($rem -is [array]) { $rem = $rem[0] }
-        if ($rem -and [int]$rem -lt 5) { Warn "Groq reachable, key valid — but only $rem requests left this window" }
-        elseif ($rem) { Ok "Groq reachable, key valid ($rem requests remaining)" }
+        $remInt = $rem -as [int]
+        if (($null -ne $remInt) -and ($remInt -lt 5)) { Warn "Groq reachable, key valid — but only $rem requests left this window" }
+        elseif ($null -ne $remInt) { Ok "Groq reachable, key valid ($rem requests remaining)" }
         else { Ok "Groq reachable, key valid" }
       }
       401 { Bad "Groq rejected your key (401) — check GROQ_API_KEY in .env or regenerate at https://console.groq.com/keys"; $fail = $true }
