@@ -65,3 +65,4 @@ Fix the item(s) marked `✗`:
 - **Couldn't reach api.groq.com** — check your network / VPN; if Groq is down, use the OpenRouter fallback (see the section above).
 - **Node / Promptfoo / .env missing** — run `./setup.sh` again.
 - **Missing starter files** — restore with the `git checkout -- <file>` command preflight prints.
+
