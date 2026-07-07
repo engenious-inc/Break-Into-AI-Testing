@@ -65,7 +65,43 @@ else
   for f in "${missing[@]}"; do echo "    restore with: git checkout -- $f"; done
 fi
 
-# ── Phase 2 inserted here in Task 2 ──────────────────────────────────────────
+# ── Phase 2 — live Groq check (one curl; only if the key looked usable) ──────
+if [ "$key_ok" -eq 1 ]; then
+  hdr="$(mktemp)"
+  status="$(curl -sS -m 10 -o /dev/null -D "$hdr" -w '%{http_code}' \
+    -X POST "$GROQ_API_BASE/chat/completions" \
+    -H "Authorization: Bearer $key" \
+    -H "Content-Type: application/json" \
+    -d '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}')"
+  curl_exit=$?
+  if [ "$curl_exit" -ne 0 ]; then
+    bad "Couldn't reach ${GROQ_API_BASE} (curl exit ${curl_exit}) — check your network / VPN"; fail=1
+  else
+    case "$status" in
+      200)
+        remaining="$(grep -i '^x-ratelimit-remaining-requests:' "$hdr" | tr -d '\r' | awk '{print $2}')"
+        if [ -n "$remaining" ] && [ "$remaining" -lt 5 ] 2>/dev/null; then
+          warn "Groq reachable, key valid — but only ${remaining} requests left this window"
+        elif [ -n "$remaining" ]; then
+          ok "Groq reachable, key valid (${remaining} requests remaining)"
+        else
+          ok "Groq reachable, key valid"
+        fi
+        ;;
+      401)
+        bad "Groq rejected your key (401) — check GROQ_API_KEY in .env or regenerate at https://console.groq.com/keys"; fail=1
+        ;;
+      429)
+        retry="$(grep -i '^retry-after:' "$hdr" | tr -d '\r' | awk '{print $2}')"
+        warn "Configured correctly, but currently throttled (429)${retry:+ — wait ${retry}s}; add -j 2 to your evals"
+        ;;
+      *)
+        bad "Unexpected response from Groq (HTTP ${status}) — see docs/03-troubleshooting.md"; fail=1
+        ;;
+    esac
+  fi
+  rm -f "$hdr"
+fi
 
 # ── Verdict ──────────────────────────────────────────────────────────────────
 echo
