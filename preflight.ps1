@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 # Read-only workshop readiness probe (Windows parity of preflight.sh). Changes nothing.
 $ErrorActionPreference = 'Continue'
 function Ok($m)   { Write-Host "$([char]0x2713) $m" -ForegroundColor Green }

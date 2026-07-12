@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 
 function Ok($m)   { Write-Host "✓ $m" -ForegroundColor Green }
