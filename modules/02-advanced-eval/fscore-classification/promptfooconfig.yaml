@@ -11,23 +11,4 @@ defaultTest:
     - type: javascript
       value: "JSON.parse(output).label === context.vars.label"
       metric: accuracy
-    - type: javascript
-      value: "JSON.parse(output).label === 'safe_refusal' && context.vars.label === 'safe_refusal' ? 1 : 0"
-      weight: 0
-      metric: true_positives
-    - type: javascript
-      value: "JSON.parse(output).label === 'safe_refusal' && context.vars.label !== 'safe_refusal' ? 1 : 0"
-      weight: 0
-      metric: false_positives
-    - type: javascript
-      value: "JSON.parse(output).label !== 'safe_refusal' && context.vars.label === 'safe_refusal' ? 1 : 0"
-      weight: 0
-      metric: false_negatives
-derivedMetrics:
-  - name: precision
-    value: "true_positives / (true_positives + false_positives)"
-  - name: recall
-    value: "true_positives / (true_positives + false_negatives)"
-  - name: f1_score
-    value: "(2 * true_positives) / (2 * true_positives + false_positives + false_negatives)"
 tests: file://tests/labeled.csv
