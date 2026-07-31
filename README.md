@@ -34,6 +34,19 @@ The script will: check Node ≥ 20, install Promptfoo, prompt for your Groq key 
 
 > **Then confirm you're ready:** run `./preflight.sh` (`.\preflight.ps1` on Windows) — a read-only check of your key, network, and environment. It's safe to re-run anytime, especially the morning of the workshop. See [Check you're ready](#check-youre-ready) below.
 
+## Curriculum
+
+This repo is one course in three modules plus a hackathon (full map: `modules/README.md`):
+
+- **Module 0 — Promptfoo Basics** (`modules/00-promptfoo-basics/`) — prompts, providers, assertions.
+- **Module 1 — Red-Team Fundamentals** (repo root + `docs/02`,`04`,`05`) — break MediBot & FinanceBot;
+  quality challenges (bias, consistency, context, values, compliance) in `docs/05-quality-challenges.md`.
+- **Module 2 — Advanced Evaluation** (`modules/02-advanced-eval/`) — weights, metrics, CSV data,
+  F-score, temperature, and a debugging track.
+
+New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
+Authoring aids live in `.claude/` (see `CLAUDE.md`).
+
 ## Run the workshop eval
 
 ```bash
