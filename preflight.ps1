@@ -56,6 +56,31 @@ else {
   $missing | ForEach-Object { Write-Host "    restore with: git checkout -- $_" }
 }
 
+# 6. Module config file references resolve (key-free structural check)
+# Every shipped default config must reference prompt/test files that exist.
+# Debugger fix-me configs are intentionally broken, and the new-eval-suite
+# skill template still has unfilled placeholders — both are skipped.
+$cfgMissing = $false
+$configs = Get-ChildItem -Path . -Recurse -Filter 'promptfooconfig*.yaml' -File |
+  Where-Object { $_.FullName -notmatch '[\\/]node_modules[\\/]' }
+foreach ($cfg in $configs) {
+  if ($cfg.FullName -match '[\\/]debugger[\\/]') { continue }   # intentionally broken — skip
+  if ($cfg.Name -like '*.template.yaml') { continue }           # skill scaffold placeholder — skip
+  $cfgDir = $cfg.DirectoryName
+  $refs = Select-String -Path $cfg.FullName -Pattern 'file://([^" ]+)' -AllMatches |
+    ForEach-Object { $_.Matches } | ForEach-Object { $_.Groups[1].Value }
+  foreach ($ref in $refs) {
+    if (-not $ref) { continue }
+    $target = Join-Path $cfgDir $ref
+    if (-not (Test-Path $target) -and -not (Test-Path $ref)) {
+      Write-Host "    $($cfg.FullName) references missing $ref"
+      $cfgMissing = $true
+    }
+  }
+}
+if (-not $cfgMissing) { Ok "Module config file references resolve" }
+else { Bad "Some module config references are missing (see above)"; $fail = $true }
+
 # Phase 2 — live Groq check (only if the key looked usable)
 if ($keyOk) {
   try {

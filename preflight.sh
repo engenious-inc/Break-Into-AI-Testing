@@ -76,6 +76,36 @@ else
   for f in "${missing[@]}"; do echo "    restore with: git checkout -- $f"; done
 fi
 
+# 6. Module config file references resolve (key-free structural check)
+# Every shipped default config must reference prompt/test files that exist.
+# Debugger fix-me configs are intentionally broken, and the new-eval-suite
+# skill template still has unfilled placeholders — both are skipped.
+cfg_missing=0
+while IFS= read -r cfg; do
+  case "$cfg" in
+    *"/debugger/"*) continue ;;      # intentionally broken — skip
+    *.template.yaml) continue ;;     # skill scaffold placeholder — skip
+  esac
+  cfgdir=$(dirname "$cfg")
+  while IFS= read -r ref; do
+    [ -z "$ref" ] && continue
+    target="$cfgdir/$ref"
+    if [ ! -f "$target" ] && [ ! -f "$ref" ]; then
+      echo "    $cfg references missing $ref"
+      cfg_missing=1
+    fi
+  done <<EOF
+$(grep -oE 'file://[^" ]+' "$cfg" | sed 's#file://##')
+EOF
+done <<EOF
+$(find . -name 'promptfooconfig*.yaml' -not -path './node_modules/*')
+EOF
+if [ "$cfg_missing" -eq 0 ]; then
+  ok "Module config file references resolve"
+else
+  bad "Some module config references are missing (see above)"; fail=1
+fi
+
 # ── Phase 2 — live Groq check (one curl; only if the key looked usable) ──────
 if [ "$key_ok" -eq 1 ]; then
   hdr="$(mktemp)"
