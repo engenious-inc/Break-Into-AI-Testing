@@ -10,4 +10,6 @@ defaultTest:
 tests:
   - assert:
       - type: llm-rubric
-        value: "The response is friendly, welcoming, and under 50 words."
+        value: "The response is friendly and welcoming."
+      - type: javascript
+        value: "output.split(/\\s+/).length <= 50"

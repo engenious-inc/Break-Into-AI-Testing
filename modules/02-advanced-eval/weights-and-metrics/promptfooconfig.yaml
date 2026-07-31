@@ -12,8 +12,12 @@ tests:
     threshold: 0.7
     assert:
       - type: llm-rubric
-        value: "The response is enthusiastic and under 50 words."
+        value: "The response is enthusiastic."
         weight: 2
+        metric: Tone
+      - type: javascript
+        value: "output.split(/\\s+/).length <= 50"
+        weight: 1
         metric: Tone
       - type: icontains
         value: "fund"
