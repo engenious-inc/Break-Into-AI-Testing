@@ -9,6 +9,8 @@ Run any lesson: `npx promptfoo@latest eval -c modules/00-promptfoo-basics/<path>
 ## Lessons
 1. **Prompts** (`01-prompts/`) — text, multiline, variable, and file-based prompts.
 2. **Providers** (`02-providers/`) — provider config tuning; a local LM Studio model (optional).
+   - `configuration/` — Groq 3-model matrix (temperature, max_tokens tuning).
+   - `local-model/` — OPTIONAL: requires LM Studio running on localhost:1234; off the key-free default path.
 3. **Assertions & Metrics** (`03-assertions/`) — contains, regex, factuality, llm-rubric,
    and answer-relevance (optional — needs embeddings).
 

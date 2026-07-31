@@ -1,0 +1,18 @@
+description: "Providers 2/2 — OPTIONAL local model via LM Studio (needs LM Studio running on :1234)"
+prompts:
+  - "Greet the user and say one sentence about {{topic}}."
+providers:
+  # Requires LM Studio serving an OpenAI-compatible endpoint at localhost:1234.
+  # No cloud key needed. Start LM Studio, load a model, enable the local server.
+  - id: openai:chat
+    config:
+      apiBaseUrl: http://localhost:1234/v1
+      apiKey: lmstudio
+      model: llama-3.2-3b-instruct
+      temperature: 0.7
+      max_tokens: 300
+  # Compare against the Groq default (uncomment to run both):
+  # - id: groq:llama-3.3-70b-versatile
+  #   config: { temperature: 0.7, max_tokens: 300 }
+tests:
+  - vars: { topic: "index funds" }
