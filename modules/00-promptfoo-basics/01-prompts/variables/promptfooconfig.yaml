@@ -1,0 +1,10 @@
+description: "Prompts 3/4 — {{variable}} substitution across multiple rows"
+prompts:
+  - |
+    Write a one-line support reply for {{name}} at {{company}} about: {{issue}}
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 400 }
+tests:
+  - vars: { name: "Dana", company: "Acme Brokerage", issue: "password reset" }
+  - vars: { name: "Lee", company: "Acme Clinic", issue: "appointment change" }

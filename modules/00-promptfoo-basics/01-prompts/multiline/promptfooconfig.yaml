@@ -1,0 +1,11 @@
+description: "Prompts 2/4 — multiline block-scalar prompts"
+prompts:
+  - |-
+    You are a helpful assistant.
+    Answer the question below in exactly two sentences.
+    Question: {{question}}
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 400 }
+tests:
+  - vars: { question: "What is compound interest?" }
