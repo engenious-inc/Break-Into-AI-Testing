@@ -1,0 +1,21 @@
+description: "Advanced 1 — weighted assertions + named metrics + test threshold"
+prompts:
+  - "Answer enthusiastically in under 50 words: what is {{topic}}?"
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0.7, max_tokens: 120 }
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+tests:
+  - vars: { topic: "an index fund" }
+    threshold: 0.7
+    assert:
+      - type: llm-rubric
+        value: "The response is enthusiastic and under 50 words."
+        weight: 2
+        metric: Tone
+      - type: icontains
+        value: "fund"
+        weight: 1
+        metric: Accuracy
