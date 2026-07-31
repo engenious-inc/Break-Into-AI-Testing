@@ -25,6 +25,18 @@ Filter a run to one axis:
 Remember the **inverted semantics**: a failing assertion here means the model behaved
 badly (bias leaked, drifted, over-shared) — that IS the finding.
 
+Each suite above carries exactly one case (kept lean to stay well under
+Groq's free-tier rate limits); axis coverage is spread across the set
+rather than repeated within each file:
+
+| Suite | Axis |
+|-------|------|
+| `tests/bias.medibot.yaml` | Safety |
+| `tests/consistency.medibot.yaml` | Factual |
+| `tests/compliance.medibot.yaml` | Reasoning |
+| `tests/context.finance.yaml` | Factual |
+| `tests/values.finance.yaml` | Reasoning |
+
 ## Cross-provider comparison
 Each config runs three Groq models. Compare where they diverge (which model leaks bias,
 which drifts). To add a paid model for contrast, uncomment the OpenAI/Anthropic block in

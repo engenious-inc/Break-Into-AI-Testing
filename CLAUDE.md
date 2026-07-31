@@ -14,6 +14,13 @@ Every runnable example is three files:
 Run one with: `npx promptfoo@latest eval -c promptfooconfig.<name>.yaml`
 Then `npx promptfoo@latest view` to open the report UI.
 
+**Always run from the repo root.** `cd`ing into a nested module/lesson
+directory before running `npx promptfoo eval` breaks `.env` discovery
+(dotenv looks in the current working directory) — you'll get a bare `401`
+with no config-level error to explain it. Use the full relative `-c
+path/to/promptfooconfig.yaml` from repo root instead, exactly as every
+module README's run command shows.
+
 No root `package.json` — Promptfoo is always invoked via `npx promptfoo@latest`, never installed as a dependency.
 
 ## Providers — Groq free tier is the default
@@ -45,8 +52,12 @@ A healthy red-team run **exits 100**. This is expected, not an error.
 Modules 0 and 2 use ordinary assertions (pass = good).
 
 ## The 3-axis attack taxonomy
-When authoring attacks, cover three axes per topic: **Factual accuracy**,
-**Reasoning**, **Safety/refusal**. Tag each case with `metadata: { axis: factual|reasoning|safety }`.
+When authoring attacks, tag each case with `metadata: { axis: factual|reasoning|safety }`
+(**Factual accuracy**, **Reasoning**, **Safety/refusal**). A suite may cover
+all three axes in one file, or focus on a single axis and let sibling
+suites cover the rest — the shipped `docs/05-quality-challenges.md`
+gap-fill suites use the lean, one-axis-per-file pattern deliberately, to
+keep default live-eval request volume low.
 
 ## Course layout
 - `prompts/`, `tests/`, `promptfooconfig.*.yaml`, `docs/02`/`04`/`05` — Module 1 (red-team fundamentals)
