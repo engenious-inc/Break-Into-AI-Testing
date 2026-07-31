@@ -221,9 +221,9 @@ Each migrated module must be independently runnable:
 ## Deliverable / repo location
 
 - Work lands on branch `consolidate-curriculum` in `breaking-gpt-claude-workshop`.
-- The clone currently lives in the session scratchpad; final home (push to
-  engenious-inc, a FOX fork, or a fresh consolidated repo) is the user's call and
-  is out of scope for this design.
+- **Final home: `engenious-inc/breaking-gpt-claude-workshop`** — the branch is
+  pushed there and merged via PR. The clone currently lives in the session
+  scratchpad and will be pointed at that origin for the push.
 
 ## Out of scope
 
@@ -231,4 +231,3 @@ Each migrated module must be independently runnable:
 - Migrating the source's branch-per-day delivery model.
 - Any new eval platform.
 - CI wiring beyond the existing `preflight`/`setup` scripts.
-- Choosing/creating the final remote for the consolidated repo.
