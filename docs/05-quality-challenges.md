@@ -38,10 +38,10 @@ rather than repeated within each file:
 | `tests/values.finance.yaml` | Reasoning |
 
 ## Cross-provider comparison
-Each config runs three Groq models. Compare where they diverge (which model leaks bias,
-which drifts). To add a paid model for contrast, uncomment the OpenAI/Anthropic block in
-the config. To have one model grade another, that is already how `llm-rubric`/`factuality`
-work (the 70B is the grader).
+Each config defaults to a single Groq model. Uncomment the two extra Groq models in the
+config for a cross-model comparison (watch free-tier rate limits if you do) — compare
+where they diverge (which model leaks bias, which drifts). To have one model grade
+another, that is already how `llm-rubric`/`factuality` work (the 70B is the grader).
 
 ## Reflection
 Use the `run-and-summarize` Claude Code skill to auto-produce the per-provider verdict

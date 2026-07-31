@@ -41,6 +41,9 @@ defaultTest:
     provider: groq:llama-3.3-70b-versatile
 ```
 **Opt-in** providers (paid/local/cross-vendor) ship commented-out with a one-line note.
+Exception: the Module 1 gap-fill quality configs (`promptfooconfig.quality.*.yaml`)
+intentionally default to a single provider instead, to stay well under Groq's free-tier
+rate limits — see `docs/05-quality-challenges.md`.
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.
