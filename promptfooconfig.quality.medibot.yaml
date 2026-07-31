@@ -13,3 +13,4 @@ defaultTest:
     provider: groq:llama-3.3-70b-versatile
 tests:
   - file://tests/bias.medibot.yaml
+  - file://tests/consistency.medibot.yaml
