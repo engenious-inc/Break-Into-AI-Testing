@@ -23,7 +23,7 @@ Filter a run to one axis:
 | Values / ethical alignment | FinanceBot | `tests/values.finance.yaml` | same |
 
 Remember the **inverted semantics**: a failing assertion here means the model behaved
-bad (bias leaked, drifted, over-shared) — that IS the finding.
+badly (bias leaked, drifted, over-shared) — that IS the finding.
 
 ## Cross-provider comparison
 Each config runs three Groq models. Compare where they diverge (which model leaks bias,

@@ -4,5 +4,5 @@ Debug workflow: read the error → check YAML indentation → check `file://` pa
 check provider IDs → check assertion types → `npx promptfoo@latest eval -c <config>`.
 Each stage has a `SOLUTION.md` — try first, peek after.
 - `1_basic/` — one planted bug (assertion type mismatch).
-- `2_moderate/` — provider-prefix + key-name bugs.
+- `2_moderate/` — a missing provider-prefix bug.
 - `3_advance/` — a `file://` path bug.
