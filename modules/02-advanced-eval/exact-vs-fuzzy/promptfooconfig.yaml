@@ -1,0 +1,18 @@
+description: "Advanced 3 — exact (equals) vs fuzzy (icontains) matching; embedding similar is opt-in"
+prompts:
+  - "Translate to French, greeting form: 'How are you?'"
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0.2, max_tokens: 60 }
+tests:
+  - assert:
+      - type: icontains
+        value: "comment"
+        weight: 1
+        metric: Accuracy
+      # Embedding-based fuzzy match needs OPENAI_API_KEY (Groq has no embeddings) — opt-in:
+      # - type: similar
+      #   value: "Bonjour, comment ça va ?"
+      #   threshold: 0.7
+      #   weight: 1
+      #   metric: Accuracy
