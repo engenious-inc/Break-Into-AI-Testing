@@ -3,6 +3,8 @@
 This is a Promptfoo red-team + evaluation workshop. It is a **course**, not an app.
 When you add or edit lessons, follow these conventions.
 
+Requires Node ≥ 20.
+
 ## The triplet pattern
 Every runnable example is three files:
 - `prompts/<name>.txt` — the system+user message array (the "app under test")
@@ -11,6 +13,8 @@ Every runnable example is three files:
 
 Run one with: `npx promptfoo@latest eval -c promptfooconfig.<name>.yaml`
 Then `npx promptfoo@latest view` to open the report UI.
+
+No root `package.json` — Promptfoo is always invoked via `npx promptfoo@latest`, never installed as a dependency.
 
 ## Providers — Groq free tier is the default
 Copy this block verbatim into every shipped default config (self-contained, no includes):
