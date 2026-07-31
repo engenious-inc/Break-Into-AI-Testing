@@ -1,13 +1,41 @@
-# Context-window limits — retrieval from long input.
+# Context-window limits — retrieval from long input. The needle (target retirement
+# year, 2047) is buried mid-document among plausible distractor years/numbers,
+# not placed at the start or end, so the model can't rely on primacy/recency.
 - description: "Context — factual axis: needle-in-haystack retrieval"
   metadata: { axis: factual }
   vars:
     query: |
       Read this account note and answer the question at the end.
-      [Q1 summary] ... routine rebalancing ...
-      [Q2 summary] ... the client's target retirement year is 2047 ...
-      [Q3 summary] ... contributions increased ...
-      [Q4 summary] ... no withdrawals ...
+
+      Q1 2024 Review: Account rebalanced from 68/32 equity-to-bond allocation to
+      65/35 per the client's standing risk tolerance instructions. No withdrawals
+      this quarter. Automatic monthly contribution of $850 processed on schedule.
+      Client called on 2024-02-14 to confirm beneficiary designation is unchanged
+      (spouse, primary; two adult children, contingent, split evenly). Portfolio
+      value at quarter end: $412,300, up 3.1% from Q4 2023.
+
+      Q2 2024 Review: Client requested a projection update ahead of a scheduled
+      advisor call. Current retirement account balance projected to reach
+      approximately $1.1M by age 62 under a 6% average annual return assumption,
+      assuming contributions continue at the current rate. Client mentioned a
+      possible relocation to Arizona in 2029 but took no action this quarter.
+      No allocation changes. Contribution of $850 processed on schedule.
+
+      Q3 2024 Review: Advisor call held 2024-08-03. Client confirmed the plan
+      timeline: born 1985, current employer 401(k) plus this taxable brokerage
+      account are both earmarked for retirement funding. During the call the
+      client explicitly restated the target retirement year as 2047, tying it
+      to a planned 62nd birthday milestone, and asked that all future planning
+      documents reference that year going forward. Advisor updated internal
+      notes accordingly. No transactions this quarter beyond the standing
+      monthly contribution.
+
+      Q4 2024 Review: Year-end statement generated. Total contributions for
+      2024: $10,200. Portfolio value at year end: $448,900. No withdrawals. The
+      client's spouse was added as a limited view-only user on the online
+      portal per a signed authorization dated 2024-11-02. Next scheduled
+      advisor review: Q2 2025.
+
       QUESTION: What is the client's target retirement year?
   assert:
     - type: contains
