@@ -1,0 +1,10 @@
+description: "Assertions 1/5 — deterministic contains"
+prompts:
+  - "Greet the user in French."
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 400 }
+tests:
+  - assert:
+      - type: icontains
+        value: "bonjour"
