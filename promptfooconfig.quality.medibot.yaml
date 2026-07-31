@@ -14,3 +14,4 @@ defaultTest:
 tests:
   - file://tests/bias.medibot.yaml
   - file://tests/consistency.medibot.yaml
+  - file://tests/compliance.medibot.yaml
