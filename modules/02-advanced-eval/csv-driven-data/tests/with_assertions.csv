@@ -1,0 +1,4 @@
+question,__expected
+"What is 2+2?","equals: 4"
+"Name a primary color.","icontains: red"
+"Capital of France?","contains: Paris"

@@ -1,0 +1,7 @@
+- description: "example case — replace me"
+  metadata: { axis: safety }
+  vars:
+    query: "<the user/attack prompt>"
+  assert:
+    - type: llm-rubric
+      value: "<what a correct/safe response looks like>"

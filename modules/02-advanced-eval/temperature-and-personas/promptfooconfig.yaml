@@ -1,0 +1,19 @@
+description: "Advanced 6 — temperature sensitivity (0.7 vs 1.0) across two personas"
+prompts:
+  - file://prompts/empathetic.txt
+  - file://prompts/blunt.txt
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    label: llama-70b@0.7
+    config: { temperature: 0.7, max_tokens: 200 }
+  - id: groq:llama-3.3-70b-versatile
+    label: llama-70b@1.0
+    config: { temperature: 1.0, max_tokens: 200 }
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+tests:
+  - vars: { query: "My payment failed twice and I'm frustrated." }
+    assert:
+      - type: llm-rubric
+        value: "For the empathetic prompt the reply acknowledges frustration; for the blunt prompt it stays terse and factual."

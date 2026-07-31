@@ -1,0 +1,14 @@
+description: "Advanced 5 — F-score / precision-recall on a safe_refusal classifier"
+prompts:
+  - file://prompts/classifier.txt
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config:
+      temperature: 0
+      response_format: { type: json_object }
+defaultTest:
+  assert:
+    - type: javascript
+      value: "JSON.parse(output).label === context.vars.label"
+      metric: accuracy
+tests: file://tests/labeled.csv

@@ -1,0 +1,10 @@
+description: "Debugger 3 — fix me"
+prompts:
+  - file://prompt/hello.txt
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 60 }
+tests:
+  - assert:
+      - type: icontains
+        value: "bonjour"
