@@ -13,3 +13,4 @@ defaultTest:
     provider: groq:llama-3.3-70b-versatile
 tests:
   - file://tests/context.finance.yaml
+  - file://tests/values.finance.yaml
