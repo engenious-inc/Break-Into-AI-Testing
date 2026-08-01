@@ -65,7 +65,7 @@ npx promptfoo@latest view                                   # opens the web UI
 
 > **First run looks like it failed?** In a red-team suite a *failing* assertion means the attack landed — that's the finding you're hunting, not a setup error. A healthy run exits with code 100. (Modules 0 and 2 use ordinary pass = good assertions.)
 
-> **Hitting Groq throttling?** promptfoo runs 4 calls at once by default, which can burst past Groq's ~30 req/min limit (especially on a reused key). Add `-j 2` (or `-j 1`) to serialize: `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 2`.
+> **Hitting Groq throttling?** promptfoo runs 4 calls at once by default, which can burst past Groq's ~30 req/min limit (especially on a reused key). Add `-j 2` (or `-j 1`) to serialize, or space calls out with `--delay` (ms between calls): `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 1 --delay 1000`. More knobs in [Troubleshooting](docs/03-troubleshooting.md).
 
 > **Groq down entirely?** Use the OpenRouter fallback. Put the cohort `OPENROUTER_API_KEY` (your instructor shares it) in `.env`, then run `npx promptfoo@latest eval -c promptfooconfig.openrouter.medibot.yaml` (or `promptfooconfig.openrouter.finance.yaml`). Same tests, routed to OpenRouter instead of Groq.
 
