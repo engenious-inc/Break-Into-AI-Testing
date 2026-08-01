@@ -20,6 +20,10 @@ Groq's free tier allows ~30 requests/min per key. promptfoo runs 4 calls concurr
 ```bash
 npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 2   # or -j 1 for one call at a time
 ```
+Or space the calls out — with or without lowering concurrency — with `--delay` (milliseconds between calls):
+```bash
+npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 1 --delay 1000
+```
 A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. If you widen the matrix by uncommenting the extra Groq models, expect throttling on the free tier — use `-j 2` or paid keys.
 
 ### Groq is down or your key is fully exhausted — use the OpenRouter fallback

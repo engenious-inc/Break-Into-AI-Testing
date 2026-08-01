@@ -1,0 +1,40 @@
+name: lint
+
+# Lightweight CI: static-check every tracked shell script on each PR and on
+# pushes to main. Uses only the first-party actions/checkout; shellcheck is
+# preinstalled on the ubuntu-latest runner, so no third-party actions are pulled.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: shellcheck + bash -n
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static-check shell scripts
+        run: |
+          set -euo pipefail
+          # Portable (no bash-4 mapfile): while-read over process substitution
+          # keeps the loop in the main shell so `set -e` aborts on any failure.
+          scripts="$(git ls-files '*.sh')"
+          if [ -z "$scripts" ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          shellcheck --version | awk '/version:/{print "shellcheck " $2}'
+          echo "Checking shell scripts:"
+          echo "$scripts" | sed 's/^/  /'
+          # Gate on warning+ : info/style findings (e.g. SC2317 unreachable-in-a-
+          # trap-handler, SC1091 can't-follow-runtime-.env) are advisory false
+          # positives here, and pinning to them would break CI whenever the
+          # runner's shellcheck version drifts. Real defects are warning or error.
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            echo "== $f =="
+            bash -n "$f"
+            shellcheck --severity=warning "$f"
+          done < <(printf '%s\n' "$scripts")
+          echo "All shell scripts pass bash -n + shellcheck (warning+)."

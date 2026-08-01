@@ -13,11 +13,20 @@
 # comes out differently this run) is expected behavior, not a smoke-check
 # failure; those configs use inverted semantics on purpose (see CLAUDE.md).
 #
-# Paced with a delay between configs (SMOKE_GAP_SECS, default 20s) to let Groq's
-# free-tier per-minute budget recover; raise it if configs still time out. Each
-# config is also bounded by a per-config timeout, and a timed-out eval — together
-# with its node child — is killed as a whole process tree so it can't keep
-# throttling the rest of the run.
+# Paced three ways to stay under Groq's free-tier limits: --delay between calls
+# (SMOKE_DELAY_MS, default 1500ms), -j 1 serialization, and a pause between
+# configs (SMOKE_GAP_SECS, default 20s). Each config is also bounded by a
+# per-config timeout, and a timed-out eval — together with its node child — is
+# killed as a whole process tree so it can't keep throttling the rest of the run.
+#
+# Two modes:
+#   ./scripts/smoke-check.sh                default: reads/writes promptfoo's disk
+#                                           cache, so a throttled re-run resumes
+#                                           from cache instead of re-hammering
+#                                           Groq; same-day re-runs are near-free.
+#   SMOKE_FRESH=1 ./scripts/smoke-check.sh  authoritative: --no-cache forces every
+#                                           call live end-to-end. Run once, when
+#                                           Groq is calm (e.g. the cohort morning).
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
@@ -35,6 +44,17 @@ timeout_count=0
 # Seconds to pause between configs so Groq's per-minute budget recovers. Raise
 # it (e.g. SMOKE_GAP_SECS=45) if you still see timeouts under heavier load.
 GAP_SECS="${SMOKE_GAP_SECS:-20}"
+
+# Milliseconds to wait between each promptfoo call (passed as --delay). With
+# -j 1 this sets a spacing floor so even a fast model stays under Groq's
+# ~30 req/min. Raise it (e.g. SMOKE_DELAY_MS=2500) under heavier load.
+DELAY_MS="${SMOKE_DELAY_MS:-1500}"
+
+# Default: read/write promptfoo's disk cache so a throttled re-run resumes
+# instead of re-hammering Groq. SMOKE_FRESH=1 adds --no-cache for the
+# authoritative pre-cohort run that validates the live Groq path end-to-end.
+CACHE_FLAG=""
+[ "${SMOKE_FRESH:-0}" = "1" ] && CACHE_FLAG="--no-cache"
 
 # Track the in-flight eval so an interrupt kills it and cleans up (no orphaned
 # npx/node child, no leftover tmpdir).
@@ -122,7 +142,12 @@ run_config() {
   # lacks by default): run in the background, poll, kill if it overruns. This
   # is exactly the guard that would have made today's Groq queue-throttling
   # visible as "TIMEOUT" instead of silently stalling the whole sweep.
-  npx promptfoo@latest eval -c "$cfg" -j 1 --no-progress-bar --no-table --no-share --no-cache -o "$tmpfile" >"$outfile" 2>&1 &
+  # $CACHE_FLAG is intentionally word-split: "" -> nothing, "--no-cache" -> one
+  # flag. A string var, not a bash array — an empty array under `set -u` errors
+  # on macOS's stock bash 3.2, which this script must run on. The value has no
+  # spaces/globs, so the split is safe and deliberate.
+  # shellcheck disable=SC2086
+  npx promptfoo@latest eval -c "$cfg" -j 1 --delay "$DELAY_MS" --no-progress-bar --no-table --no-share $CACHE_FLAG -o "$tmpfile" >"$outfile" 2>&1 &
   local pid=$!
   CURRENT_PID="$pid"
   local waited=0
