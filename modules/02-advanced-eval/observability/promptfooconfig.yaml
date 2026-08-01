@@ -1,0 +1,14 @@
+description: "Module 2 — Observability: real Arato.ai logging + OTel-shaped tracing (single provider, zero npm dependencies)"
+
+prompts:
+  - file://prompts/prompt.txt
+
+providers:
+  - id: file://provider.mjs
+    config:
+      model: llama-3.3-70b-versatile
+      temperature: 0
+      max_tokens: 400
+
+tests:
+  - file://tests/basic.yaml

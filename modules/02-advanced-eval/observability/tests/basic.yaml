@@ -1,0 +1,13 @@
+- description: "Simple factual question"
+  vars:
+    query: "What is HTTP?"
+  assert:
+    - type: icontains
+      value: "protocol"
+
+- description: "Simple definitional question"
+  vars:
+    query: "In one sentence, what is OpenTelemetry?"
+  assert:
+    - type: icontains-any
+      value: ["trace", "observability", "telemetry"]
