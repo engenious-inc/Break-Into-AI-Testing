@@ -87,7 +87,7 @@ if ($keyOk) {
     # No -SkipHttpErrorCheck: it doesn't exist on Windows PowerShell 5.1 (the
     # documented target). On 5.1 a non-2xx response throws; we read the status
     # from the exception in the catch. Invoke-WebRequest only returns here on 2xx.
-    $resp = Invoke-WebRequest -Uri "$base/chat/completions" -Method Post -TimeoutSec 10 `
+    $resp = Invoke-WebRequest -UseBasicParsing -Uri "$base/chat/completions" -Method Post -TimeoutSec 10 `
       -Headers @{ Authorization = "Bearer $key"; "Content-Type" = "application/json" } `
       -Body '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}'
     $rem = $resp.Headers['x-ratelimit-remaining-requests']

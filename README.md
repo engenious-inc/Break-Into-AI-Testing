@@ -88,7 +88,7 @@ missing key, a rate-limit throttle, or an environment that needs `./setup.sh` ag
 3. **Cost & context** — assert latency and response-length thresholds
 4. **Multi-model comparison** — the default config runs three Groq-hosted models (free-tier-safe). Uncomment the extra Groq models, or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` lines, in the config to widen the matrix. Add any paid-vendor keys to `.env` first.
 
-All cases live in `tests/smoke.medibot.yaml` (MediBot) and `tests/smoke.finance.yaml` (FinanceBot) — one curated case per category. Add your own attacks there.
+All cases live in `tests/smoke.medibot.yaml` (MediBot, 6 cases) and `tests/smoke.finance.yaml` (FinanceBot, 4 cases) — a curated spread across jailbreak, safety, hallucination, cost, and exfiltration. Add your own attacks there.
 
 ### Notes on the default lineup
 

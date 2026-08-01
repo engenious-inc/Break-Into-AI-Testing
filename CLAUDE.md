@@ -44,10 +44,13 @@ defaultTest:
     provider: groq:llama-3.3-70b-versatile
 ```
 **Opt-in** providers (paid/local/cross-vendor) ship commented-out with a one-line note.
-Single-provider by design (NOT the 3-model block): every Module 0 and Module 2 lesson
-config (each isolates one concept and keeps free-tier request volume low), and the
+Single-provider by design (NOT the 3-model block): most Module 0 and Module 2 lesson
+configs (each isolates one concept and keeps free-tier request volume low), plus the
 Module 1 gap-fill quality configs (`promptfooconfig.quality.*.yaml`, see
-`docs/05-quality-challenges.md`).
+`docs/05-quality-challenges.md`). The deliberate multi-provider exceptions are the two
+lessons whose subject IS the matrix: `modules/00-promptfoo-basics/02-providers/configuration/`
+(three Groq models) and `modules/02-advanced-eval/temperature-and-personas/` (one model
+at two temperatures).
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.

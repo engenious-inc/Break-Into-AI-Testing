@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const REPO_URL = process.env.REPO_URL || 'https://github.com/YOUR_USERNAME/promptfoo-redteam-workshop';
+const REPO_URL = process.env.REPO_URL || 'https://github.com/engenious-inc/breaking-gpt-claude-workshop';
 
 try {
   require.resolve('qrcode');
