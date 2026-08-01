@@ -3,6 +3,9 @@
 ### `node: command not found` / `node` is not recognized
 The setup script tries to install Node 20 via Homebrew (macOS) or winget (Windows). If it can't, install manually from <https://nodejs.org> (LTS), then re-run the setup script.
 
+### `401 Unauthorized` from Groq (default path)
+Groq is the default provider, so this is the 401 most students hit: your `GROQ_API_KEY` in `.env` is missing, wrong, or expired. Get a fresh key at <https://console.groq.com/keys>, paste it into `.env`, then run `./preflight.sh` (`.\preflight.ps1` on Windows) to confirm before re-running the eval.
+
 ### `401 Unauthorized` from OpenAI
 Your `OPENAI_API_KEY` in `.env` is missing or wrong. Verify at <https://platform.openai.com/api-keys>, then re-run `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml`.
 

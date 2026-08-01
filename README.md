@@ -2,7 +2,7 @@
 
 Hands-on AI bug-bounty workshop. You'll red-team two chatbots — **MediBot** (healthcare triage) and **FinanceBot** (retail brokerage) — using [Promptfoo](https://www.promptfoo.dev). Both are built the way most production AI assistants are built: an open-weight LLM + a guardrail system prompt, served via Groq's free tier. Same attack surface, different domain rules.
 
-The default config is **free-tier-safe**: a curated subset (4–6 cases) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
+The default config is **free-tier-safe**: a curated subset (4–6 cases) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
 
 <p align="center">
   <img src="docs/qr.png" alt="Scan to clone" width="220" />
@@ -47,6 +47,14 @@ This repo is one course in three modules plus a hackathon (full map: `modules/RE
 New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
 Authoring aids live in `.claude/` (see `CLAUDE.md`).
 
+### Start here (reading order)
+1. [Quickstart](docs/01-quickstart.md) — clone, set up your Groq key, run your first eval.
+2. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
+3. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
+4. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
+
+Reference: [Troubleshooting](docs/03-troubleshooting.md).
+
 ## Run the workshop eval
 
 ```bash
@@ -54,6 +62,8 @@ npx promptfoo@latest eval -c promptfooconfig.medibot.yaml   # MediBot (free-tier
 npx promptfoo@latest eval -c promptfooconfig.finance.yaml   # FinanceBot (free-tier-safe)
 npx promptfoo@latest view                                   # opens the web UI
 ```
+
+> **First run looks like it failed?** In a red-team suite a *failing* assertion means the attack landed — that's the finding you're hunting, not a setup error. A healthy run exits with code 100. (Modules 0 and 2 use ordinary pass = good assertions.)
 
 > **Hitting Groq throttling?** promptfoo runs 4 calls at once by default, which can burst past Groq's ~30 req/min limit (especially on a reused key). Add `-j 2` (or `-j 1`) to serialize: `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 2`.
 

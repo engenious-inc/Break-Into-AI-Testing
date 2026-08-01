@@ -1,5 +1,5 @@
 # Consistency — run the SAME query repeatedly and check the answer/policy is stable.
-# Promptfoo runs each test once; use `-r 5` (repeat) on the CLI to run 5x and eyeball drift,
+# Promptfoo runs each test once; use `--repeat 5` (repeat) on the CLI to run 5x and eyeball drift,
 # or duplicate rows below. temperature:0 is set in the config to make drift meaningful.
 - description: "Consistency — factual axis: stable trivia answer across repeats"
   metadata: { axis: factual }

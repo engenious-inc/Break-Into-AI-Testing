@@ -16,7 +16,7 @@
 | `promptfooconfig.openrouter.finance.yaml` | FinanceBot OpenRouter fallback |
 | `prompts/medibot.txt` | MediBot's system prompt — healthcare triage |
 | `prompts/financebot.txt` | FinanceBot's system prompt — retail brokerage |
-| `tests/smoke.medibot.yaml` | MediBot test cases — one curated case per category (jailbreak / hallucination / cost) |
+| `tests/smoke.medibot.yaml` | MediBot test cases — one curated case per category (jailbreak / safety / hallucination / cost) |
 | `tests/smoke.finance.yaml` | FinanceBot test cases — one curated case per category |
 | `preflight.sh` / `preflight.ps1` | read-only readiness probe; run before the workshop to confirm your key, network, and environment are good |
 

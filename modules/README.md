@@ -10,3 +10,5 @@ This workshop is one course in three modules plus a hackathon.
 | Hackathon | `docs/04-challenges.md` | (base repo) |
 
 Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.
+
+> There's no `modules/01-` folder on purpose — Module 1 (Red-Team Fundamentals) lives at the repo root: `prompts/`, `tests/`, `promptfooconfig.*.yaml`, and `docs/02`/`04`/`05`.
