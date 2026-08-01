@@ -13,8 +13,11 @@
 # comes out differently this run) is expected behavior, not a smoke-check
 # failure; those configs use inverted semantics on purpose (see CLAUDE.md).
 #
-# Paced with a short delay between configs to stay well under Groq's
-# free-tier per-minute rate limit.
+# Paced with a delay between configs (SMOKE_GAP_SECS, default 20s) to let Groq's
+# free-tier per-minute budget recover; raise it if configs still time out. Each
+# config is also bounded by a per-config timeout, and a timed-out eval — together
+# with its node child — is killed as a whole process tree so it can't keep
+# throttling the rest of the run.
 set -uo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.." || exit 1
 
@@ -29,16 +32,34 @@ skip=0
 debugger_ok=0
 timeout_count=0
 
+# Seconds to pause between configs so Groq's per-minute budget recovers. Raise
+# it (e.g. SMOKE_GAP_SECS=45) if you still see timeouts under heavier load.
+GAP_SECS="${SMOKE_GAP_SECS:-20}"
+
 # Track the in-flight eval so an interrupt kills it and cleans up (no orphaned
 # npx/node child, no leftover tmpdir).
 CURRENT_PID=""
 CURRENT_TMPDIR=""
+
+# Kill a process AND all its descendants. `npx promptfoo` runs the real eval in
+# a node CHILD of the npx wrapper, so a plain `kill` on the wrapper pid orphans
+# that child — which keeps calling Groq and throttles every later config into a
+# cascade of timeouts. Recurse so nothing survives. Portable: pgrep -P works on
+# macOS (BSD) and Linux; no `setsid`/GNU-only flags.
+kill_tree() {
+  local p="$1" child
+  while IFS= read -r child; do
+    [ -n "$child" ] && kill_tree "$child"
+  done < <(pgrep -P "$p" 2>/dev/null)
+  kill -9 "$p" 2>/dev/null
+}
+
 # shellcheck disable=SC2329 # invoked indirectly via `trap`, not called directly
 cleanup_on_interrupt() {
-  [ -n "$CURRENT_PID" ] && kill -9 "$CURRENT_PID" 2>/dev/null
+  [ -n "$CURRENT_PID" ] && kill_tree "$CURRENT_PID"
   [ -n "$CURRENT_TMPDIR" ] && rm -rf "$CURRENT_TMPDIR"
   echo "" >&2
-  echo "Interrupted — killed the in-flight eval and cleaned up." >&2
+  echo "Interrupted — killed the in-flight eval (and its node child) and cleaned up." >&2
   exit 130
 }
 trap cleanup_on_interrupt INT TERM
@@ -109,7 +130,7 @@ run_config() {
     sleep 1
     waited=$((waited + 1))
     if [ "$waited" -ge "$timeout_secs" ]; then
-      kill -9 "$pid" 2>/dev/null
+      kill_tree "$pid"
       wait "$pid" 2>/dev/null
       rm -rf "$tmpdir"
       CURRENT_PID=""; CURRENT_TMPDIR=""
@@ -160,7 +181,7 @@ for cfg in "${CONFIGS[@]}"; do
     echo "$STATUS_DETAIL" | tail -20
     fail=$((fail + 1))
   fi
-  sleep 2
+  sleep "$GAP_SECS"
 done
 
 echo ""
@@ -187,7 +208,7 @@ for cfg in "${DEBUGGER_CONFIGS[@]}"; do
     echo "correctly still broken ($STATUS)"
     debugger_ok=$((debugger_ok + 1))
   fi
-  sleep 2
+  sleep "$GAP_SECS"
 done
 
 echo ""
