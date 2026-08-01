@@ -13,7 +13,18 @@ if (!path) {
   process.exit(1);
 }
 
-const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+let data;
+try {
+  data = JSON.parse(fs.readFileSync(path, 'utf8'));
+} catch (err) {
+  console.error(`Could not read/parse "${path}" as JSON: ${err.message}`);
+  console.error('Generate it first with: npx promptfoo@latest eval -c promptfooconfig.yaml -o results.json');
+  process.exit(1);
+}
+if (!data || !data.results || !Array.isArray(data.results.results)) {
+  console.error(`"${path}" is not a promptfoo -o results file (expected data.results.results[]).`);
+  process.exit(1);
+}
 const rows = data.results.results;
 
 let tp = 0;

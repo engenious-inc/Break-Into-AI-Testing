@@ -31,6 +31,7 @@ if ($needNode) {
 # 2. Warm npx cache
 Write-Host "Installing Promptfoo (via npx cache)…"
 & npx --yes promptfoo@latest --version | Out-Null
+if ($LASTEXITCODE -ne 0) { Err "Promptfoo not available — check your network and re-run .\setup.ps1 (see docs/03-troubleshooting.md)" }
 Ok "Promptfoo ready"
 
 # 3. .env

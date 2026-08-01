@@ -38,7 +38,9 @@ fi
 
 # 2. Warm npx cache for promptfoo
 echo "Installing Promptfoo (via npx cache)…"
-npx --yes promptfoo@latest --version >/dev/null
+if ! npx --yes promptfoo@latest --version >/dev/null 2>&1; then
+  err "Promptfoo not available — check your network and re-run ./setup.sh (see docs/03-troubleshooting.md)"
+fi
 ok "Promptfoo ready"
 
 # 3. .env

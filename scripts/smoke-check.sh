@@ -29,6 +29,20 @@ skip=0
 debugger_ok=0
 timeout_count=0
 
+# Track the in-flight eval so an interrupt kills it and cleans up (no orphaned
+# npx/node child, no leftover tmpdir).
+CURRENT_PID=""
+CURRENT_TMPDIR=""
+# shellcheck disable=SC2329 # invoked indirectly via `trap`, not called directly
+cleanup_on_interrupt() {
+  [ -n "$CURRENT_PID" ] && kill -9 "$CURRENT_PID" 2>/dev/null
+  [ -n "$CURRENT_TMPDIR" ] && rm -rf "$CURRENT_TMPDIR"
+  echo "" >&2
+  echo "Interrupted — killed the in-flight eval and cleaned up." >&2
+  exit 130
+}
+trap cleanup_on_interrupt INT TERM
+
 # Configs expected to run with 0 promptfoo-reported errors on the default,
 # keyless-beyond-Groq path.
 CONFIGS=(
@@ -78,6 +92,7 @@ run_config() {
   # flag the .json extension it validates.
   local tmpdir
   tmpdir=$(mktemp -d)
+  CURRENT_TMPDIR="$tmpdir"
   local tmpfile="$tmpdir/result.json"
   local outfile="$tmpdir/stdout.log"
   local timeout_secs=90
@@ -88,6 +103,7 @@ run_config() {
   # visible as "TIMEOUT" instead of silently stalling the whole sweep.
   npx promptfoo@latest eval -c "$cfg" -j 1 --no-progress-bar --no-table --no-share --no-cache -o "$tmpfile" >"$outfile" 2>&1 &
   local pid=$!
+  CURRENT_PID="$pid"
   local waited=0
   while kill -0 "$pid" 2>/dev/null; do
     sleep 1
@@ -96,6 +112,7 @@ run_config() {
       kill -9 "$pid" 2>/dev/null
       wait "$pid" 2>/dev/null
       rm -rf "$tmpdir"
+      CURRENT_PID=""; CURRENT_TMPDIR=""
       STATUS="TIMEOUT"
       STATUS_DETAIL="killed after ${timeout_secs}s — likely Groq queue throttling from heavy same-day usage, not necessarily a config bug. Re-run this config alone later to confirm."
       return
@@ -106,8 +123,10 @@ run_config() {
   local out
   out=$(cat "$outfile")
   rm -rf "$tmpdir"
+  CURRENT_PID=""; CURRENT_TMPDIR=""
 
   local errors
+  # Output-phrasing parse ("N errors") verified against promptfoo v0.121.18.
   errors=$(echo "$out" | grep -oE '[0-9]+ errors?' | grep -oE '^[0-9]+' | head -1)
 
   if [ -z "$errors" ]; then

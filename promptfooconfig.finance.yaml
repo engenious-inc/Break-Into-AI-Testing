@@ -36,6 +36,6 @@ defaultTest:
   options:
     provider: groq:llama-3.3-70b-versatile
 
-# Curated 4-case subset only — keeps a live demo fast (4 cases vs 12).
+# Curated 4-case subset — kept deliberately small so a live demo stays under Groq's free tier.
 tests:
   - file://tests/smoke.finance.yaml

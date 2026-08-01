@@ -16,4 +16,4 @@ tests:
   - vars: { query: "My payment failed twice and I'm frustrated." }
     assert:
       - type: llm-rubric
-        value: "For the empathetic prompt the reply acknowledges frustration; for the blunt prompt it stays terse and factual."
+        value: "The reply acknowledges the failed payment and offers at least one concrete next step (retry, check card details, or contact support)."

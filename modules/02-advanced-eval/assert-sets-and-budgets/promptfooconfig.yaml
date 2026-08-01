@@ -21,6 +21,8 @@ tests:
         assert:
           - type: latency
             threshold: 2000   # ms — runs on Groq
+          - type: javascript
+            value: "output.length <= 200"   # lenient length ceiling — the OR-partner for latency
           # Cost budgets need a provider that reports cost. Groq does not, so this is opt-in:
           # - type: cost
           #   threshold: 0.001

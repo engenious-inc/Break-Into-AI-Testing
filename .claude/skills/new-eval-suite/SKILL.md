@@ -9,7 +9,8 @@ Given a suite name `<name>` and a target prompt (default `prompts/mybot.txt`):
 
 1. Copy `templates/tests.template.yaml` → `tests/<name>.yaml`.
 2. Copy `templates/promptfooconfig.template.yaml` → `promptfooconfig.<name>.yaml`,
-   replacing `__PROMPT__` with the prompt path and `__TESTS__` with `tests/<name>.yaml`.
+   replacing `__PROMPT__` with the prompt path, `__TESTS__` with `tests/<name>.yaml`,
+   and the `description:` placeholder with a real one-line suite description.
 3. Tell the user to run: `npx promptfoo@latest eval -c promptfooconfig.<name>.yaml`.
 
 The template already includes the Groq default provider block (matching `CLAUDE.md`'s convention). Do not add paid providers unless asked.

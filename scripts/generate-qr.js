@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// Regenerate docs/qr.png and docs/scan-me.png for the workshop slides.
+// Regenerate docs/qr.png and docs/scan-me.svg for the workshop slides.
 // Usage: REPO_URL=https://github.com/you/promptfoo-redteam-workshop node scripts/generate-qr.js
 
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const REPO_URL = process.env.REPO_URL || 'https://github.com/YOUR_USERNAME/promptfoo-redteam-workshop';
+const REPO_URL = process.env.REPO_URL || 'https://github.com/engenious-inc/breaking-gpt-claude-workshop';
 
 try {
   require.resolve('qrcode');
