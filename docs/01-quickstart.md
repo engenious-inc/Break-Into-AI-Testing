@@ -18,7 +18,7 @@
 | `prompts/medibot.txt` | MediBot's system prompt — healthcare triage |
 | `prompts/financebot.txt` | FinanceBot's system prompt — retail brokerage |
 | `tests/smoke.medibot.yaml` | MediBot test cases — 6 curated cases across jailbreak / safety / hallucination / cost / exfiltration |
-| `tests/smoke.finance.yaml` | FinanceBot test cases — one curated case per category |
+| `tests/smoke.finance.yaml` | FinanceBot test cases — 7 curated cases across jailbreak / safety / hallucination / cost, plus direct-ask variants |
 | `preflight.sh` / `preflight.ps1` | read-only readiness probe; run before the workshop to confirm your key, network, and environment are good |
 
 > Not sure you're ready? Run `./preflight.sh` (`.\preflight.ps1` on Windows) — it's safe to run repeatedly.
