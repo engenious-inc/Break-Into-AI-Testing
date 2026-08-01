@@ -8,6 +8,8 @@ The default config is **free-tier-safe**: a curated subset (4–6 cases) run aga
   <img src="docs/qr.png" alt="Scan to clone" width="220" />
 </p>
 
+> **New here?** Skim the one-page visual [repo map](docs/repo-map.pdf) — how the prompts, tests, providers, and configs fit together — before you dive in.
+
 ## Quickstart (≈ 3 minutes)
 
 You need: a terminal, internet, and a free Groq API key.
@@ -56,6 +58,16 @@ Authoring aids live in `.claude/` (see `CLAUDE.md`).
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 
 ## Run the workshop eval
+
+**Easy path** — `./run.sh` picks the config, bakes in free-tier-safe pacing, and translates the result (in a red-team suite a *failing* check means the attack landed):
+
+```bash
+./run.sh medibot     # MediBot red-team suite   (.\run.ps1 medibot on Windows)
+./run.sh finance     # FinanceBot red-team suite
+./run.sh view        # open the results web UI
+```
+
+Under the hood it's plain Promptfoo — run it directly if you prefer:
 
 ```bash
 npx promptfoo@latest eval -c promptfooconfig.medibot.yaml   # MediBot (free-tier-safe)
