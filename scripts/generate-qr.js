@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Regenerate docs/qr.png and docs/scan-me.png for the workshop slides.
+// Regenerate docs/qr.png and docs/scan-me.svg for the workshop slides.
 // Usage: REPO_URL=https://github.com/you/promptfoo-redteam-workshop node scripts/generate-qr.js
 
 const fs = require('fs');
