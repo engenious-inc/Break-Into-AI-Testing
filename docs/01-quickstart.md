@@ -3,13 +3,14 @@
 1. Clone this repo and `cd` into it.
 2. Run `./setup.sh` (macOS/Linux) or `.\setup.ps1` (Windows).
 3. Paste your free Groq API key when prompted (get one at <https://console.groq.com/keys>).
-4. `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml` — runs the MediBot tests.
-5. `npx promptfoo@latest view` — opens the result UI in your browser.
+4. `./run.sh medibot` (`.\run.ps1 medibot` on Windows) — runs the MediBot tests and explains the result.
+5. `./run.sh view` — opens the result UI in your browser.
 
 ## File map
 
 | File | What it does |
 |---|---|
+| `run.sh` / `run.ps1` | one-command eval runner: `./run.sh medibot` — safe pacing baked in, plain-English verdict |
 | `promptfooconfig.medibot.yaml` | MediBot eval config (free-tier-safe: 3 models, curated subset) |
 | `promptfooconfig.finance.yaml` | FinanceBot eval config |
 | `promptfooconfig.openrouter.medibot.yaml` | MediBot OpenRouter fallback (use if Groq is down) |
