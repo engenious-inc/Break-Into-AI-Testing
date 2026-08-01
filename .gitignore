@@ -4,3 +4,5 @@ output/
 .promptfoo/
 *.log
 .DS_Store
+results.json
+pf-latest.json
