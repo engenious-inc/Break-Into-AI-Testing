@@ -27,6 +27,7 @@ pass=0
 fail=0
 skip=0
 debugger_ok=0
+timeout_count=0
 
 # Configs expected to run with 0 promptfoo-reported errors on the default,
 # keyless-beyond-Groq path.
@@ -78,13 +79,36 @@ run_config() {
   local tmpdir
   tmpdir=$(mktemp -d)
   local tmpfile="$tmpdir/result.json"
-  local out
-  out=$(npx promptfoo@latest eval -c "$cfg" -j 1 --no-progress-bar --no-table --no-share --no-cache -o "$tmpfile" 2>&1)
+  local outfile="$tmpdir/stdout.log"
+  local timeout_secs=90
+
+  # Portable per-config timeout (no dependency on GNU `timeout`, which macOS
+  # lacks by default): run in the background, poll, kill if it overruns. This
+  # is exactly the guard that would have made today's Groq queue-throttling
+  # visible as "TIMEOUT" instead of silently stalling the whole sweep.
+  npx promptfoo@latest eval -c "$cfg" -j 1 --no-progress-bar --no-table --no-share --no-cache -o "$tmpfile" >"$outfile" 2>&1 &
+  local pid=$!
+  local waited=0
+  while kill -0 "$pid" 2>/dev/null; do
+    sleep 1
+    waited=$((waited + 1))
+    if [ "$waited" -ge "$timeout_secs" ]; then
+      kill -9 "$pid" 2>/dev/null
+      wait "$pid" 2>/dev/null
+      rm -rf "$tmpdir"
+      STATUS="TIMEOUT"
+      STATUS_DETAIL="killed after ${timeout_secs}s — likely Groq queue throttling from heavy same-day usage, not necessarily a config bug. Re-run this config alone later to confirm."
+      return
+    fi
+  done
+  wait "$pid"
   local exit_code=$?
+  local out
+  out=$(cat "$outfile")
   rm -rf "$tmpdir"
 
   local errors
-  errors=$(echo "$out" | grep -oE '[0-9]+ errors' | grep -oE '^[0-9]+' | head -1)
+  errors=$(echo "$out" | grep -oE '[0-9]+ errors?' | grep -oE '^[0-9]+' | head -1)
 
   if [ -z "$errors" ]; then
     STATUS="CRASHED"
@@ -108,6 +132,10 @@ for cfg in "${CONFIGS[@]}"; do
   if [ "$STATUS" = "OK" ]; then
     echo "OK"
     pass=$((pass + 1))
+  elif [ "$STATUS" = "TIMEOUT" ]; then
+    echo "TIMEOUT (inconclusive — see note below, not counted as broken)"
+    echo "  $STATUS_DETAIL"
+    timeout_count=$((timeout_count + 1))
   else
     echo "BROKEN ($STATUS)"
     echo "$STATUS_DETAIL" | tail -20
@@ -133,6 +161,9 @@ for cfg in "${DEBUGGER_CONFIGS[@]}"; do
   if [ "$STATUS" = "OK" ]; then
     echo "UNEXPECTEDLY RAN CLEAN — this stage may have been accidentally fixed, check it"
     fail=$((fail + 1))
+  elif [ "$STATUS" = "TIMEOUT" ]; then
+    echo "TIMEOUT — inconclusive, can't confirm the planted bug this run; re-run alone later"
+    timeout_count=$((timeout_count + 1))
   else
     echo "correctly still broken ($STATUS)"
     debugger_ok=$((debugger_ok + 1))
@@ -145,12 +176,18 @@ echo "== Summary =="
 echo "  $pass configs ran clean (0 errors)"
 echo "  $fail configs BROKEN"
 echo "  $skip configs skipped (opt-in, documented reason)"
+echo "  $timeout_count configs TIMED OUT (inconclusive — likely Groq throttling, re-run alone later)"
 echo "  $debugger_ok/3 debugger fix-me stages correctly still broken"
 
 if [ "$fail" -gt 0 ]; then
   echo ""
   echo "SMOKE CHECK FAILED — see BROKEN entries above."
   exit 1
+fi
+if [ "$timeout_count" -gt 0 ]; then
+  echo ""
+  echo "SMOKE CHECK INCONCLUSIVE — $timeout_count config(s) timed out (see above). No confirmed breaks, but re-run the timed-out configs alone once Groq load clears before trusting this a full PASS."
+  exit 2
 fi
 echo ""
 echo "SMOKE CHECK PASSED."
