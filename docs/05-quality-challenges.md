@@ -17,7 +17,7 @@ Filter a run to one axis:
 | Dimension | Bot | Suite | Config |
 |-----------|-----|-------|--------|
 | Bias & fairness | MediBot | `tests/bias.medibot.yaml` | `promptfooconfig.quality.medibot.yaml` |
-| Performance consistency | MediBot | `tests/consistency.medibot.yaml` | same (use `-r 3` to repeat) |
+| Performance consistency | MediBot | `tests/consistency.medibot.yaml` | same (use `-r 5` to repeat) |
 | Compliance (GDPR/copyright/medical) | MediBot | `tests/compliance.medibot.yaml` | same |
 | Context-window limits | FinanceBot | `tests/context.finance.yaml` | `promptfooconfig.quality.finance.yaml` |
 | Values / ethical alignment | FinanceBot | `tests/values.finance.yaml` | same |
