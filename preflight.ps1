@@ -84,30 +84,41 @@ else { Bad "Some module config references are missing (see above)"; $fail = $tru
 # Phase 2 — live Groq check (only if the key looked usable)
 if ($keyOk) {
   try {
+    # No -SkipHttpErrorCheck: it doesn't exist on Windows PowerShell 5.1 (the
+    # documented target). On 5.1 a non-2xx response throws; we read the status
+    # from the exception in the catch. Invoke-WebRequest only returns here on 2xx.
     $resp = Invoke-WebRequest -Uri "$base/chat/completions" -Method Post -TimeoutSec 10 `
       -Headers @{ Authorization = "Bearer $key"; "Content-Type" = "application/json" } `
-      -Body '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}' `
-      -SkipHttpErrorCheck
-    $status = [int]$resp.StatusCode
-    switch ($status) {
-      200 {
-        $rem = $resp.Headers['x-ratelimit-remaining-requests']
-        if ($rem -is [array]) { $rem = $rem[0] }
-        $remInt = $rem -as [int]
-        if (($null -ne $remInt) -and ($remInt -lt 5)) { Warn "Groq reachable, key valid — but only $rem requests left this window" }
-        elseif ($null -ne $remInt) { Ok "Groq reachable, key valid ($rem requests remaining)" }
-        else { Ok "Groq reachable, key valid" }
-      }
-      401 { Bad "Groq rejected your key (401) — check GROQ_API_KEY in .env or regenerate at https://console.groq.com/keys"; $fail = $true }
-      429 {
-        $ra = $resp.Headers['retry-after']; if ($ra -is [array]) { $ra = $ra[0] }
-        $wait = if ($ra) { " — wait ${ra}s" } else { "" }
-        Warn "Configured correctly, but currently throttled (429)$wait; add -j 2 to your evals"
-      }
-      default { Bad "Unexpected response from Groq (HTTP $status) — see docs/03-troubleshooting.md"; $fail = $true }
-    }
+      -Body '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}'
+    $rem = $resp.Headers['x-ratelimit-remaining-requests']
+    if ($rem -is [array]) { $rem = $rem[0] }
+    $remInt = $rem -as [int]
+    if (($null -ne $remInt) -and ($remInt -lt 5)) { Warn "Groq reachable, key valid — but only $rem requests left this window" }
+    elseif ($null -ne $remInt) { Ok "Groq reachable, key valid ($rem requests remaining)" }
+    else { Ok "Groq reachable, key valid" }
   } catch {
-    Bad "Couldn't reach $base ($($_.Exception.Message)) — check your network / VPN"; $fail = $true
+    # Non-2xx (or transport failure): dig the HTTP status out of the exception.
+    # $_.Exception.Response.StatusCode is a [System.Net.HttpStatusCode] enum on
+    # both Windows PowerShell 5.1 and pwsh 7, so [int] gives the numeric code.
+    $status = $null
+    $exResp = $_.Exception.Response
+    if ($exResp) { try { $status = [int]$exResp.StatusCode } catch { $status = $null } }
+    if ($null -eq $status) {
+      Bad "Couldn't reach $base ($($_.Exception.Message)) — check your network / VPN"; $fail = $true
+    }
+    elseif ($status -eq 401) {
+      Bad "Groq rejected your key (401) — check GROQ_API_KEY in .env or regenerate at https://console.groq.com/keys"; $fail = $true
+    }
+    elseif ($status -eq 429) {
+      $ra = $null
+      try { $ra = $exResp.Headers['Retry-After'] } catch { $ra = $null }
+      if ($ra -is [array]) { $ra = $ra[0] }
+      $wait = if ($ra) { " — wait ${ra}s" } else { "" }
+      Warn "Configured correctly, but currently throttled (429)$wait; add -j 2 to your evals"
+    }
+    else {
+      Bad "Unexpected response from Groq (HTTP $status) — see docs/03-troubleshooting.md"; $fail = $true
+    }
   }
 }
 
