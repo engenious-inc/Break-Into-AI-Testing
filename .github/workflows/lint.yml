@@ -1,0 +1,35 @@
+name: lint
+
+# Lightweight CI: static-check every tracked shell script on each PR and on
+# pushes to main. Uses only the first-party actions/checkout; shellcheck is
+# preinstalled on the ubuntu-latest runner, so no third-party actions are pulled.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  shellcheck:
+    name: shellcheck + bash -n
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static-check shell scripts
+        run: |
+          set -euo pipefail
+          # Portable (no bash-4 mapfile): while-read over process substitution
+          # keeps the loop in the main shell so `set -e` aborts on any failure.
+          scripts="$(git ls-files '*.sh')"
+          if [ -z "$scripts" ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          echo "Checking shell scripts:"
+          echo "$scripts" | sed 's/^/  /'
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            echo "== $f =="
+            bash -n "$f"
+            shellcheck "$f"
+          done < <(printf '%s\n' "$scripts")
+          echo "All shell scripts pass bash -n + shellcheck."
