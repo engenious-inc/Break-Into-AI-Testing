@@ -1,105 +1,272 @@
-# Production observability lesson (OTel + Arato.ai), doc-only
+# Observability lesson: real Arato.ai + hand-rolled OTel-shaped tracing
 
 **Date:** 2026-08-01
-**Source:** [github.com/Jaimeman84/financial-chat-bot](https://github.com/Jaimeman84/financial-chat-bot) (legacy repo) — its OpenTelemetry + Arato.ai instrumentation, deferred from the earlier "port cohort lessons" design (`2026-08-01-financebot-legacy-lessons-design.md`) because it requires a running service to instrument, which no part of this workshop has.
+**Source:** [github.com/Jaimeman84/financial-chat-bot](https://github.com/Jaimeman84/financial-chat-bot) (legacy repo) — its OpenTelemetry + Arato.ai instrumentation, deferred from the earlier "port cohort lessons" design because it requires a running service to instrument, which no part of this workshop has.
+
+**Revision note:** this replaces an earlier doc-only draft of this same spec. After presenting that draft, the user clarified they want *real* Arato.ai wiring, not just prose describing it — while still avoiding the complications (npm install, a running server) that made a fully faithful port seem to require those. This version is the resolution: a real, runnable, zero-dependency lesson.
 
 ## Context
 
-Since that earlier design, `engenious-inc/breaking-gpt-claude-workshop` was restructured into a 3-module course (Module 0: Promptfoo Basics, Module 1: Red-Team Fundamentals, Module 2: Advanced Eval) plus a hackathon — see `CLAUDE.md` and `modules/README.md`. There is still no running app anywhere in this workshop; every lesson is a `prompts/*.txt` + `tests/*.yaml` + `promptfooconfig.*.yaml` triplet read directly by `npx promptfoo`, zero-install.
+`engenious-inc/breaking-gpt-claude-workshop` is a 3-module course (Module 0: Promptfoo Basics, Module 1: Red-Team Fundamentals, Module 2: Advanced Eval) plus a hackathon — see `CLAUDE.md` and `modules/README.md`. Module 2's lessons each live in a self-contained subfolder (`modules/02-advanced-eval/<lesson>/`) with their own `prompts/`, `tests/`, `promptfooconfig.yaml` — e.g. `csv-driven-data/`, `fscore-classification/`. `CLAUDE.md` states two hard constraints this design must respect: **no root `package.json`** (Promptfoo is always invoked via `npx promptfoo@latest`) and Module 2 lessons are **single-provider by design** (not the 3-model matrix Module 1 uses).
 
 ## Decisions (from brainstorming)
 
-1. **Depth:** conceptual doc-only. No runnable code, no new Node dependency, no new install step — matches how "automated redteam generation" was added to Module 1 earlier.
-2. **Placement:** appended to the end of `modules/02-advanced-eval/README.md` as a new `## Going further: production observability` section. Module 2 has no separate exercises doc the way Module 1 does (`docs/02-redteam-exercises.md`) — its README is the single doc for the whole module — so this follows that module's existing pattern rather than introducing a new file.
-3. **Arato.ai:** featured prominently, matching the legacy repo's actual usage — named specifically, with its real env var names, not genericized away.
+1. **Real, not simulated.** The Groq call, its latency, its token counts, and the prompt's SHA-256 hash are all genuinely measured/computed at request time. The Arato.ai REST log call is a real HTTP POST — it fires for real if `ARATO_API_KEY`/`ARATO_API_URL` are set, and gracefully no-ops (printing why) if they aren't.
+2. **Zero npm dependencies.** A custom Promptfoo JS provider (`callApi`) can use only Node built-ins (`fetch`, `node:crypto`) — no `@opentelemetry/api` SDK, no `package.json` anywhere in the repo. The OTel *span shape* (trace_id/span_id/attributes) is hand-rolled and honestly labeled as such — real data, not the official SDK.
+3. **Placement:** a new lesson subfolder, `modules/02-advanced-eval/observability/`, matching every other Module 2 lesson's structure. Gets a new bullet in `modules/02-advanced-eval/README.md`'s Lessons list — it's a real runnable lesson now, not a doc-only appendix.
+4. **Arato.ai featured prominently and for real** — its actual REST endpoint shape and env var names, matching the legacy repo's actual usage.
+5. **Single provider**, per Module 2's documented convention — one Groq model (`llama-3.3-70b-versatile`), not the 3-model block.
 
-## Content to add
+## Files to create
 
-Append to `modules/02-advanced-eval/README.md`, immediately after the existing "Maps to `how-to-test-ai` day-03-promptfoo-advanced." line:
+### `modules/02-advanced-eval/observability/provider.mjs`
+
+```js
+// Custom Promptfoo provider that wraps a REAL Groq chat-completion call with
+// hand-rolled OTel-shaped tracing (console output, no SDK — this repo has no
+// package.json anywhere) and a REAL Arato.ai REST log call (skipped
+// gracefully if ARATO_API_URL/ARATO_API_KEY aren't set). Zero npm
+// dependencies: only Node builtins (fetch, node:crypto).
+
+import { randomBytes, createHash } from 'node:crypto';
+
+function hex(bytes) {
+  return randomBytes(bytes).toString('hex');
+}
+
+async function logToArato(entry) {
+  const url = process.env.ARATO_API_URL;
+  const key = process.env.ARATO_API_KEY;
+  if (!url || !key) {
+    console.log('[arato] skipped — ARATO_API_URL/ARATO_API_KEY not set');
+    return;
+  }
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+      body: JSON.stringify(entry),
+    });
+    console.log(`[arato] POST ${url} -> ${res.status}`);
+  } catch (err) {
+    console.log(`[arato] request failed: ${err.message}`);
+  }
+}
+
+export default class ObservedGroqProvider {
+  constructor(options) {
+    this.providerId = options.id || 'observed-groq';
+    this.config = options.config || {};
+  }
+
+  id() {
+    return this.providerId;
+  }
+
+  async callApi(prompt) {
+    const model = this.config.model || 'llama-3.3-70b-versatile';
+    const traceId = hex(16);
+    const spanId = hex(8);
+    const start = Date.now();
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: prompt }],
+        temperature: this.config.temperature ?? 0,
+        max_tokens: this.config.max_tokens ?? 400,
+      }),
+    });
+
+    const durationMs = Date.now() - start;
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { error: `Groq API error ${response.status}: ${JSON.stringify(data)}` };
+    }
+
+    const output = data.choices[0].message.content;
+    const promptHash = createHash('sha256').update(prompt).digest('hex');
+
+    console.log(JSON.stringify({
+      span: 'llm.chat.completion',
+      trace_id: traceId,
+      span_id: spanId,
+      model,
+      duration_ms: durationMs,
+      tokens: data.usage,
+      'prompt.sha256': promptHash,
+    }, null, 2));
+
+    await logToArato({
+      model,
+      tokenUsage: data.usage,
+      latencyMs: durationMs,
+      traceId,
+      spanId,
+      promptHash,
+    });
+
+    return {
+      output,
+      tokenUsage: {
+        total: data.usage?.total_tokens,
+        prompt: data.usage?.prompt_tokens,
+        completion: data.usage?.completion_tokens,
+      },
+    };
+  }
+}
+```
+
+### `modules/02-advanced-eval/observability/promptfooconfig.yaml`
+
+```yaml
+description: "Module 2 — Observability: real Arato.ai logging + OTel-shaped tracing (single provider, zero npm dependencies)"
+
+prompts:
+  - file://prompts/prompt.txt
+
+providers:
+  - id: file://provider.mjs
+    config:
+      model: llama-3.3-70b-versatile
+      temperature: 0
+      max_tokens: 400
+
+tests:
+  - file://tests/basic.yaml
+```
+
+### `modules/02-advanced-eval/observability/prompts/prompt.txt`
+
+```
+{{query}}
+```
+
+### `modules/02-advanced-eval/observability/tests/basic.yaml`
+
+```yaml
+- description: "Simple factual question"
+  vars:
+    query: "What is HTTP?"
+  assert:
+    - type: icontains
+      value: "protocol"
+
+- description: "Simple definitional question"
+  vars:
+    query: "In one sentence, what is OpenTelemetry?"
+  assert:
+    - type: icontains-any
+      value: ["trace", "observability", "telemetry"]
+```
+
+### `modules/02-advanced-eval/observability/README.md`
 
 ````markdown
+# Observability: Arato.ai + OTel-shaped tracing
 
-## Going further: production observability
+Every other lesson in this module asks "did the model answer well?" This one
+asks a different question: once a system like this is *deployed*, what is it
+doing — how slow, how many tokens, which requests are erroring? That's
+observability, and the standard for it is OpenTelemetry (OTel).
 
-Everything above is about evaluation quality — did the model answer well, by some
-scored, weighted, F-score-y measure. None of it tells you what a *deployed* system
-is actually doing once it's live: how slow is it, how many tokens is it burning,
-is one user hitting errors nobody else is. That's a different discipline —
-observability — and the standard for it is OpenTelemetry (OTel).
+## What's real here
 
-- **Trace** — one user request end-to-end.
-- **Span** — one step within a trace (the LLM call itself, a DB lookup, ...).
-- **OTLP** — the wire format traces/metrics ship in, to any OTLP-compatible backend.
+- **Trace/span IDs, latency, token counts** — genuinely measured from a real
+  Groq API call, not simulated.
+- **The prompt hash** — a real SHA-256 of the actual prompt, computed at
+  request time.
+- **The Arato.ai log call** — a real REST POST to
+  [Arato.ai](https://www.arato.ai)'s logging endpoint, if you set
+  `ARATO_API_URL`/`ARATO_API_KEY` in `.env` (both optional — sample output
+  below shows what happens either way).
 
-### A real worked example
+## What's simplified
 
-A production financial-education chatbot we've worked with instruments every LLM
-call with both: an OTel span (model, token usage, TTFT/TTLT latency, conversation
-ID) exported via OTLP, *and* a parallel REST log to **[Arato.ai](https://www.arato.ai)**,
-an LLM-observability platform built for exactly this. Wiring looks like:
+There's no official `@opentelemetry/api` SDK here — this repo has no
+`package.json` anywhere (see `CLAUDE.md`), so adding one would mean an
+`npm install` step that breaks that convention for one lesson. Instead,
+`provider.mjs` prints a trace/span-*shaped* JSON object by hand, using real
+measured data. It's not wire-compatible OTLP output — it's the same
+information, shown honestly as a simplified stand-in for what the real SDK
+would emit.
 
+## Why privacy is part of this, not an afterthought
+
+`provider.mjs` never logs the raw prompt text — only its SHA-256 hash. This
+mirrors a real production pattern: telemetry is itself a place user data can
+leak, so it gets the same "don't log what you don't need" treatment as any
+other data sink.
+
+## Run it
+
+```bash
+npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
+```
+
+Sample output (Arato unset):
+```
+{
+  "span": "llm.chat.completion",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7",
+  "model": "llama-3.3-70b-versatile",
+  "duration_ms": 412,
+  "tokens": { "prompt_tokens": 12, "completion_tokens": 34, "total_tokens": 46 },
+  "prompt.sha256": "8f3a2b1c..."
+}
+[arato] skipped — ARATO_API_URL/ARATO_API_KEY not set
+```
+
+With a real Arato account, add to `.env`:
 ```env
-OTEL_SERVICE_NAME=financial-chatbot
-OTEL_EXPORTER_OTLP_ENDPOINT=https://otel.arato.ai
-OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer <your-api-key>
-
 ARATO_API_URL=https://api.arato.ai/<your-project>/log
 ARATO_API_KEY=ar-...
 ```
+and the last line becomes `[arato] POST https://api.arato.ai/<your-project>/log -> 200`.
 
-Illustrative shape (not runnable here — no app exists in this workshop to attach
-this to):
+## Why MediBot/FinanceBot don't have any of this
 
-```ts
-// One call, two destinations: an OTel span for the trace pipeline,
-// and a direct Arato log call for their dashboard.
-const span = tracer.startSpan('llm.chat.completion')
-const response = await llm.chat(messages)
-span.setAttributes({
-  'llm.model': modelName,
-  'llm.tokens.prompt': response.usage.promptTokens,
-  'llm.tokens.completion': response.usage.completionTokens,
-  'llm.latency_ms': Date.now() - start,
-})
-span.end()
+Module 1's bots call Groq directly via Promptfoo's built-in `groq:` provider
+— there's no code of ours in that path to instrument. This lesson swaps in a
+*custom* provider specifically so there's somewhere to put that
+instrumentation. In a real deployment, your own API layer is that somewhere.
 
-await logToArato({
-  model: modelName,
-  tokenUsage: response.usage,
-  latencyMs: Date.now() - start,
-  conversationId,
-})
-```
-
-### Privacy is part of the observability surface, not an afterthought
-
-That same app logs `LOG_RAW_PROMPTS=false` by default — telemetry gets message
-*length* and a SHA-256 *hash*, never the raw text, unless a developer explicitly
-flips it on for local debugging. Observability tooling is itself a place user
-data can leak; treat it with the same care as any other data sink.
-
-### Why none of this exists in MediBot/FinanceBot
-
-This workshop's bots call Groq directly — there's no wrapping service, so there's
-nothing to instrument. The moment you put a real API in front of an LLM (which
-almost every production deployment does), you inherit this whole surface: what do
-you log, where does it go, who can see it, and what happens when the vendor you
-send it to is down.
-
-**Further reading:** [OpenTelemetry docs](https://opentelemetry.io/docs/) ·
-[Arato.ai](https://www.arato.ai)
+> Extension lesson — not part of the original `how-to-test-ai` day-03-promptfoo-advanced curriculum.
 ````
 
-## Files touched
+## Files to modify
 
-**Modified:**
-- `modules/02-advanced-eval/README.md` — one new section appended, as above
+### `.env.example` — append
 
-**Not touched:** everything else. No new files, no dependency changes, no `CLAUDE.md` update (that file's "Course layout" list operates at module granularity, not per-subsection — adding a subsection to Module 2's existing doc doesn't change it).
+```env
+
+# Optional — enables real REST logging in modules/02-advanced-eval/observability/ (Arato.ai account).
+# ARATO_API_URL=https://api.arato.ai/<your-project>/log
+# ARATO_API_KEY=ar-...
+```
+
+### `modules/02-advanced-eval/README.md` — add one bullet to the Lessons list
+
+```markdown
+- `observability/` — real Arato.ai REST logging + hand-rolled OTel-shaped tracing via a custom zero-dependency provider; shows what production telemetry adds beyond eval-time quality checks
+```
 
 ## Verification plan
 
-This is prose-only — no live eval, no code to run. Verification is a read-through:
-1. Confirm the section renders correctly as Markdown (headings, code fences, links).
-2. Confirm it doesn't imply any of this is runnable in the current workshop (the "not runnable here" caveat on the code snippet is load-bearing — must survive any later editing).
-3. Confirm the `modules/02-advanced-eval/README.md` file still reads coherently end-to-end after the append (no abrupt tone shift from the terse "Lessons" index into a long-form essay without a clear section break — the `##` heading should carry that transition).
+1. Run `npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml` live against the real `GROQ_API_KEY`, with `ARATO_API_URL`/`ARATO_API_KEY` unset — confirm: 0 errors, both test cases pass, console shows real span-shaped JSON with plausible `duration_ms`/`tokens`, and `[arato] skipped — ...` prints exactly once per case.
+2. Confirm the printed `prompt.sha256` is deterministic and correct by spot-checking one value against `shasum -a 256` on the actual rendered prompt text.
+3. Read through `README.md` for internal consistency between the "what's real" / "what's simplified" claims and the actual `provider.mjs` code.
+4. Grep the whole new lesson folder for stray `package.json` or `node_modules` — must not exist (zero-dependency claim must hold).
+
+## Files touched (summary)
+
+**New:** `modules/02-advanced-eval/observability/{provider.mjs, promptfooconfig.yaml, prompts/prompt.txt, tests/basic.yaml, README.md}`
+**Modified:** `.env.example`, `modules/02-advanced-eval/README.md`
