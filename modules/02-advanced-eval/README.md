@@ -15,5 +15,6 @@ Run any lesson: `npx promptfoo@latest eval -c modules/02-advanced-eval/<path>/pr
 - `fscore-classification/` — TP/FP/FN from the eval's JSON output via a `compute-fscore.js` companion script (promptfoo's `derivedMetrics`/`weight:0` can't compute it — see the lesson README)
 - `temperature-and-personas/` — same providers at temp 0.7 vs 1; empathetic vs not
 - `debugger/` — fix intentionally-broken configs (`1_basic → 2_moderate → 3_advance`)
+- `observability/` — real Arato.ai REST logging + hand-rolled OTel-shaped tracing via a custom zero-dependency provider; shows what production telemetry adds beyond eval-time quality checks
 
 > Maps to `how-to-test-ai` day-03-promptfoo-advanced.
