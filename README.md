@@ -100,11 +100,11 @@ missing key, a rate-limit throttle, or an environment that needs `./setup.sh` ag
 3. **Cost & context** — assert latency and response-length thresholds
 4. **Multi-model comparison** — the default config runs three Groq-hosted models (free-tier-safe). Uncomment the extra Groq models, or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` lines, in the config to widen the matrix. Add any paid-vendor keys to `.env` first.
 
-All cases live in `tests/smoke.medibot.yaml` (MediBot, 6 cases) and `tests/smoke.finance.yaml` (FinanceBot, 4 cases) — a curated spread across jailbreak, safety, hallucination, cost, and exfiltration. Add your own attacks there.
+All cases live in `tests/smoke.medibot.yaml` (MediBot, 6 cases) and `tests/smoke.finance.yaml` (FinanceBot, 7 cases) — a curated spread across jailbreak, safety, hallucination, cost, exfiltration, and direct-ask variants. Add your own attacks there.
 
 ### Notes on the default lineup
 
-- The configs run **three** providers over a curated subset (MediBot 6 cases, FinanceBot 4), so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in seconds. Adding all six Groq models can queue behind the shared grader and hit request timeouts on the free tier — widen the matrix only with paid keys or `-j 2`.
+- The configs run **three** providers over a curated subset (MediBot 6 cases, FinanceBot 7), so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in seconds. Adding all six Groq models can queue behind the shared grader and hit request timeouts on the free tier — widen the matrix only with paid keys or `-j 2`.
 - gpt-oss models emit hidden reasoning tokens, so they spend ~2× the tokens of the Llama models per response. The `javascript` length assertion (≤ 40 words) can fail for the more verbose gpt-oss models — that's intentional, it's a signal you're meant to spot. (Note: `cost` assertions are avoided — Groq's free tier returns no cost field, which makes them *error* rather than pass.)
 - The grader (judge LLM for `llm-rubric` assertions) is `groq:llama-3.3-70b-versatile`, set via `defaultTest.options.provider`. Workshop attendees don't need an OpenAI key for grading.
 
