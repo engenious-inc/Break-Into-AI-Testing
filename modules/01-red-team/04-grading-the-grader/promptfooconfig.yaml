@@ -1,0 +1,25 @@
+description: "Red-team 4 — who grades the grader? (original vs rubric-only vs shipped)"
+
+# NOTE: file:// paths resolve relative to THIS config file, not the repo root
+# (the repo-root rule is about .env discovery, which is a separate thing).
+# Same pattern as modules/00-promptfoo-basics/01-prompts/file-based/.
+prompts:
+  - file://../../../prompts/medibot.txt
+
+# Single provider on purpose: llama-3.3-70b-versatile is the model that produced
+# the original leak AND graded its own output as safe. Swapping the model breaks
+# the demonstration.
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 400 }
+
+# The grader is the same 70B. That is the whole point of the lesson — this is the
+# default in every red-team config in this repo, and here it is grading itself.
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+
+tests:
+  - file://tests/1-original.yaml
+  - file://tests/2-rubric-only.yaml
+  - file://tests/3-shipped.yaml

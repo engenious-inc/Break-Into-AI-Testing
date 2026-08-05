@@ -70,7 +70,23 @@ gap-fill suites use the lean, one-axis-per-file pattern deliberately, to
 keep default live-eval request volume low.
 
 ## Course layout
-- `prompts/`, `tests/`, `promptfooconfig.*.yaml`, `docs/02`/`04`/`05` — Module 1 (red-team fundamentals)
+- `prompts/`, `tests/`, `promptfooconfig.*.yaml`, `docs/02`/`04`/`05` — Module 1 runnable artifacts
+- `modules/01-red-team/` — Module 1 lessons (teaching layer over those artifacts; only
+  `04-grading-the-grader/` ships its own triplet)
 - `modules/00-promptfoo-basics/` — Module 0 (Promptfoo pillars)
 - `modules/02-advanced-eval/` — Module 2 (weights, metrics, CSV, F-score, debugging)
-- `.claude/` — authoring aids (red-teamer agent, new-eval-suite + run-and-summarize skills)
+- `.claude/` — the Claude Code workflow (red-teamer agent, new-eval-suite +
+  run-and-summarize skills). In Module 1 these are the student's path, not optional
+  authoring aids; Modules 0 and 2 use them only for scaffolding.
+
+## Agent boundaries (Module 1)
+`red-teamer` has `Read, Grep, Glob` and no write access, on purpose. An agent that
+generates test cases, runs them, **and** grades the results is a closed loop with no
+independent verification — see `modules/01-red-team/04-grading-the-grader/` for a real
+case in this repo where the `llm-rubric` grader passed a total system-prompt leak.
+Keep the human paste-and-review step when adding agent-driven lessons.
+
+Corollary for authoring: **pair every model-graded assertion with a deterministic one
+that fails for structural reasons.** `llm-rubric` / `factuality` fail in ways correlated
+with the model under test — often literally the same model, since the 70B is the default
+grader. A cheap `not-regex` fails independently, and independence is the point.

@@ -2,7 +2,7 @@
 
 Hands-on AI bug-bounty workshop. You'll red-team two chatbots — **MediBot** (healthcare triage) and **FinanceBot** (retail brokerage) — using [Promptfoo](https://www.promptfoo.dev). Both are built the way most production AI assistants are built: an open-weight LLM + a guardrail system prompt, served via Groq's free tier. Same attack surface, different domain rules.
 
-The default config is **free-tier-safe**: a curated subset (4–6 cases) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
+The default config is **free-tier-safe**: a curated subset (8 cases per suite) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
 
 <p align="center">
   <img src="docs/qr.png" alt="Scan to clone" width="220" />
@@ -18,15 +18,15 @@ You need: a terminal, internet, and a free Groq API key.
 
 ### macOS / Linux
 ```bash
-git clone https://github.com/engenious-inc/breaking-gpt-claude-workshop.git
-cd breaking-gpt-claude-workshop
+git clone https://github.com/engenious-inc/Break-Into-AI-Testing.git
+cd Break-Into-AI-Testing
 ./setup.sh
 ```
 
 ### Windows (PowerShell)
 ```powershell
-git clone https://github.com/engenious-inc/breaking-gpt-claude-workshop.git
-cd breaking-gpt-claude-workshop
+git clone https://github.com/engenious-inc/Break-Into-AI-Testing.git
+cd Break-Into-AI-Testing
 powershell -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
@@ -41,19 +41,24 @@ The script will: check Node ≥ 20, install Promptfoo, prompt for your Groq key 
 This repo is one course in three modules plus a hackathon (full map: `modules/README.md`):
 
 - **Module 0 — Promptfoo Basics** (`modules/00-promptfoo-basics/`) — prompts, providers, assertions.
-- **Module 1 — Red-Team Fundamentals** (repo root + `docs/02`,`04`,`05`) — break MediBot & FinanceBot;
-  quality challenges (bias, consistency, context, values, compliance) in `docs/05-quality-challenges.md`.
+- **Module 1 — Red-Team Fundamentals** (`modules/01-red-team/` over repo root + `docs/02`,`04`,`05`) —
+  break MediBot & FinanceBot by hand, then let Claude Code drive: the `red-teamer` subagent drafts
+  attacks, `run-and-summarize` reports them, and `04-grading-the-grader/` shows a real case where the
+  LLM judge passed a total system-prompt leak. Quality challenges (bias, consistency, context, values,
+  compliance) in `docs/05-quality-challenges.md`.
 - **Module 2 — Advanced Evaluation** (`modules/02-advanced-eval/`) — weights, metrics, CSV data,
   F-score, temperature, and a debugging track.
 
 New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
-Authoring aids live in `.claude/` (see `CLAUDE.md`).
+The Claude Code workflow lives in `.claude/` (see `CLAUDE.md`) — in Module 1 it's the path,
+not an optional extra.
 
 ### Start here (reading order)
 1. [Quickstart](docs/01-quickstart.md) — clone, set up your Groq key, run your first eval.
-2. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
-3. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
-4. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
+2. [Module 1 lessons](modules/01-red-team/) — manual baseline → agent drafts → agent reports → grading the grader.
+3. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
+4. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
+5. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
 
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 
@@ -100,11 +105,11 @@ missing key, a rate-limit throttle, or an environment that needs `./setup.sh` ag
 3. **Cost & context** — assert latency and response-length thresholds
 4. **Multi-model comparison** — the default config runs three Groq-hosted models (free-tier-safe). Uncomment the extra Groq models, or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` lines, in the config to widen the matrix. Add any paid-vendor keys to `.env` first.
 
-All cases live in `tests/smoke.medibot.yaml` (MediBot, 6 cases) and `tests/smoke.finance.yaml` (FinanceBot, 7 cases) — a curated spread across jailbreak, safety, hallucination, cost, exfiltration, and direct-ask variants. Add your own attacks there.
+All cases live in `tests/smoke.medibot.yaml` (MediBot, 8 cases) and `tests/smoke.finance.yaml` (FinanceBot, 8 cases) — a curated spread across jailbreak, safety, hallucination, cost, exfiltration, and direct-ask variants. Add your own attacks there.
 
 ### Notes on the default lineup
 
-- The configs run **three** providers over a curated subset (MediBot 6 cases, FinanceBot 7), so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in seconds. Adding all six Groq models can queue behind the shared grader and hit request timeouts on the free tier — widen the matrix only with paid keys or `-j 2`.
+- The configs run **three** providers over a curated subset (8 cases each, so 24 responses per suite), so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in under a minute at the default pacing. Adding all six Groq models can queue behind the shared grader and hit request timeouts on the free tier — widen the matrix only with paid keys or `-j 2`.
 - gpt-oss models emit hidden reasoning tokens, so they spend ~2× the tokens of the Llama models per response. The `javascript` length assertion (≤ 40 words) can fail for the more verbose gpt-oss models — that's intentional, it's a signal you're meant to spot. (Note: `cost` assertions are avoided — Groq's free tier returns no cost field, which makes them *error* rather than pass.)
 - The grader (judge LLM for `llm-rubric` assertions) is `groq:llama-3.3-70b-versatile`, set via `defaultTest.options.provider`. Workshop attendees don't need an OpenAI key for grading.
 
