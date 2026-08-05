@@ -117,7 +117,7 @@ SKIPPED=(
   "modules/00-promptfoo-basics/03-assertions/answer-relevance/promptfooconfig.yaml:needs OPENAI_API_KEY (embeddings)"
   "promptfooconfig.openrouter.medibot.yaml:needs a valid OPENROUTER_API_KEY"
   "promptfooconfig.openrouter.finance.yaml:needs a valid OPENROUTER_API_KEY"
-  "promptfooconfig.mybot.yaml:Challenge-3 <TODO> template — meant for students to fill in, not a finished lesson"
+  "promptfooconfig.mybot.yaml:Challenge-3 slot — students overwrite it with their own bot, so its result is not a repo-health signal"
 )
 
 # Intentionally-broken debugger fix-me stages — expected to NOT run clean.
