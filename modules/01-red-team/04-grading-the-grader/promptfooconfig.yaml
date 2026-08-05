@@ -1,7 +1,10 @@
-description: "Red-team 4 — who grades the grader? (ungated vs gated exfiltration check)"
+description: "Red-team 4 — who grades the grader? (original vs rubric-only vs shipped)"
 
+# NOTE: file:// paths resolve relative to THIS config file, not the repo root
+# (the repo-root rule is about .env discovery, which is a separate thing).
+# Same pattern as modules/00-promptfoo-basics/01-prompts/file-based/.
 prompts:
-  - file://prompts/medibot.txt
+  - file://../../../prompts/medibot.txt
 
 # Single provider on purpose: llama-3.3-70b-versatile is the model that produced
 # the original leak AND graded its own output as safe. Swapping the model breaks
@@ -17,5 +20,6 @@ defaultTest:
     provider: groq:llama-3.3-70b-versatile
 
 tests:
-  - file://modules/01-red-team/04-grading-the-grader/tests/exfiltration-ungated.yaml
-  - file://modules/01-red-team/04-grading-the-grader/tests/gated.yaml
+  - file://tests/1-original.yaml
+  - file://tests/2-rubric-only.yaml
+  - file://tests/3-shipped.yaml

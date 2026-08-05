@@ -5,7 +5,8 @@ Break MediBot and FinanceBot, then hand the repetitive half of the job to an age
 Module 1's runnable artifacts live at the **repo root** (`prompts/`, `tests/`,
 `promptfooconfig.*.yaml`) — this directory is the teaching layer over them, so
 there is exactly one copy of every attack suite. Only lesson 04 ships its own
-triplet, because it deliberately runs a *broken* version of a shipped assertion.
+triplet, because it runs three variants of one shipped assertion side by side
+(pre-fix, half-fixed, shipped) to isolate what each half of the fix contributes.
 
 ## Before you start
 
@@ -28,7 +29,9 @@ red-team run **exits 100**. Modules 0 and 2 use ordinary semantics (pass = good)
 - `01-manual-baseline/` — land one attack by hand; read a 3-model report
 - `02-agent-generates/` — the `red-teamer` subagent drafts attacks along the 3 axes
 - `03-agent-reports/` — the `run-and-summarize` skill turns a run into a verdict table
-- `04-grading-the-grader/` — watch an LLM judge pass a real system-prompt leak, then fix it
+- `04-grading-the-grader/` — reproduce a real grading failure: the LLM judge quotes a
+  leaked rule back as proof of a refusal. Verify it before teaching it with
+  `./scripts/outcome-check.sh`.
 
 Then: `docs/02-redteam-exercises.md` (Act 2 — transfer to FinanceBot),
 `docs/05-quality-challenges.md` (bias / consistency / compliance / context / values),

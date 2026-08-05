@@ -15,5 +15,6 @@ Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.
 > `promptfooconfig.*.yaml`, and `docs/02`/`04`/`05`. `modules/01-red-team/` is a
 > *teaching layer* over them (lesson ordering, the Claude Code workflow, and the
 > exercises), not a second copy of the suites. The one exception is
-> `04-grading-the-grader/`, which ships its own triplet because it deliberately runs
-> a deliberately-broken variant of a shipped assertion side by side with the fixed one.
+> `04-grading-the-grader/`, which ships its own triplet because it runs three variants
+> of one shipped assertion side by side — pre-fix, half-fixed, and shipped — to isolate
+> what each half of commit `e89a944` actually contributes.
