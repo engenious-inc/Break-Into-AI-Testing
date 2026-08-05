@@ -41,19 +41,24 @@ The script will: check Node ≥ 20, install Promptfoo, prompt for your Groq key 
 This repo is one course in three modules plus a hackathon (full map: `modules/README.md`):
 
 - **Module 0 — Promptfoo Basics** (`modules/00-promptfoo-basics/`) — prompts, providers, assertions.
-- **Module 1 — Red-Team Fundamentals** (repo root + `docs/02`,`04`,`05`) — break MediBot & FinanceBot;
-  quality challenges (bias, consistency, context, values, compliance) in `docs/05-quality-challenges.md`.
+- **Module 1 — Red-Team Fundamentals** (`modules/01-red-team/` over repo root + `docs/02`,`04`,`05`) —
+  break MediBot & FinanceBot by hand, then let Claude Code drive: the `red-teamer` subagent drafts
+  attacks, `run-and-summarize` reports them, and `04-grading-the-grader/` shows a real case where the
+  LLM judge passed a total system-prompt leak. Quality challenges (bias, consistency, context, values,
+  compliance) in `docs/05-quality-challenges.md`.
 - **Module 2 — Advanced Evaluation** (`modules/02-advanced-eval/`) — weights, metrics, CSV data,
   F-score, temperature, and a debugging track.
 
 New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
-Authoring aids live in `.claude/` (see `CLAUDE.md`).
+The Claude Code workflow lives in `.claude/` (see `CLAUDE.md`) — in Module 1 it's the path,
+not an optional extra.
 
 ### Start here (reading order)
 1. [Quickstart](docs/01-quickstart.md) — clone, set up your Groq key, run your first eval.
-2. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
-3. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
-4. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
+2. [Module 1 lessons](modules/01-red-team/) — manual baseline → agent drafts → agent reports → grading the grader.
+3. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
+4. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
+5. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
 
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 
