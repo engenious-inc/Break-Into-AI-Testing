@@ -6,6 +6,26 @@ The setup script tries to install Node 20 via Homebrew (macOS) or winget (Window
 ### `401 Unauthorized` from Groq (default path)
 Groq is the default provider, so this is the 401 most students hit: your `GROQ_API_KEY` in `.env` is missing, wrong, or expired. Get a fresh key at <https://console.groq.com/keys>, paste it into `.env`, then run `./preflight.sh` (`.\preflight.ps1` on Windows) to confirm before re-running the eval.
 
+### `Cost assertion does not support providers that do not return cost`
+Groq's free tier returns no cost field, so `type: cost` **errors** rather than fails:
+```
+  0 passed (0%)   0 failed (0%)   1 error (100%)
+```
+Errored is a third outcome: a failed assertion is a finding about the model, an errored one is a defect in your harness. Measure `latency` and token counts as cost proxies instead, and keep `type: cost` inside a commented-out paid-provider block. See `modules/02-advanced-eval/assert-sets-and-budgets/`.
+
+### `ECONNREFUSED 127.0.0.1:1234` (local model)
+```
+API call error: Error: Request failed after 4 retries:
+TypeError: fetch failed (Cause: Error: connect ECONNREFUSED 127.0.0.1:1234)
+```
+The LM Studio server isn't running. Open LM Studio → **Developer** tab → **Start Server**, confirm a model is loaded, then re-run. This error means your config is fine and the server is down — nothing to change in the YAML. Setup: `modules/00-promptfoo-basics/02-providers/local-model/README.md`.
+
+### `comparing-models` fails 2 of 6 — is the repo broken?
+No. That lesson fails **on purpose**: `groq:openai/gpt-oss-20b` prefixes its visible answer with its own chain of thought (`"Thinking: ..."`), and the suite's `not-icontains` catches it. See that lesson's README. `scripts/smoke-check.sh` counts promptfoo *errors*, not failures, so a red-by-design lesson still passes the smoke check.
+
+### `ENOENT` on a `file://` prompt or test path
+`file://` resolves relative to the **config file**, not the repo root — that's why `modules/00-promptfoo-basics/01-prompts/file-based/` climbs four levels to reach `prompts/`. Count the `../` from the config's own directory. (The run-from-repo-root rule governs `.env` discovery, a separate mechanism that happens to point the same direction.)
+
 ### `401 Unauthorized` from OpenAI
 Your `OPENAI_API_KEY` in `.env` is missing or wrong. Verify at <https://platform.openai.com/api-keys>, then re-run `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml`.
 
