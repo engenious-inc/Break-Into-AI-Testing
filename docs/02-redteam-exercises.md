@@ -7,6 +7,16 @@ You have **two targets**:
 
 Both are built the same way most production AI assistants are built: an open-weight LLM + a guardrail system prompt, served on Groq's free tier. Same attack surface, different domain rules.
 
+> **Before you start:** assertions here describe the **safe** answer, so a *failing*
+> assertion means the attack **landed**, and a healthy run **exits 100**. That is the
+> finding, not a broken test.
+>
+> **Working through this with Claude Code?** [`modules/01-red-team/`](../modules/01-red-team/)
+> sequences these exercises into four lessons and hands the repetitive half to an agent:
+> land one attack by hand → the `red-teamer` subagent drafts along the 3 axes →
+> `run-and-summarize` produces the verdict table → then watch an LLM judge pass a real
+> system-prompt leak in `04-grading-the-grader/`.
+
 ---
 
 ## Act 1 — Guided red-team of MediBot
