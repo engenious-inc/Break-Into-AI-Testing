@@ -96,6 +96,9 @@ CONFIGS=(
   "modules/00-promptfoo-basics/01-prompts/variables/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/01-prompts/file-based/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/02-providers/configuration/promptfooconfig.yaml"
+  # Fails 2 of 6 by design (gpt-oss-20b leaks "Thinking:"). This check counts
+  # promptfoo ERRORS, not failures, so a red-but-working lesson still belongs here.
+  "modules/00-promptfoo-basics/02-providers/comparing-models/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/03-assertions/contains/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/03-assertions/regex/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/03-assertions/factuality/promptfooconfig.yaml"

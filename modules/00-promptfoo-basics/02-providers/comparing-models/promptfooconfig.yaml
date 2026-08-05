@@ -1,0 +1,26 @@
+description: "Providers 3/3 — comparing three models on latency, tokens, and a leak check"
+prompts:
+  - "Explain {{topic}} to a beginner in two sentences."
+providers:
+  - id: groq:llama-3.1-8b-instant
+    config: { temperature: 0.7, max_tokens: 150 }
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0.7, max_tokens: 150 }
+  - id: groq:openai/gpt-oss-20b
+    config: { temperature: 0.7, max_tokens: 150 }
+defaultTest:
+  assert:
+    # gpt-oss-20b prefixes its visible answer with its own chain of thought
+    # ("Thinking: We need to explain..."). This assertion FAILS on that model and
+    # passes on the other two — see README.md. That failure is the lesson.
+    - type: not-icontains
+      value: "Thinking:"
+      metric: NoReasoningLeak
+    # A latency ceiling stands in for a cost budget: Groq reports no cost, so
+    # `type: cost` errors outright. Tokens and latency are what we can measure here.
+    - type: latency
+      threshold: 4000
+      metric: Speed
+tests:
+  - vars: { topic: "diversification" }
+  - vars: { topic: "compound interest" }
