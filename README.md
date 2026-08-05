@@ -18,15 +18,15 @@ You need: a terminal, internet, and a free Groq API key.
 
 ### macOS / Linux
 ```bash
-git clone https://github.com/engenious-inc/breaking-gpt-claude-workshop.git
-cd breaking-gpt-claude-workshop
+git clone https://github.com/engenious-inc/Break-Into-AI-Testing.git
+cd Break-Into-AI-Testing
 ./setup.sh
 ```
 
 ### Windows (PowerShell)
 ```powershell
-git clone https://github.com/engenious-inc/breaking-gpt-claude-workshop.git
-cd breaking-gpt-claude-workshop
+git clone https://github.com/engenious-inc/Break-Into-AI-Testing.git
+cd Break-Into-AI-Testing
 powershell -ExecutionPolicy Bypass -File .\setup.ps1
 ```
 
