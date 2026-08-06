@@ -96,6 +96,9 @@ CONFIGS=(
   "modules/00-promptfoo-basics/01-prompts/variables/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/01-prompts/file-based/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/02-providers/configuration/promptfooconfig.yaml"
+  # Fails 2 of 6 by design (gpt-oss-20b leaks "Thinking:"). This check counts
+  # promptfoo ERRORS, not failures, so a red-but-working lesson still belongs here.
+  "modules/00-promptfoo-basics/02-providers/comparing-models/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/03-assertions/contains/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/03-assertions/regex/promptfooconfig.yaml"
   "modules/00-promptfoo-basics/03-assertions/factuality/promptfooconfig.yaml"
@@ -114,7 +117,7 @@ SKIPPED=(
   "modules/00-promptfoo-basics/03-assertions/answer-relevance/promptfooconfig.yaml:needs OPENAI_API_KEY (embeddings)"
   "promptfooconfig.openrouter.medibot.yaml:needs a valid OPENROUTER_API_KEY"
   "promptfooconfig.openrouter.finance.yaml:needs a valid OPENROUTER_API_KEY"
-  "promptfooconfig.mybot.yaml:Challenge-3 <TODO> template — meant for students to fill in, not a finished lesson"
+  "promptfooconfig.mybot.yaml:Challenge-3 slot — students overwrite it with their own bot, so its result is not a repo-health signal"
 )
 
 # Intentionally-broken debugger fix-me stages — expected to NOT run clean.

@@ -47,10 +47,18 @@ defaultTest:
 Single-provider by design (NOT the 3-model block): most Module 0 and Module 2 lesson
 configs (each isolates one concept and keeps free-tier request volume low), plus the
 Module 1 gap-fill quality configs (`promptfooconfig.quality.*.yaml`, see
-`docs/05-quality-challenges.md`). The deliberate multi-provider exceptions are the two
+`docs/05-quality-challenges.md`). The deliberate multi-provider exceptions are the three
 lessons whose subject IS the matrix: `modules/00-promptfoo-basics/02-providers/configuration/`
-(three Groq models) and `modules/02-advanced-eval/temperature-and-personas/` (one model
-at two temperatures).
+and `.../comparing-models/` (three Groq models each) and
+`modules/02-advanced-eval/temperature-and-personas/` (one model at two temperatures).
+
+## Lessons that fail on purpose
+Outside Module 1's inverted scoring, one Module 0 lesson ships red by design:
+`02-providers/comparing-models/` fails 2 of 6 because `groq:openai/gpt-oss-20b` emits its
+chain of thought (`"Thinking: ..."`) in the visible answer. Do not "fix" it by loosening
+the assertion — the failure is the lesson, and its README says so. If you add another
+deliberately-failing lesson, say so in the module README so a red run is never mistaken
+for a broken repo.
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.

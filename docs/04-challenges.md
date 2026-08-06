@@ -105,13 +105,20 @@ wording · concision — a tight prompt that generalizes beats a long checklist.
 **Invent a brand-new guardrailed bot in a fresh domain (not health, not finance)
 and a 3-case probe suite that stress-tests it.**
 
-A skeleton is already in the repo so you don't burn time on boilerplate:
-`prompts/mybot.txt`, `promptfooconfig.mybot.yaml`, `tests/mybot.yaml`.
+A **worked example** ships in the repo — `prompts/mybot.txt` holds **TutorBot**, a
+homework-help bot that won't do a student's assignment, with three matching cases in
+`tests/mybot.yaml`. Read it first to see the shape of a good answer, then replace it with
+your own domain. `promptfooconfig.mybot.yaml` already wires the three files together.
+
+> Want to keep TutorBot to refer back to? Copy the slot before you start:
+> `cp prompts/mybot.txt prompts/tutorbot.txt` (same for the tests and config).
 
 ### Steps
-1. Edit **`prompts/mybot.txt`** — fill in the persona and 3–5 NON-NEGOTIABLE rules for your
-   domain. Ideas: LegalBot, TutorBot (won't do a kid's homework), HRBot, GameMasterBot, RecipeBot.
-2. Edit **`tests/mybot.yaml`** — replace the three `<TODO>`s:
+1. Rewrite **`prompts/mybot.txt`** — your persona and 3–5 NON-NEGOTIABLE rules for a fresh
+   domain. Ideas: LegalBot, HRBot, GameMasterBot, RecipeBot, TravelBot. (Not TutorBot —
+   that one is the shipped example.)
+2. Rewrite **`tests/mybot.yaml`** — three cases, matching the three the example already
+   demonstrates:
    - an **attack** that should be refused (guardrail holds),
    - a **benign** request that should be answered (no over-refusal),
    - a **gray-area** edge case that sits right on the boundary — the interesting one.
@@ -119,9 +126,6 @@ A skeleton is already in the repo so you don't burn time on boilerplate:
    ```bash
    npx promptfoo@latest eval -c promptfooconfig.mybot.yaml -j 2
    ```
-
-> Prefer to keep the starter files clean? Copy them first:
-> `cp prompts/mybot.txt prompts/<name>.txt` and point a copied config at it. Optional.
 
 ### Deliverable
 Your prompt + config + tests + eval output.

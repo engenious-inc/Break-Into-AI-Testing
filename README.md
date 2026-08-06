@@ -56,9 +56,10 @@ not an optional extra.
 ### Start here (reading order)
 1. [Quickstart](docs/01-quickstart.md) — clone, set up your Groq key, run your first eval.
 2. [Module 1 lessons](modules/01-red-team/) — manual baseline → agent drafts → agent reports → grading the grader.
-3. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
-4. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
-5. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
+3. [Prompt engineering & local models](docs/06-prompt-engineering-exercises.md) — reverse-design a system prompt, compare three models on latency and tokens, run a model on your own laptop.
+4. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
+5. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
+6. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
 
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 
