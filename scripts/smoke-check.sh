@@ -109,6 +109,9 @@ CONFIGS=(
   "modules/02-advanced-eval/csv-driven-data/promptfooconfig.yaml"
   "modules/02-advanced-eval/fscore-classification/promptfooconfig.yaml"
   "modules/02-advanced-eval/temperature-and-personas/promptfooconfig.yaml"
+  # Day 8 lesson. Its Arato POST is optional and skips cleanly when the env vars are
+  # unset, so the custom provider still gets exercised here on every run.
+  "modules/02-advanced-eval/observability/promptfooconfig.yaml"
 )
 
 # Opt-in configs needing a key/service not present by default — skipped, not failed.

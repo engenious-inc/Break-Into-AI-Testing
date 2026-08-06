@@ -155,9 +155,12 @@ clean, the *exercise* is broken.
 
 ## Going further
 
-- **Observability** —
+- **Observability (Day 8, not today)** —
   [`modules/02-advanced-eval/observability/`](../modules/02-advanced-eval/observability/):
-  real REST logging plus OTel-shaped tracing via a zero-dependency custom provider.
+  real Arato.ai REST logging plus OTel-shaped tracing via a zero-dependency custom
+  provider. It sits in Module 2 because it is shaped like one, but it is taught on Day 8
+  with Arato.ai and Agenta.ai — everything above is eval-time quality, this is what a
+  *deployed* system reports about itself.
 - **Quality challenges** — [`docs/05-quality-challenges.md`](05-quality-challenges.md):
   bias, consistency, context, values, compliance.
 - **Day 5** — [`docs/02-redteam-exercises.md`](02-redteam-exercises.md). Everything you

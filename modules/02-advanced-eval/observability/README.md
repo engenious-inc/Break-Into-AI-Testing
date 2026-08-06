@@ -1,5 +1,10 @@
 # Observability: Arato.ai + OTel-shaped tracing
 
+> **This is a Day 8 lesson**, taught with Arato.ai and Agenta.ai — not part of the
+> Day 4 metrics exercises. It lives in Module 2 because it is shaped like a Module 2
+> lesson (single provider, ordinary pass=good assertions), not because it is taught
+> alongside them.
+
 Every other lesson in this module asks "did the model answer well?" This one
 asks a different question: once a system like this is *deployed*, what is it
 doing — how slow, how many tokens, which requests are erroring? That's
@@ -58,7 +63,22 @@ With a real Arato account, add to `.env`:
 ARATO_API_URL=https://api.arato.ai/<your-project>/log
 ARATO_API_KEY=ar-...
 ```
-and the last line becomes `[arato] POST https://api.arato.ai/<your-project>/log -> 200`.
+and the last line should become `[arato] POST https://api.arato.ai/<your-project>/log -> 200`.
+
+> **Not yet verified against a live Arato endpoint.** Everything above the Arato call —
+> the span, the real timings, the token counts, the hash, and the graceful skip — has
+> been run for real. The POST path has only ever taken the skip branch, because no
+> account credentials have been available.
+>
+> Two things to check the first time you point it at a real project:
+> 1. **The body schema.** `provider.mjs` sends
+>    `{model, tokenUsage, latencyMs, traceId, spanId, promptHash}`. Those field names are
+>    ours, not Arato's published contract. If Arato expects different names it will very
+>    likely still answer `200` and silently drop the record — the worst failure mode
+>    there is, because the lesson looks like it worked.
+> 2. **Confirm the record actually landed** in the Arato UI before trusting the `200`.
+>    A status code proves the request was accepted, not that the data was stored the way
+>    you meant.
 
 ## Why MediBot/FinanceBot don't have any of this
 
@@ -67,4 +87,6 @@ Module 1's bots call Groq directly via Promptfoo's built-in `groq:` provider
 *custom* provider specifically so there's somewhere to put that
 instrumentation. In a real deployment, your own API layer is that somewhere.
 
-> Extension lesson — not part of the original `how-to-test-ai` day-03-promptfoo-advanced curriculum.
+> Extension lesson — not part of the original `how-to-test-ai` day-03-promptfoo-advanced
+> curriculum. Taught on **Day 8** (Advanced Red Teaming, SDLC Testing + Arato.ai &
+> Agenta.ai).
