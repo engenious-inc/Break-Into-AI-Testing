@@ -1,24 +1,24 @@
 [
   {
-    "id": "FIG-003",
+    "id": "FG-003",
     "title": "Login & Biometric Onboarding",
     "frames": 6,
     "text": "Six frames covering first-run login, biometric opt-in, passcode fallback, and the trusted-device consent sheet added in v2.4. The biometric opt-in frame is the only screen that may show two primary buttons."
   },
   {
-    "id": "FIG-007",
+    "id": "FG-007",
     "title": "Payment Confirmation Screen",
     "frames": 4,
     "text": "Frames for the payment confirmation screen: recipient summary, fee breakdown expanded, confirm button enabled state, and the post-confirm receipt. The confirm button uses the shared UI kit primary button component."
   },
   {
-    "id": "FIG-012",
+    "id": "FG-012",
     "title": "Card Management — Freeze Card Toggle",
     "frames": 5,
     "text": "The card management screen. Includes the freeze card toggle in both on and off states, the report-lost confirmation dialog, and the virtual card creation sheet. The freeze card toggle is the component referenced by PF-121 for the missing accessibility label."
   },
   {
-    "id": "FIG-018",
+    "id": "FG-018",
     "title": "Transaction History — Filters and Export",
     "frames": 7,
     "text": "Transaction history list, filter drawer with date range and category, empty state, and the export sheet offering CSV and PDF. The list uses pagination at 50 rows per page."

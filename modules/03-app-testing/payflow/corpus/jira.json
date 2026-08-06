@@ -59,7 +59,7 @@
     "assignee": "Priya Raman",
     "sprint": "Sprint 16",
     "release_blocker": false,
-    "text": "The freeze card toggle on the card management screen has no accessibility label, so VoiceOver announces it as 'button'. Design reference is FIG-012."
+    "text": "The freeze card toggle on the card management screen has no accessibility label, so VoiceOver announces it as 'button'. Design reference is FG-012."
   },
   {
     "id": "PF-130",
