@@ -8,7 +8,9 @@ embedding-based checks are opt-in (need a paid key), and are marked per lesson.
 Run any lesson: `npx promptfoo@latest eval -c modules/02-advanced-eval/<path>/promptfooconfig.yaml`
 
 ## Lessons
-- `weights-and-metrics/` — multiple assertions with `weight:` + named `metric:` + test `threshold:`
+- `weights-and-metrics/` — multiple assertions with `weight:` + named `metric:` + test
+  `threshold:`. Its README documents the verified threshold rule (`>=`, not `>`) and why
+  6/9 does not clear 0.67.
 - `assert-sets-and-budgets/` — `assert-set`, OR via `threshold: 0.5`, latency budget (+ optional cost)
 - `exact-vs-fuzzy/` — `equals` + `icontains` (+ optional embedding `similar`)
 - `csv-driven-data/` — `tests: file://tests/*.csv`, `__expected*` / `__metadata:*` columns
@@ -17,4 +19,6 @@ Run any lesson: `npx promptfoo@latest eval -c modules/02-advanced-eval/<path>/pr
 - `debugger/` — fix intentionally-broken configs (`1_basic → 2_moderate → 3_advance`)
 - `observability/` — real Arato.ai REST logging + hand-rolled OTel-shaped tracing via a custom zero-dependency provider; shows what production telemetry adds beyond eval-time quality checks
 
-> Maps to `how-to-test-ai` day-03-promptfoo-advanced.
+> Maps to `how-to-test-ai` day-03-promptfoo-advanced, and to the August cohort's
+> **Day 4 (Model-Graded Assertions & Metrics)**. Exercises are written up in
+> [`docs/07-metrics-exercises.md`](../../docs/07-metrics-exercises.md).
