@@ -100,6 +100,16 @@ npx promptfoo@latest eval -c promptfooconfig.payflow.yaml -j 2
 npx promptfoo@latest view
 ```
 
+> **Editing the corpus? Add `--no-cache`.** Promptfoo caches by request, and the request
+> here is just your question — it has no idea the documents behind the app changed. Edit a
+> corpus file, re-run without `--no-cache`, and you get the *old* answer replayed with your
+> *new* assertions, which fails for a reason that is not real. The tell is
+> `Duration: 0s` and an empty server log: the app was never called.
+>
+> ```bash
+> ./run.sh payflow --no-cache
+> ```
+
 ## The corpus
 
 `payflow/corpus/` holds 20 fixture documents across four specialists. They are internally
@@ -112,7 +122,7 @@ consistent on purpose, and they contain deliberate traps:
 | `PF-098` | blocks PF-104, so "what is blocking the release" has a second hop |
 | `PF-113` | states the release condition, and names PF-105 without PF-105 being retrieved |
 | `CF-009` | the login flow change log — lives in Confluence, not Jira |
-| `FIG-012` | the freeze card toggle screen, referenced by `PF-121` |
+| `FG-012` | the freeze card toggle screen, referenced by `PF-121` |
 
 Read them before you write test cases. Knowing the ground truth is what lets you tell a
 grounded answer from a fluent one.

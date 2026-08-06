@@ -36,9 +36,9 @@
     - type: javascript
       value: output.route.selected_specialists.includes('figma')
     - type: javascript
-      value: output.citations.some((c) => c.id === 'FIG-012')
+      value: output.citations.some((c) => c.id === 'FG-012')
     - type: icontains
-      value: FIG-012
+      value: FG-012
 
 - description: Product question is answered from the product overview
   vars:
