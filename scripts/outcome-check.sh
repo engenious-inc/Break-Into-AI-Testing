@@ -7,12 +7,13 @@
 # 2 of 3 models", "held across all 3", "the grader is fooled"). Groq rotates and
 # retires model endpoints, so those claims decay silently.
 #
-# Usage:  ./scripts/outcome-check.sh            all claims   (~50 requests, ~2.5 min)
+# Usage:  ./scripts/outcome-check.sh            all claims   (~55 requests, ~3 min)
 #         ./scripts/outcome-check.sh day5       Module 1     (~40 requests, ~2 min)
+#         ./scripts/outcome-check.sh day4       Module 2      (~3 requests, ~15 s)
 #         ./scripts/outcome-check.sh day3       Module 0      (~8 requests, ~30 s)
 #
 # Run it from the repo root. Scope it to the day you are teaching and you skip the
-# other day's Groq requests, which matters on a shared or nearly-exhausted key.
+# other days' Groq requests, which matters on a shared or nearly-exhausted key.
 #
 # Exit 0 = every claim still holds. Exit 1 = at least one drifted; read the output
 # and adjust your talk track BEFORE class rather than discovering it live.
@@ -21,8 +22,8 @@ set -uo pipefail
 
 SCOPE="${1:-all}"
 case "$SCOPE" in
-  all|day3|day5) ;;
-  *) printf "Unknown scope '%s'. Use: all | day3 | day5\n" "$SCOPE" >&2; exit 2 ;;
+  all|day3|day4|day5) ;;
+  *) printf "Unknown scope '%s'. Use: all | day3 | day4 | day5\n" "$SCOPE" >&2; exit 2 ;;
 esac
 want() { [ "$SCOPE" = "all" ] || [ "$SCOPE" = "$1" ]; }
 
@@ -33,10 +34,12 @@ FIN="$TMP/oc-finance-$$.json"
 GRAD="$TMP/oc-grader-$$.json"
 CMP="$TMP/oc-compare-$$.json"
 COST="$TMP/oc-cost-$$.yaml"
+THRESH="$TMP/oc-threshold-$$.yaml"
+THRESHJ="$TMP/oc-threshold-$$.json"
 GRADER_CFG="modules/01-red-team/04-grading-the-grader/promptfooconfig.yaml"
 COMPARE_CFG="modules/00-promptfoo-basics/02-providers/comparing-models/promptfooconfig.yaml"
 
-cleanup() { rm -f "$MEDI" "$FIN" "$GRAD" "$CMP" "$COST"; }
+cleanup() { rm -f "$MEDI" "$FIN" "$GRAD" "$CMP" "$COST" "$THRESH" "$THRESHJ"; }
 trap cleanup EXIT
 
 if [ ! -f promptfooconfig.medibot.yaml ]; then
@@ -95,9 +98,46 @@ YAML
   COST_ERRORS=$(npx --yes promptfoo@latest eval -c "$COST" -j 1 2>&1 \
     | grep -ci "does not support providers that do not return cost" || true)
 fi
+
+if want day4; then
+  # Day 4 slides 11-12 assert two things about promptfoo's threshold rule: that a score
+  # exactly equal to the threshold PASSES (>=, not >), and that the classic 6/9 example
+  # does NOT clear 0.67. Both are taught as fact and both could change upstream.
+  cat > "$THRESH" <<'YAML'
+description: "outcome-check probe — threshold semantics"
+prompts: ["Say OK."]
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 5 }
+tests:
+  - description: "tie 0.50 vs 0.50"
+    threshold: 0.5
+    assert:
+      - { type: javascript, value: "true",  weight: 1 }
+      - { type: javascript, value: "false", weight: 1 }
+  - description: "6of9 vs 0.67"
+    threshold: 0.67
+    assert:
+      - { type: javascript, value: "true",  weight: 3 }
+      - { type: javascript, value: "true",  weight: 3 }
+      - { type: javascript, value: "false", weight: 1 }
+      - { type: javascript, value: "false", weight: 1 }
+      - { type: javascript, value: "false", weight: 1 }
+  - description: "6of9 vs 0.66"
+    threshold: 0.66
+    assert:
+      - { type: javascript, value: "true",  weight: 3 }
+      - { type: javascript, value: "true",  weight: 3 }
+      - { type: javascript, value: "false", weight: 1 }
+      - { type: javascript, value: "false", weight: 1 }
+      - { type: javascript, value: "false", weight: 1 }
+YAML
+  printf "  running threshold-semantics probe…\n"
+  npx --yes promptfoo@latest eval -c "$THRESH" -j 1 -o "$THRESHJ" >/dev/null 2>&1
+fi
 echo
 
-node - "$MEDI" "$FIN" "$GRAD" "$CMP" "$COST_ERRORS" "$SCOPE" <<'NODE'
+node - "$MEDI" "$FIN" "$GRAD" "$CMP" "$COST_ERRORS" "$SCOPE" "$THRESHJ" <<'NODE'
 const fs = require('fs');
 const G = '\x1b[32m', R = '\x1b[31m', Y = '\x1b[33m', N = '\x1b[0m';
 
@@ -219,6 +259,27 @@ say(costErrors < 0 ? null : costErrors > 0,
       : costErrors > 0 ? '(error message present)'
       : '(no cost error — Groq may now report cost; slide 19 needs a rewrite)');
 }   // end day3
+
+// ---------------------------------------------------------------- Day 4
+if (want('day4')) {
+console.log((scope === 'all' ? '\n' : '') + 'Day 4 — threshold semantics (slides 11, 12):');
+const th = load(process.argv[8]);
+if (!th.length) {
+  say(null, 'threshold probe', '(not run)');
+} else {
+  const pick = (tag) => th.find((r) => desc(r).includes(tag));
+  const tie = pick('tie 0.50'), miss = pick('6of9 vs 0.67'), hit = pick('6of9 vs 0.66');
+  say(tie ? tie.success === true : null,
+      'a score equal to the threshold still PASSES (>=, not >)',
+      tie ? `(score ${tie.score.toFixed(4)} vs 0.5 -> ${tie.success ? 'pass' : 'FAIL'})` : '(case missing)');
+  say(miss ? miss.success === false : null,
+      '6/9 still does NOT clear 0.67',
+      miss ? `(score ${miss.score.toFixed(4)} vs 0.67 -> ${miss.success ? 'PASS' : 'fail'})` : '(case missing)');
+  say(hit ? hit.success === true : null,
+      '6/9 does clear 0.66',
+      hit ? `(score ${hit.score.toFixed(4)} vs 0.66 -> ${hit.success ? 'pass' : 'FAIL'})` : '(case missing)');
+}
+}
 
 process.exit(drift);
 NODE
