@@ -48,6 +48,10 @@ This repo is one course in three modules plus a hackathon (full map: `modules/RE
   compliance) in `docs/05-quality-challenges.md`.
 - **Module 2 — Advanced Evaluation** (`modules/02-advanced-eval/`) — weights, metrics, CSV data,
   F-score, temperature, and a debugging track.
+- **Module 3 — Testing an Application** (`modules/03-app-testing/`) — the PayFlow GenAI demo:
+  a guard LLM, an orchestrator, and four document specialists behind `POST /chat`. Promptfoo's
+  `http` provider points at the running app, so assertions read `output.route` and
+  `output.citations` — the routing decision, not just the prose.
 
 New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
 The Claude Code workflow lives in `.claude/` (see `CLAUDE.md`) — in Module 1 it's the path,
@@ -61,6 +65,7 @@ not an optional extra.
 5. [Red-team exercises](docs/02-redteam-exercises.md) — the guided walkthrough against MediBot & FinanceBot.
 6. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
 7. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
+8. [Testing an application](modules/03-app-testing/) — point Promptfoo at a running multi-agent app and assert on its routing decisions.
 
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "BK-001",
+    "title": "What PayFlow is",
+    "text": "PayFlow is a fintech app for sending payments, managing cards, and tracking transaction history across mobile and web. This demo corpus is fictional and exists to give the specialist agents something to retrieve."
+  },
+  {
+    "id": "BK-002",
+    "title": "Who this demo is for",
+    "text": "The PayFlow GenAI demo is an educational multi-agent system used in the Break Into AI Testing course. It routes questions to a Jira, Confluence, or Figma specialist, or answers from basic knowledge, and exposes its routing decision so the pipeline itself can be tested."
+  },
+  {
+    "id": "BK-003",
+    "title": "Support hours",
+    "text": "PayFlow support is staffed 07:00–19:00 US Eastern, Monday through Friday. Outside those hours the in-app assistant handles account access and transaction lookup only."
+  }
+]

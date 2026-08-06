@@ -1,0 +1,44 @@
+# PayFlow GenAI demo — testing an APPLICATION, not a model.
+#
+# Every other config in this repo points at a model provider. This one points at a running
+# HTTP service, so the thing under test is the whole pipeline: guard, orchestrator,
+# retrieval, and answer. That is what `providers: - id: http` buys you.
+#
+# Start the app first (it must be running before you eval):
+#   node modules/03-app-testing/payflow/server.js     # or ./run.sh payflow-serve
+#
+# Then:
+#   ./run.sh payflow
+#   npx promptfoo@latest eval -c promptfooconfig.payflow.yaml -j 2
+
+description: PayFlow GenAI demo — guard, routing, retrieval and grounding
+
+providers:
+  - id: http
+    label: payflow-api
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: eval-session-promptfoo
+        user_role: student
+      # `json` is the parsed response body. Returning the whole object — rather than just
+      # the answer text — is the entire point: it lets assertions read `output.route` and
+      # test the ROUTING DECISION, not just the prose.
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+# Point the llm-rubric grader at Groq. Without this promptfoo reaches for its default
+# OpenAI grader and the run dies with credit_balance_exhausted — which reads like a rate
+# limit but is a billing error from a provider you never meant to call.
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+
+tests:
+  - file://tests/payflow.routing.yaml

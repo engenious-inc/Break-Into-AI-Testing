@@ -1,0 +1,38 @@
+[
+  {
+    "id": "CF-001",
+    "title": "PayFlow Product Overview",
+    "space": "Product",
+    "text": "PayFlow is a fintech application that enables individual consumers and small businesses to send payments, manage cards, and track transaction history from a unified mobile and web dashboard. Core features: secure login with biometric support; real-time payment processing; card management including freeze, report lost, and virtual cards; full transaction history with filtering and export."
+  },
+  {
+    "id": "CF-004",
+    "title": "Payment Confirmation Flow — Functional Requirements",
+    "space": "Engineering",
+    "text": "The payment confirmation screen must show the recipient, amount, fee, and estimated arrival before the user confirms. The confirm button is disabled until the user has reviewed the fee breakdown. On confirm, the client sends an idempotency key so a retry cannot create a second transaction. A confirmation receipt is written to transaction history within two seconds."
+  },
+  {
+    "id": "CF-005",
+    "title": "Payment Release v2.4 — Known Issues and Release Blockers",
+    "space": "Releases",
+    "text": "Release blockers for v2.4 are PF-104 (payment confirmation button unresponsive on iOS) and PF-105 (duplicate transaction on network retry). Both must be fully resolved and a full regression pass completed before release. PF-106 (payment history timeout for large accounts) is a known issue in this release but is not a blocker."
+  },
+  {
+    "id": "CF-009",
+    "title": "Login Flow — Change Log",
+    "space": "Engineering",
+    "text": "v2.3 introduced biometric login as the default on devices that support it, with a passcode fallback. v2.3.1 fixed a duplicate biometric prompt after upgrade, tracked as PF-130. v2.4 adds a 30-day trusted-device window so returning users are not re-prompted on every launch. No changes to password complexity rules."
+  },
+  {
+    "id": "CF-014",
+    "title": "Card Management — Freeze and Report Lost",
+    "space": "Product",
+    "text": "Freezing a card blocks new authorizations immediately but allows previously authorized recurring payments to settle. Reporting a card lost is irreversible and triggers a replacement. Both actions are available from the card detail screen and are reflected in the web dashboard within five seconds."
+  },
+  {
+    "id": "CF-021",
+    "title": "Support Escalation Policy",
+    "space": "Support",
+    "text": "Tier 1 handles account access and transaction lookup. Anything involving a disputed transaction over $500, suspected fraud, or a regulatory complaint escalates to Tier 2 within one business hour. Tier 2 owns communication with the customer until resolution."
+  }
+]
