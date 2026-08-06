@@ -1,0 +1,74 @@
+[
+  {
+    "id": "PF-098",
+    "title": "iOS tap-event handler regression in shared UI kit",
+    "status": "IN PROGRESS",
+    "priority": "CRITICAL",
+    "assignee": "Morgan Taylor",
+    "sprint": "Sprint 15",
+    "release_blocker": false,
+    "blocks": ["PF-104"],
+    "text": "A regression in the shared UI kit's tap-event handler stops touch events propagating to buttons rendered inside a modal sheet on iOS 16 and iOS 17. This is the underlying cause of PF-104. Android is unaffected because it uses a different gesture recognizer."
+  },
+  {
+    "id": "PF-104",
+    "title": "Payment Confirmation Button Unresponsive on iOS",
+    "status": "BLOCKED",
+    "priority": "CRITICAL",
+    "assignee": "Morgan Taylor",
+    "sprint": "Sprint 15",
+    "release_blocker": true,
+    "blocked_by": ["PF-098"],
+    "text": "On iOS 16 and iOS 17 the confirm payment button does not respond to tap events on the payment confirmation screen. Affects 100% of iOS users attempting to complete a payment. PF-104 itself is blocked by PF-098. This is a release blocker for v2.4."
+  },
+  {
+    "id": "PF-105",
+    "title": "Duplicate Transaction Created on Network Retry",
+    "status": "BLOCKED",
+    "priority": "CRITICAL",
+    "assignee": "Riley Park",
+    "sprint": "Sprint 15",
+    "release_blocker": true,
+    "text": "When a payment request times out and the client retries, a duplicate transaction is sometimes created. Engineering is implementing idempotency keys to resolve this. This is a release blocker for v2.4."
+  },
+  {
+    "id": "PF-106",
+    "title": "Payment history timeout for large accounts",
+    "status": "OPEN",
+    "priority": "HIGH",
+    "assignee": "Sam Okafor",
+    "sprint": "Sprint 15",
+    "release_blocker": false,
+    "text": "Accounts with more than 50,000 transactions time out when loading the payment history view. Open and HIGH priority in Sprint 15, but explicitly NOT listed as a release blocker for v2.4."
+  },
+  {
+    "id": "PF-113",
+    "title": "Release Condition — v2.4 payment release",
+    "status": "BLOCKED",
+    "priority": "CRITICAL",
+    "assignee": "Jordan Avery",
+    "sprint": "Sprint 15",
+    "release_blocker": true,
+    "text": "The v2.4 payment release cannot proceed until both PF-104 and PF-105 are fully resolved, and a full regression pass is completed. PF-106 is open but is not a blocker for this release."
+  },
+  {
+    "id": "PF-121",
+    "title": "Freeze card toggle missing accessibility label",
+    "status": "OPEN",
+    "priority": "MEDIUM",
+    "assignee": "Priya Raman",
+    "sprint": "Sprint 16",
+    "release_blocker": false,
+    "text": "The freeze card toggle on the card management screen has no accessibility label, so VoiceOver announces it as 'button'. Design reference is FIG-012."
+  },
+  {
+    "id": "PF-130",
+    "title": "Biometric login prompt shown twice after app upgrade",
+    "status": "RESOLVED",
+    "priority": "HIGH",
+    "assignee": "Dana Kim",
+    "sprint": "Sprint 14",
+    "release_blocker": false,
+    "text": "After upgrading from v2.2 to v2.3 the biometric login prompt appeared twice on first launch. Resolved by clearing the stale keychain migration flag. Shipped in v2.3.1."
+  }
+]

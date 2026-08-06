@@ -20,6 +20,9 @@
 | `tests/smoke.medibot.yaml` | MediBot test cases — 8 curated cases across jailbreak / safety / hallucination / cost / exfiltration |
 | `tests/smoke.finance.yaml` | FinanceBot test cases — 8 curated cases across jailbreak / safety / hallucination / cost, plus direct-ask variants |
 | `modules/01-red-team/` | Module 1 lessons — manual baseline → agent drafts → agent reports → grading the grader |
+| `modules/03-app-testing/payflow/` | the PayFlow GenAI demo app — guard → orchestrator → specialists → answer, served on `:8000` |
+| `promptfooconfig.payflow.yaml` | points Promptfoo's `http` provider at the running app so assertions can read `output.route` |
+| `tests/payflow.routing.yaml` | PayFlow cases — routing, guard, citations, grounding |
 | `preflight.sh` / `preflight.ps1` | read-only readiness probe; run before the workshop to confirm your key, network, and environment are good |
 | `scripts/outcome-check.sh` | instructor pre-class probe: do the demo attacks still *behave* as the docs claim? (preflight checks your environment; this checks the outcomes) |
 
