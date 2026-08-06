@@ -63,6 +63,29 @@ not an optional extra.
 
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 
+### The 7 core AI testing challenges — where each one lives
+
+Day 1 introduces a seven-item taxonomy of what makes AI hard to test. Every one of them
+is already exercised somewhere in this repo; this table is the map from the lecture to
+the runnable suite.
+
+> Not to be confused with the **hackathon** challenges in
+> [`docs/04-challenges.md`](docs/04-challenges.md), which are numbered 1–3 and are a
+> different thing entirely — those are the team competition, these are failure modes.
+
+| # | Challenge | Exercised in | Suite |
+|---|-----------|--------------|-------|
+| 0 | Security — injection, leakage, instruction override | [`docs/02-redteam-exercises.md`](docs/02-redteam-exercises.md) | `tests/smoke.medibot.yaml`, `tests/smoke.finance.yaml` |
+| 1 | Hallucinations — confident and wrong | [`docs/02-redteam-exercises.md`](docs/02-redteam-exercises.md) | same smoke suites |
+| 2 | Bias & fairness | [`docs/05-quality-challenges.md`](docs/05-quality-challenges.md) | `tests/bias.medibot.yaml` |
+| 3 | Performance consistency | [`docs/05-quality-challenges.md`](docs/05-quality-challenges.md) | `tests/consistency.medibot.yaml` |
+| 4 | Context limitations | [`docs/05-quality-challenges.md`](docs/05-quality-challenges.md) | `tests/context.finance.yaml` |
+| 5 | Human values alignment | [`docs/05-quality-challenges.md`](docs/05-quality-challenges.md) | `tests/values.finance.yaml` |
+| 6 | Compliance | [`docs/05-quality-challenges.md`](docs/05-quality-challenges.md) | `tests/compliance.medibot.yaml` |
+
+Day 1's homework — *design three test prompts for one of the seven* — starts here: pick a
+row, open its suite, and write cases in the same shape.
+
 ## Run the workshop eval
 
 **Easy path** — `./run.sh` picks the config, bakes in free-tier-safe pacing, and translates the result (in a red-team suite a *failing* check means the attack landed):
