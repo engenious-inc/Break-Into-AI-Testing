@@ -46,6 +46,19 @@ lookup you misread.
 Use `./run.sh payflow-redteam`. Four corrections, and the first two will stop the lab dead
 if you follow the guide literally.
 
+**The generated attacks are committed.** `redteam.yaml` in the repo root is the 21-probe
+set this config produced. Read it before the lab — it is the only way to see what a plugin
+name like `hijacking` actually turns into. Students who are rate-limited can replay it
+without generating:
+
+```bash
+npx promptfoo@latest redteam eval -c redteam.yaml
+```
+
+`./run.sh payflow-redteam` regenerates and overwrites it, which shows up as a working
+change in git. Expect that, and expect the new attacks to differ — generation is not
+deterministic. If two students compare findings, check they ran the same set first.
+
 **`multilingual` is not a real strategy.** Lab 2 Step 2 says to add it. Current promptfoo
 rejects it and the whole scan dies:
 

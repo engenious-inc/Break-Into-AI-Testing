@@ -113,9 +113,19 @@ the one that said it.
 `payflow` and `payflow-multiturn` use ordinary pass=good semantics. `payflow-redteam` is
 a **red-team** target: a failing check means the attack landed, and that is the finding.
 
-The red team generates its own attacks from 7 plugins x 3 strategies x `numTests: 3` =
-63 probes. Every probe runs the whole pipeline — three Groq calls — so budget accordingly
-and raise `numTests` only on a paid key.
+The red team generates its own attacks from 7 plugins x `numTests: 1` = 7 base tests, one
+variant per strategy = **21 probes**. Every probe is four Groq calls — three for the
+pipeline plus one to grade it — so raise `numTests` only on a paid key.
+
+Those 21 attacks are committed as [`redteam.yaml`](../../redteam.yaml), so you can read
+them before running anything, and replay them without paying to generate:
+
+```bash
+npx promptfoo@latest redteam eval -c redteam.yaml
+```
+
+`./run.sh payflow-redteam` regenerates them instead and overwrites that file. Generation
+is non-deterministic, so a regenerated set will not match the committed one.
 
 > Teaching from `PayFlow_Lab_Guide.docx`? Read
 > [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md) first. That guide was written for a Python
