@@ -35,6 +35,12 @@ function fixed64(field, n) {
   return Buffer.concat([tag(field, 1), b]);
 }
 
+function fixed32(field, n) {
+  const b = Buffer.alloc(4);
+  b.writeUInt32LE(n);
+  return Buffer.concat([tag(field, 5), b]);
+}
+
 // KeyValue { key = 1; value = 2 } wrapping AnyValue { string_value = 1; int_value = 3 }
 function attribute(key, value) {
   const anyValue = typeof value === 'number' ? vint(3, value) : str(1, String(value));
@@ -61,12 +67,19 @@ export function encodeTrace(params) {
     fixed64(7, BigInt(params.startMs) * 1000000n),
     fixed64(8, BigInt(params.endMs) * 1000000n),
     ...attributes,
-    lenDelim(15, vint(3, 1)), // Status { code = STATUS_CODE_OK }
+    // Status {} left UNSET and flags = 256 (bit 8, "context has is_remote"):
+    // both match byte-for-byte what the official SDK emits for a root span.
+    lenDelim(15, Buffer.alloc(0)),
+    fixed32(16, 256),
   ]);
 
   const scope = Buffer.concat([str(1, params.scopeName), str(2, '1.0')]);
   const scopeSpans = Buffer.concat([lenDelim(1, scope), lenDelim(2, span)]);
-  const resource = lenDelim(1, attribute('service.name', params.serviceName));
+  const resource = Buffer.concat([
+    lenDelim(1, attribute('telemetry.sdk.language', 'nodejs')),
+    lenDelim(1, attribute('telemetry.sdk.name', 'opentelemetry')),
+    lenDelim(1, attribute('service.name', params.serviceName)),
+  ]);
   const resourceSpans = Buffer.concat([lenDelim(1, resource), lenDelim(2, scopeSpans)]);
 
   return lenDelim(1, resourceSpans); // TracesData { resource_spans = 1 }

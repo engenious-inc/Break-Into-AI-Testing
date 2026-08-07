@@ -95,6 +95,36 @@ Copy that `trace_id` and find it in the Arato UI. **Do that at least once.** A
 meant — and the whole reason this lesson exists is that "it returned 200" and
 "it worked" are different claims.
 
+### Ingested is not the same as visible
+
+Arato dashboards are **built, not automatic**. Send perfectly good spans to a
+project with no dashboard querying them and you will see nothing at all — which
+looks exactly like a broken integration and is not one.
+
+That is worth sitting with for a second, because it is the whole lesson in
+miniature. Three different things have to be true before a number reaches your
+eyes, and they fail independently:
+
+1. the app emits the span,
+2. the backend accepts and stores it,
+3. some view actually queries it.
+
+"I don't see it" tells you one of the three broke, not which. This is the same
+class of mistake as reading a green test suite that asserts nothing.
+
+Build a dashboard against these — they're what `provider.mjs` sends:
+
+| Field | Value |
+|---|---|
+| `service.name` | `break-into-ai-testing` (or your `OTEL_SERVICE_NAME`) |
+| instrumentation scope | `openinference.instrumentation.openai` |
+| span name | `llm.chat.completion` |
+| `openinference.span.kind` | `LLM` |
+| `llm.model_name` | `llama-3.3-70b-versatile` |
+| `llm.provider` / `llm.system` | `groq` |
+| `llm.token_count.prompt` / `.completion` / `.total` | integers |
+| `input.value` / `output.value` | prompt/response, or their hash when `LOG_RAW_PROMPTS` is off |
+
 ### The privacy trade-off is a switch, and it has a cost
 
 By default the message-content attributes are **not** your text — they're
