@@ -65,20 +65,55 @@ ARATO_API_KEY=ar-...
 ```
 and the last line should become `[arato] POST https://api.arato.ai/<your-project>/log -> 200`.
 
-> **Not yet verified against a live Arato endpoint.** Everything above the Arato call —
-> the span, the real timings, the token counts, the hash, and the graceful skip — has
-> been run for real. The POST path has only ever taken the skip branch, because no
-> account credentials have been available.
->
-> Two things to check the first time you point it at a real project:
-> 1. **The body schema.** `provider.mjs` sends
->    `{model, tokenUsage, latencyMs, traceId, spanId, promptHash}`. Those field names are
->    ours, not Arato's published contract. If Arato expects different names it will very
->    likely still answer `200` and silently drop the record — the worst failure mode
->    there is, because the lesson looks like it worked.
-> 2. **Confirm the record actually landed** in the Arato UI before trusting the `200`.
->    A status code proves the request was accepted, not that the data was stored the way
->    you meant.
+### What Arato receives
+
+```json
+{
+  "model": "llama-3.3-70b-versatile",
+  "id": "msg-1a2b3c4d5e6f7a8b",
+  "messages": [{ "role": "user", "content": "sha256:8f3a2b1c... (len=61)" }],
+  "response": "sha256:c4d5e6f7... (len=284)",
+  "variables": { "trace_id": "...", "span_id": "...", "prompt_sha256": "..." },
+  "usage": { "prompt_tokens": 12, "completion_tokens": 34 },
+  "performance": { "ttft": 412, "ttlt": 412 },
+  "tool_calls": null,
+  "arato_thread_id": null,
+  "prompt_id": "observability-lesson",
+  "prompt_version": "1.0",
+  "tags": { "environment": "development", "feature": "eval" }
+}
+```
+
+These field names are Arato's, not ours — the wire format is snake_case and matches a
+working production integration ([`Jaimeman84/financial-chat-bot`](https://github.com/Jaimeman84/financial-chat-bot),
+`lib/arato.ts`). That matters, because a schema mismatch here would very likely still
+answer `200` and silently drop the record, which is the worst failure mode there is: the
+lesson looks like it worked.
+
+**Still confirm the record landed in the Arato UI the first time.** A status code proves
+the request was accepted, not that the data was stored the way you meant.
+
+`ttft` and `ttlt` are equal because this provider does not stream. Time-to-first-token is
+only a distinct measurement when tokens arrive incrementally.
+
+### The privacy trade-off is a switch, and it has a cost
+
+By default `messages[].content` and `response` are **not** your text — they're
+`sha256:<hash> (len=N)`. That keeps the telemetry sink from becoming a copy of every
+prompt your users typed.
+
+It also means Arato's UI will show you hashes instead of conversations. That is the real
+tension in production observability, and it's worth naming out loud in class: the tool is
+more useful the more it knows, and more dangerous for exactly the same reason. Flip it
+when you need to read the conversations back:
+
+```env
+LOG_RAW_PROMPTS=true
+```
+
+Worth noting: the reference integration ships this same `LOG_RAW_PROMPTS` switch for its
+OTel spans, but sends raw text to Arato regardless of it. Redacting one sink and not the
+other is an easy inconsistency to introduce — a good thing to have students go find.
 
 ## Why MediBot/FinanceBot don't have any of this
 
