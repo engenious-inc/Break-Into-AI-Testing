@@ -92,7 +92,13 @@ if [ "$target" = "payflow-redteam" ]; then
   printf "  Every probe runs the full pipeline — three Groq calls each. Expect this to take a while.\n"
   printf "  Reminder: a ${YELLOW}failing${NC} check means the attack landed. That's the finding.\n\n"
   ec=0
-  npx --yes promptfoo@latest redteam run -c promptfooconfig.payflow-redteam.yaml "$@" || ec=$?
+  # OPENAI_API_KEY is unset for this run on purpose. Nothing here uses OpenAI — but
+  # promptfoo treats the key's mere presence as "generate attacks locally" and switches
+  # off its own remote generator, which several strategies require. The whole scan then
+  # dies with "requires remote generation". The key is optional in this repo (only the
+  # paid comparison block in promptfooconfig.medibot.yaml reads it), so dropping it here
+  # costs nothing and keeps every strategy available.
+  env -u OPENAI_API_KEY npx --yes promptfoo@latest redteam run -c promptfooconfig.payflow-redteam.yaml "$@" || ec=$?
   echo
   case "$ec" in
     0)   printf "${GREEN}🛡  Exit 0 — nothing landed on this run.${NC}\n" ;;

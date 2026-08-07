@@ -6,3 +6,4 @@ output/
 .DS_Store
 results.json
 pf-latest.json
+redteam.yaml
