@@ -1,0 +1,15 @@
+description: "Act 1 — reverse-engineered Magical Story Creator prompt hypothesis"
+prompts:
+  - file://prompts/reverse.txt
+providers:
+  - id: groq:llama-3.1-8b-instant
+    config: { temperature: 0, max_tokens: 400 }
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 400 }
+  - id: groq:openai/gpt-oss-20b
+    config: { temperature: 0, max_tokens: 400 }
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+tests:
+  - file://tests/reverse.yaml
