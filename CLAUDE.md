@@ -83,6 +83,8 @@ keep default live-eval request volume low.
   `04-grading-the-grader/` ships its own triplet)
 - `modules/00-promptfoo-basics/` — Module 0 (Promptfoo pillars)
 - `modules/02-advanced-eval/` — Module 2 (weights, metrics, CSV, F-score, debugging)
+- `modules/03-app-testing/` — Module 3 (PayFlow `http` app, plus an MCP track:
+  `mcp-deepwiki/`, `mcp-local/`, `mcp-promptfoo/`)
 - `.claude/` — the Claude Code workflow (red-teamer agent, new-eval-suite +
   run-and-summarize skills). In Module 1 these are the student's path, not optional
   authoring aids; Modules 0 and 2 use them only for scaffolding.

@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "required": ["city", "country", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "city": { "type": "string", "minLength": 1 },
+    "country": { "type": "string", "minLength": 1 },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

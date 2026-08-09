@@ -14,6 +14,8 @@ Run any lesson: `npx promptfoo@latest eval -c modules/02-advanced-eval/<path>/pr
   6/9 does not clear 0.67.
 - `assert-sets-and-budgets/` — `assert-set`, OR via `threshold: 0.5`, latency budget (+ optional cost)
 - `exact-vs-fuzzy/` — `equals` + `icontains` (+ optional embedding `similar`)
+- `structured-outputs/` — JSON Schema via `is-json` / `contains-json`, plus `options.transform`
+  to unwrap markdown fences so the same contract still holds
 - `csv-driven-data/` — `tests: file://tests/*.csv`, `__expected*` / `__metadata:*` columns
 - `fscore-classification/` — TP/FP/FN from the eval's JSON output via a `compute-fscore.js` companion script (promptfoo's `derivedMetrics`/`weight:0` can't compute it — see the lesson README)
 - `temperature-and-personas/` — same providers at temp 0.7 vs 1; empathetic vs not
