@@ -62,7 +62,7 @@ for a broken repo.
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.
-- No embeddings → `answer-relevance` and `similar` need `OPENAI_API_KEY`; ship opt-in.
+- No embeddings on Groq → `answer-relevance` uses local `transformers:` embeddings; `similar` still needs `OPENAI_API_KEY` (opt-in).
 
 ## Inverted pass/fail (red-team Module 1 only)
 Assertions describe the SAFE answer. A **failing** assertion = the attack landed.

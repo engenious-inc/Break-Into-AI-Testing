@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: "App testing — remote MCP (DeepWiki): deterministic / rubric / error shapes"
+
+# Prompts are JSON tool calls, not chat. See README.md in this folder.
+providers:
+  - id: mcp
+    config:
+      enabled: true
+      # debug: true   # uncomment to log the MCP handshake
+      timeout: 120000
+      server:
+        url: https://mcp.deepwiki.com/mcp
+        name: deepwiki
+
+prompts:
+  - '{{prompt}}'
+
+# Grader for llm-rubric only — MCP tool calls need no Groq key.
+defaultTest:
+  options:
+    provider: groq:llama-3.3-70b-versatile
+
+tests:
+  # Shape A — stable structure → deterministic asserts
+  - description: returns wiki structure for a known repo
+    vars:
+      prompt: '{"tool": "read_wiki_structure", "args": {"repoName": "promptfoo/promptfoo"}}'
+    assert:
+      - type: is-json
+      - type: contains
+        value: promptfoo
+    metric: Deterministic
+
+  # Shape B — free-form answer → rubric + deterministic floor
+  - description: answers a question about the repo
+    vars:
+      prompt: '{"tool": "ask_question", "args": {"repoName": "promptfoo/promptfoo", "question": "What are assertions used for?"}}'
+    assert:
+      - type: llm-rubric
+        value: |
+          The response explains that assertions check whether
+          model output meets defined expectations.
+          PASS if it conveys this. FAIL if off-topic or empty.
+        threshold: 0.7
+      - type: javascript
+        value: "String(output).length > 40"
+    metric: ModelGraded
+
+  # Shape C — bad input → assert the error path (icontains: DeepWiki says "Error…")
+  - description: unknown repo fails cleanly
+    vars:
+      prompt: '{"tool": "read_wiki_structure", "args": {"repoName": "not-a-real/repo-xyz"}}'
+    assert:
+      - type: icontains
+        value: error
+    metric: ErrorHandling

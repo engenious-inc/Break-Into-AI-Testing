@@ -1,7 +1,7 @@
-# OPTIONAL: Assertions 5/5 — answer-relevance (needs OPENAI_API_KEY for embeddings)
+# OPTIONAL: Assertions 5/5 — answer-relevance (local embeddings, no paid key)
 # answer-relevance scores topical relevance using embeddings. Groq has no embeddings,
-# so this lesson needs OPENAI_API_KEY set. It is off the key-free default path.
-description: "Assertions 5/5 — OPTIONAL model-graded answer-relevance (needs OPENAI_API_KEY for embeddings)"
+# so this lesson uses transformers.js locally for the embedding step.
+description: "Assertions 5/5 — OPTIONAL model-graded answer-relevance (local transformers embeddings)"
 prompts:
   - "Explain photosynthesis in two sentences."
 providers:
@@ -9,8 +9,12 @@ providers:
     config: { temperature: 0, max_tokens: 400 }
 defaultTest:
   options:
-    provider: groq:llama-3.3-70b-versatile
+    # text grader on Groq; embeddings run locally (no OPENAI/GOOGLE key required).
+    provider:
+      text: groq:llama-3.3-70b-versatile
+      embedding: transformers:feature-extraction:Xenova/all-MiniLM-L6-v2
 tests:
   - assert:
       - type: answer-relevance
-        threshold: 0.8
+        # MiniLM cosine scores land lower than OpenAI embeddings; 0.5 still fails off-topic answers.
+        threshold: 0.5
