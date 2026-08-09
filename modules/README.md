@@ -7,17 +7,18 @@ This workshop is one course in four modules plus a hackathon.
 | 0 — Promptfoo Basics | `modules/00-promptfoo-basics/` | day-02-promptfoo-basics | Day 2 (assertions), **Day 3** (`01-prompts/`, `02-providers/`) |
 | 1 — Red-Team Fundamentals | `modules/01-red-team/` (lessons) over repo root (`prompts/`, `tests/`, `promptfooconfig.*`, `docs/02`,`04`,`05`) | day-01-ai-fundamentals-and-challenges | Day 5 |
 | 2 — Advanced Eval | `modules/02-advanced-eval/` | day-03-promptfoo-advanced | Day 4 — **except `observability/`, which is Day 8** |
-| 3 — Testing an Application | `modules/03-app-testing/` + `promptfooconfig.payflow{,-multiturn,-redteam}.yaml`, `tests/payflow.*.yaml` | (new) | Day 7 |
+| 3 — Testing an Application | `modules/03-app-testing/` — PayFlow (+ `promptfooconfig.payflow{,-multiturn,-redteam}.yaml`, `tests/payflow.*.yaml`), [`mcp-deepwiki/`](03-app-testing/mcp-deepwiki/), [`mcp-local/`](03-app-testing/mcp-local/), [`mcp-promptfoo/`](03-app-testing/mcp-promptfoo/) | (new) | Day 7 |
 | — Observability | `modules/02-advanced-eval/observability/` | (new) | Day 8, with Arato.ai + Agenta.ai |
 | Hackathon | `docs/04-challenges.md` | (base repo) | — |
 
 Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.
 
-> **Module 3 is the only one whose provider is not a model.** It ships a small
-> multi-agent app (`modules/03-app-testing/payflow/`) and points Promptfoo's `http`
-> provider at it, so assertions can read the routing decision and the citations rather
-> than only the answer text. The app must be running before you eval it —
-> `./run.sh payflow-serve` in one terminal, `./run.sh payflow` in another.
+> **Module 3 is the only one whose providers are not chat models.** PayFlow uses
+> Promptfoo's `http` provider against a local multi-agent app (assert on route +
+> citations — server must be up: `./run.sh payflow-serve`, then `./run.sh payflow`).
+> MCP track: `mcp-deepwiki/` (remote SUT), `mcp-local/` (stdio SUT — install once), and
+> `mcp-promptfoo/` (Promptfoo *is* the MCP server for the IDE — see root `.cursor/mcp.json`).
+> The first two test tools; the third drives evals from chat.
 >
 > It is also the only module with **both** semantics: `payflow` and `payflow-multiturn`
 > are ordinary pass=good suites, while `payflow-redteam` generates its own attacks and

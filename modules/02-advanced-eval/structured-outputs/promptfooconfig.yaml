@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: "Advanced — structured outputs: JSON schema + transform (unwrap fences)"
+
+# One prompt template; each test supplies a different instruction style via vars.query.
+prompts:
+  - "{{query}}"
+
+providers:
+  - id: groq:llama-3.3-70b-versatile
+    config: { temperature: 0, max_tokens: 200 }
+
+tests:
+  # Shape A — API-style: bare JSON only. is-json + schema is the contract.
+  - description: strict prompt returns bare JSON matching schema
+    vars:
+      query: |
+        Reply with ONLY a JSON object. No markdown fences. No prose before or after.
+        Required keys: city (string), country (string), confidence (number 0–1).
+        Question: What is the capital of France?
+    assert:
+      - type: is-json
+        value: file://schema/capital.json
+        metric: Schema
+      - type: javascript
+        value: |
+          const o = JSON.parse(String(output));
+          return typeof o.city === 'string'
+            && o.city.toLowerCase().includes('paris')
+            && o.confidence >= 0 && o.confidence <= 1;
+        metric: Payload
+
+  # Shape B — chatty model wraps JSON in ``` fences. Bare is-json would fail;
+  # contains-json finds the object inside the prose/fence.
+  - description: chatty fenced answer still contains schema-valid JSON
+    vars:
+      query: |
+        Briefly explain your reasoning in one sentence, then put the final answer
+        inside a ```json code fence (markdown).
+        JSON keys: city (string), country (string), confidence (number 0–1).
+        Question: What is the capital of France?
+    assert:
+      - type: contains-json
+        value: file://schema/capital.json
+        metric: Schema
+
+  # Shape C — same chatty instruction, but transform strips fences first so
+  # is-json (whole-output) can enforce the same schema as the strict case.
+  - description: transform unwraps fences so is-json can enforce the contract
+    vars:
+      query: |
+        Briefly explain your reasoning in one sentence, then put the final answer
+        inside a ```json code fence (markdown).
+        JSON keys: city (string), country (string), confidence (number 0–1).
+        Question: What is the capital of France?
+    options:
+      transform: |
+        let s = String(output).trim();
+        const fenced = s.match(/```(?:json)?\s*([\s\S]*?)```/i);
+        if (fenced) return fenced[1].trim();
+        const start = s.indexOf('{');
+        const end = s.lastIndexOf('}');
+        if (start >= 0 && end > start) return s.slice(start, end + 1);
+        return s;
+    assert:
+      - type: is-json
+        value: file://schema/capital.json
+        metric: Schema
+      - type: javascript
+        value: |
+          const o = JSON.parse(String(output));
+          return o.city.toLowerCase().includes('paris');
+        metric: Payload

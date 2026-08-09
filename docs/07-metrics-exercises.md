@@ -4,8 +4,8 @@ The **Day 4** exercises. Everything here runs on the Groq free tier.
 
 The lessons these build on live in
 [`modules/02-advanced-eval/`](../modules/02-advanced-eval/):
-`weights-and-metrics/`, `assert-sets-and-budgets/`, `exact-vs-fuzzy/`, `csv-driven-data/`,
-`fscore-classification/`, `temperature-and-personas/`, and `debugger/`.
+`weights-and-metrics/`, `assert-sets-and-budgets/`, `exact-vs-fuzzy/`, `structured-outputs/`,
+`csv-driven-data/`, `fscore-classification/`, `temperature-and-personas/`, and `debugger/`.
 
 > **Run everything from the repo root** — `cd`-ing into a lesson directory breaks `.env`
 > discovery and you get a bare `401`.

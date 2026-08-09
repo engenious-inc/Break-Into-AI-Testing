@@ -62,7 +62,7 @@ for a broken repo.
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.
-- No embeddings → `answer-relevance` and `similar` need `OPENAI_API_KEY`; ship opt-in.
+- No embeddings on Groq → `answer-relevance` uses local `transformers:` embeddings; `similar` still needs `OPENAI_API_KEY` (opt-in).
 
 ## Inverted pass/fail (red-team Module 1 only)
 Assertions describe the SAFE answer. A **failing** assertion = the attack landed.
@@ -83,6 +83,8 @@ keep default live-eval request volume low.
   `04-grading-the-grader/` ships its own triplet)
 - `modules/00-promptfoo-basics/` — Module 0 (Promptfoo pillars)
 - `modules/02-advanced-eval/` — Module 2 (weights, metrics, CSV, F-score, debugging)
+- `modules/03-app-testing/` — Module 3 (PayFlow `http` app, plus an MCP track:
+  `mcp-deepwiki/`, `mcp-local/`, `mcp-promptfoo/`)
 - `.claude/` — the Claude Code workflow (red-teamer agent, new-eval-suite +
   run-and-summarize skills). In Module 1 these are the student's path, not optional
   authoring aids; Modules 0 and 2 use them only for scaffolding.

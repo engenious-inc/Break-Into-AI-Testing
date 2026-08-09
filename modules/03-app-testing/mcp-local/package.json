@@ -1,0 +1,10 @@
+{
+  "name": "workshop-mcp-local",
+  "private": true,
+  "type": "module",
+  "description": "Local stdio MCP server for Module 3 — companion to mcp-deepwiki",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.3.6"
+  }
+}

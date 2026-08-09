@@ -1,0 +1,2 @@
+# Fixture for read_workspace_file — do not move outside this folder.
+workshop-local-ok

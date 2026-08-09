@@ -1,13 +1,20 @@
 # Module 3 — Testing an Application, Not a Model
 
-Every other module in this repo points Promptfoo at a **model**. This one points it at a
-**running application** — a multi-agent pipeline with a guard, an orchestrator, four
-document specialists, and retrieval in front of the answer.
+Every other module in this repo points Promptfoo at a **model**. This one points it at
+something else:
 
-That changes what you can test. When the provider is a model, the only thing you can
-assert on is the text it produced. When the provider is your application, you can assert
-on *how the answer was produced* — which specialist was chosen, which documents were
-retrieved, whether the guard fired. Most real AI defects live there, not in the prose.
+| Lesson | Provider / surface | Target |
+|--------|-------------------|--------|
+| PayFlow (below) | `http` | Local multi-agent app — assert on **route + citations** |
+| [`mcp-deepwiki/`](./mcp-deepwiki/) | `mcp` (`url:`) | Remote DeepWiki — **tool output shapes** |
+| [`mcp-local/`](./mcp-local/) | `mcp` (`command:`) | Local stdio server — happy path + **path-traversal guard** |
+| [`mcp-promptfoo/`](./mcp-promptfoo/) | Promptfoo **is** the MCP server | IDE agents get `validate` / `run` / `list` eval tools |
+
+When the provider is a model, the only thing you can assert on is the text it produced.
+When the provider is your application or tool server, you can assert on *how the answer
+was produced* — which specialist was chosen, which documents were retrieved, whether the
+guard fired, whether a tool failed cleanly. Most real AI defects live there, not in the
+prose.
 
 ## The app: PayFlow GenAI demo
 
@@ -105,7 +112,7 @@ the one that said it.
 
 ```bash
 ./run.sh payflow-serve      # terminal 1 — the app
-./run.sh payflow            # terminal 2 — 12 cases, guard/routing/citations/trace
+./run.sh payflow            # terminal 2 — 18 cases, guard/routing/citations/agency/trace
 ./run.sh payflow-multiturn  # injection after 4 turns of legitimate context
 ./run.sh payflow-redteam    # generated attacks (slow — see below)
 ```
@@ -266,3 +273,21 @@ exactly what `output.citations` assertions exist to catch.
 > specialist gets a second. Ranking one merged pool looked correct and wasn't — Jira's
 > many tickets simply out-scored Confluence's single change log, so the Confluence source
 > it had just routed to never appeared in the citations.
+
+## Lessons
+
+1. **PayFlow** — `payflow/` + root `promptfooconfig.payflow.yaml`, plus
+   `promptfooconfig.payflow-multiturn.yaml` and `promptfooconfig.payflow-redteam.yaml`.
+   Start the server, then assert on `output.route` and `output.citations`.
+   `tests/payflow.agency.yaml` adds the overreliance/excessive-agency cases. Teaching from
+   `PayFlow_Lab_Guide.docx`? Start with
+   [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md) — that guide targets a different (Python)
+   PayFlow and several of its premises are false against this one.
+2. **Remote MCP** — [`mcp-deepwiki/`](./mcp-deepwiki/). No local server. Three cases teach
+   when to use deterministic vs `llm-rubric` vs error-path asserts against tool output.
+3. **Local MCP** — [`mcp-local/`](./mcp-local/). Promptfoo spawns a tiny stdio server
+   (`npm install` once). Happy-path tools plus a path-traversal refusal you assert on.
+4. **Promptfoo’s MCP** — [`mcp-promptfoo/`](./mcp-promptfoo/). Promptfoo exposes eval tools
+   to Cursor/Claude (`validate_promptfoo_config`, `run_evaluation`, …). Not a provider
+   lesson — a control-plane lesson. Shared config: root `.cursor/mcp.json` (`npx -y
+   promptfoo@latest …`, no machine-specific paths).

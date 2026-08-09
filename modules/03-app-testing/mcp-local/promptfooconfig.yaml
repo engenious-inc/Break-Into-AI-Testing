@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: "App testing — local stdio MCP: happy path + security refusal"
+
+# Contrast with mcp-deepwiki/: this lesson uses command/args (Promptfoo spawns the
+# server). Run `npm install` once in this folder first — see README.md.
+providers:
+  - id: mcp
+    config:
+      enabled: true
+      # debug: true
+      timeout: 60000
+      server:
+        command: node
+        args:
+          - modules/03-app-testing/mcp-local/server.mjs
+        name: workshop-local
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  # Happy path — deterministic tool output
+  - description: echo returns the input text
+    vars:
+      prompt: '{"tool": "echo", "args": {"text": "hello cohort"}}'
+    assert:
+      - type: contains
+        value: hello cohort
+    metric: HappyPath
+
+  - description: add returns a deterministic sum
+    vars:
+      prompt: '{"tool": "add", "args": {"a": 2, "b": 40}}'
+    assert:
+      - type: regex
+        value: "\\b42\\b"
+    metric: HappyPath
+
+  - description: reads a fixture file inside the lesson folder
+    vars:
+      prompt: '{"tool": "read_workspace_file", "args": {"name": "fixture.txt"}}'
+    assert:
+      - type: contains
+        value: workshop-local-ok
+    metric: HappyPath
+
+  # Security refusal — pass means the guard held
+  - description: path traversal is refused
+    vars:
+      prompt: '{"tool": "read_workspace_file", "args": {"name": "../../../etc/passwd"}}'
+    assert:
+      - type: icontains
+        value: Path traversal not allowed
+    metric: Security
