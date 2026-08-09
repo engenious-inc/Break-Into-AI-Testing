@@ -2,8 +2,7 @@
   "mcpServers": {
     "promptfoo": {
       "command": "npx",
-      "args": ["promptfoo@latest", "mcp", "--transport", "stdio"],
-      "description": "Promptfoo MCP — run/validate/list evals from the IDE"
+      "args": ["-y", "promptfoo@latest", "mcp", "--transport", "stdio"]
     }
   }
 }

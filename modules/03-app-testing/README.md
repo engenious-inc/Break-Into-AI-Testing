@@ -160,4 +160,5 @@ exactly what `output.route` and `output.citations` assertions exist to catch.
    (`npm install` once). Happy-path tools plus a path-traversal refusal you assert on.
 4. **Promptfoo’s MCP** — [`mcp-promptfoo/`](./mcp-promptfoo/). Promptfoo exposes eval tools
    to Cursor/Claude (`validate_promptfoo_config`, `run_evaluation`, …). Not a provider
-   lesson — a control-plane lesson. Repo ships `.cursor/mcp.json`.
+   lesson — a control-plane lesson. Shared config: root `.cursor/mcp.json` (`npx -y
+   promptfoo@latest …`, no machine-specific paths).

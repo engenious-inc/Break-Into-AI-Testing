@@ -9,27 +9,50 @@ This is **not** `providers: [{ id: mcp }]`.
 
 Official docs: [Promptfoo MCP Server](https://www.promptfoo.dev/docs/integrations/mcp-server/).
 
-## Setup (once)
+## Setup (once) — portable for everyone
 
-This repo ships [`.cursor/mcp.json`](../../../.cursor/mcp.json) at the root:
+The repo ships a **project** MCP config (no absolute paths, no personal nvm):
+
+[`.cursor/mcp.json`](../../../.cursor/mcp.json)
 
 ```json
 {
   "mcpServers": {
     "promptfoo": {
       "command": "npx",
-      "args": ["promptfoo@latest", "mcp", "--transport", "stdio"]
+      "args": ["-y", "promptfoo@latest", "mcp", "--transport", "stdio"]
     }
   }
 }
 ```
 
-1. Open this project in Cursor (or add the same block to Claude Desktop).
-2. **Restart** the IDE / reload MCP servers so `promptfoo` appears in the tool list.
-3. Confirm you can see tools like `list_evaluations` and `validate_promptfoo_config`.
+### Steps
 
-No `npm install` for this lesson. First tool call may take a few seconds while `npx`
-fetches `promptfoo@latest`.
+1. **Open the repo root** in Cursor (`Break-Into-AI-Testing`), not a subfolder.
+2. Ensure `node` / `npx` work in a terminal **inside Cursor** (`node -v`, `npx -v`).  
+   If those fail, fix PATH for GUI apps (nvm/asdf users: open Cursor from a login shell, or install Node so `/usr/local/bin/npx` exists).
+3. **Fully quit Cursor** (Cmd+Q / quit), reopen this project.
+4. **Customize → MCPs** → enable **`promptfoo`** if it appears disabled.
+5. In chat, open **Available Tools** and confirm tools like `list_evaluations` and
+   `validate_promptfoo_config`.
+
+First connect may take a few seconds while `npx -y` fetches `promptfoo@latest`. No
+repo `npm install` is required for this lesson.
+
+### If `promptfoo` still does not list
+
+Some Cursor setups only show **user** MCPs. Add the **same** block via the UI
+(do **not** hard-code a machine-specific `npx` path in the shared repo):
+
+1. **Customize → MCPs → New MCP Server**
+2. Type: stdio  
+   Name: `promptfoo`  
+   Command: `npx`  
+   Args: `-y` `promptfoo@latest` `mcp` `--transport` `stdio`
+3. Save → toggle on → check **Output → MCP Logs** if it errors.
+
+Optional local-only override: put that same JSON under `~/.cursor/mcp.json`. Keep
+personal PATH hacks out of git.
 
 ## What you can ask the agent
 
@@ -81,11 +104,13 @@ If you only do one MCP track on Day 7: run `mcp-local` from the terminal, then d
 
 | Symptom | Fix |
 |---------|-----|
-| No `promptfoo` tools in the IDE | Restart Cursor; check `.cursor/mcp.json` is at repo root |
-| `Config error` | Point `validate_promptfoo_config` at a real `-c` path under this repo |
-| `Eval not found` | `list_evaluations` first — IDs come from prior runs in this project |
-| Provider / 401 on a Groq suite | `GROQ_API_KEY` in the environment the MCP server inherits |
-| SDK missing (slim installs) | Rare with `npx promptfoo@latest`; see upstream docs if it appears |
+| No `promptfoo` in **Customize → MCPs** | Workspace = repo root; quit/reopen Cursor; or add via UI (same `npx -y …` args). |
+| `npx` / `spawn ENOENT` in MCP Logs | Node not on PATH for GUI Cursor — fix Node install or launch Cursor from a terminal. |
+| `promptfoo` listed but red / no tools | **Output → MCP Logs**; retry after network allows `npx` to download the package. |
+| Tools missing in chat | Enable the server under **Customize → MCPs**; check **Available Tools**. |
+| `Config error` | Pass a real config path under this repo to `validate_promptfoo_config`. |
+| `Eval not found` | `list_evaluations` first — IDs come from prior runs in this project. |
+| Provider / 401 on a Groq suite | `GROQ_API_KEY` must be available to processes Cursor spawns. |
 
 ## Try it next
 
