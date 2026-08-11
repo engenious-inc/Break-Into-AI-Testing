@@ -1,5 +1,7 @@
 # 05 — Quality Challenges (beyond jailbreaks)
 
+> **Day 5 exercises.** The `05` is a document number, not a day — and the "day-01 course" mentioned below is the *previous* curriculum, not Day 1 of this one. Session index: [`days/`](../days/).
+
 Module 1's red-team exercises (`docs/02-redteam-exercises.md`) cover injection and
 hallucination. This lesson adds five quality dimensions from the original day-01 course,
 run as Promptfoo suites against MediBot and FinanceBot.
