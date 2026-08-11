@@ -113,6 +113,10 @@ row, open its suite, and write cases in the same shape.
 ./run.sh view        # open the results web UI
 ```
 
+Not every session is an eval. **`./run.sh chat <bot>`** opens an ordinary conversation with
+a bot — `/reset` clears the context, `/save <file>` writes the transcript. Day 6 uses it to
+explore a bot whose rules you have not read, which is the one thing a suite cannot teach.
+
 Under the hood it's plain Promptfoo — run it directly if you prefer:
 
 ```bash

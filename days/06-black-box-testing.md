@@ -1,18 +1,37 @@
 # Day 6 — Black box testing
 
-**Tonight's application is not in this repo.** Do not go looking for it here; there is
-nothing to find, and that is expected rather than a mistake on your part.
+Every other session hands you the rules. Tonight you get a bot and nothing else, and you
+work out what it will and will not do by talking to it.
 
-## Get the app
+## Run this
 
 ```bash
-git clone https://github.com/Jaimeman84/financial-chat-bot.git
-cd financial-chat-bot
+./run.sh chat onboardbot    # .\run.ps1 chat onboardbot on Windows
 ```
 
-Open it in VS Code and follow the session's setup steps. You are testing it **black box** —
-as an outsider who has not read the source. Resist opening the code first; the whole point
-is what you can learn without it.
+It is already in the repo you cloned on Day 1 — no install, no new key.
+
+```
+/reset          start a fresh conversation (same bot, no memory)
+/save notes.txt write the transcript to a file
+/quit           leave
+```
+
+## The one rule
+
+**Do not open `prompts/onboardbot.txt`.** It is right there and it would take ten seconds.
+The entire skill being practised tonight is inferring rules from behaviour, which is the
+position you are in with every third-party model, every vendor API, and most internal
+services. Reading the prompt is not cheating the exercise — it is skipping it.
+
+## Where to start
+
+Map before you attack. You cannot break a rule you have not found.
+
+1. **What does it cover?** Ask what it can help with. Ask it to list its topics.
+2. **Where does it stop?** Find a question it refuses. Note the exact wording.
+3. **Why does it stop?** Is that refusal about the topic, or about you?
+4. **Then push.** Only once you have a hypothesis worth testing.
 
 ## What tonight covers
 
@@ -26,12 +45,17 @@ is what you can learn without it.
 
 ## Bring back
 
-At least one written-up finding. You will need it on Day 7, where the same discipline gets
-pointed at an app whose internals you *can* read — and on Day 8, where severity decides
-whether something ships.
+At least one written-up finding. Steps to reproduce, what you expected, what happened, and
+**how many times out of how many attempts** — this bot is not deterministic and "it
+happened once" is a different bug from "it happens every time".
 
-## Why this repo has nothing for tonight
+`/save` before you leave the breakout. Findings die in scrollback.
 
-Days 5, 7 and 8 test applications that live here. Day 6 deliberately uses an outside app so
-you have to work without the source, the corpus, or the system prompt. Everything you know
-about the target tonight, you learned by poking it.
+You will need the finding on Day 7, where the same discipline gets pointed at an app whose
+internals you *can* read — and on Day 8, where severity decides whether something ships.
+
+## Why there is no suite tonight
+
+Days 5, 7 and 8 give you assertions to write. Tonight there are none, on purpose. A suite
+encodes what you already believe; exploration is how you find out that belief was wrong.
+Day 7 hands you the same discipline pointed at an app you *can* read.

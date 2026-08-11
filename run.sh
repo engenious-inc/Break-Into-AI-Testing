@@ -38,11 +38,13 @@ Targets:
   payflow-redteam     PayFlow generated red team (promptfoo redteam run — slow)
   payflow-serve       Start the PayFlow demo app on :8000 (foreground)
   payflow-health      Check the PayFlow app is answering before you eval
+  chat <bot>          Talk to a bot directly (onboardbot, medibot, financebot, mybot)
   view                Open the results web UI
 
 Examples:
   ./run.sh medibot
   ./run.sh finance --filter-first-n 1
+  ./run.sh chat onboardbot    # Day 6 — explore a bot instead of evaluating it
   ./run.sh payflow-serve      # in one terminal
   ./run.sh payflow            # in another
   ./run.sh payflow-multiturn
@@ -62,6 +64,12 @@ shift
 # `view` opens the report UI — no eval, no verdict.
 if [ "$target" = "view" ]; then
   exec npx --yes promptfoo@latest view "$@"
+fi
+
+# `chat` is an interactive session, not an eval. Day 6 uses it for black-box work.
+if [ "$target" = "chat" ]; then
+  [ -f .env ] && { set -a; . ./.env; set +a; }
+  exec node scripts/chat.mjs "$@"
 fi
 
 PAYFLOW_URL="http://localhost:${PAYFLOW_PORT:-8000}"
