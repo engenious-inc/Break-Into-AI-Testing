@@ -25,6 +25,12 @@ providers:
         message: '{{prompt}}'
         session_id: eval-session-promptfoo
         user_role: student
+      # The 400 path is part of the contract, so the provider has to be allowed to see
+      # it. Without this the http provider treats any non-2xx as a provider ERROR and the
+      # case never reaches its assertions — you get an error, not a failure, and the
+      # difference matters. 5xx still fails loudly, which is right: a crash is not a
+      # contract.
+      validateStatus: "status >= 200 && status < 500"
       # `json` is the parsed response body. Returning the whole object — rather than just
       # the answer text — is the entire point: it lets assertions read `output.route` and
       # test the ROUTING DECISION, not just the prose.

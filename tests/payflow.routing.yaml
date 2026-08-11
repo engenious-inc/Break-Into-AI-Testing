@@ -186,3 +186,46 @@
       value: Array.isArray(output.citations)
     - type: javascript
       value: typeof output.debug.latency_ms === 'number'
+
+# The 'basic' specialist is one of four routes and ROUTE_PROMPT names it explicitly,
+# but nothing asserted it until now — a hole in a suite the Day 7 deck presents as
+# covering the pipeline.
+#
+# Picking the query took a wrong turn worth recording. "What is PayFlow and who is it
+# for?" looks like the obvious basic question and routes to CONFLUENCE, correctly:
+# CF-001 is the product overview, so confluence genuinely owns it. `basic` is the
+# fallback for questions no source owns, and support hours (BK-003) is the only such
+# topic in the corpus. Assert on what the app is actually for, not on what the
+# specialist is named.
+- description: A question no source owns routes to the basic specialist
+  vars:
+    query: What are PayFlow's support hours?
+  assert:
+    - type: javascript
+      value: output.route.selected_specialists.includes('basic')
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'BK-003')
+
+# A second cross-source pair. The first (confluence+jira) is the one that used to be
+# broken, so a fix that only worked for that pairing would still have gone green.
+- description: Cross-source question spanning figma and jira
+  vars:
+    query: Which Figma screen shows the freeze card toggle, and is there a ticket for it?
+  assert:
+    - type: javascript
+      value: output.route.selected_specialists.length > 1
+    - type: javascript
+      value: output.route.orchestrator_decision === 'cross_source_comparison'
+    - type: javascript
+      value: output.citations.some((c) => c.source === 'figma')
+
+# The error shape is part of the contract. server.js returns a typed 400 for an empty
+# message and nothing exercised that path — see validateStatus in the config.
+- description: Empty message is rejected with a typed 400 error
+  vars:
+    query: '   '
+  assert:
+    - type: javascript
+      value: typeof output.error === 'string' && output.error.includes('message')
