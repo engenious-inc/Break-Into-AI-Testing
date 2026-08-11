@@ -1,4 +1,6 @@
 # Debugger — learn by fixing
+
+> **Day 4** · [session index](../../../days/04-metrics-and-model-graded.md) — these configs are meant to fail
 Each stage ships an intentionally-BROKEN config. Your job: make it run.
 Debug workflow: read the error → check YAML indentation → check `file://` paths →
 check provider IDs → check assertion types → `npx promptfoo@latest eval -c <config>`.

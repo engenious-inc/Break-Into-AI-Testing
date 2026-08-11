@@ -1,5 +1,7 @@
 # Module 0 — Promptfoo Basics
 
+> **Days 2 and 3** · [session index](../../days/02-promptfoo-basics.md) — assertions are Day 2; prompts and providers are Day 3
+
 Learn the three Promptfoo pillars before red-teaming: **Prompts**, **Providers**,
 **Assertions & Metrics**. Every lesson is a runnable config using the Groq free tier —
 no paid key needed (a couple of clearly-marked optional lessons need `OPENAI_API_KEY`).

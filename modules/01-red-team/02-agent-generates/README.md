@@ -1,5 +1,7 @@
 # 02 — The agent drafts the attacks
 
+> **Day 5** · [session index](../../../days/05-red-teaming.md)
+
 `.claude/agents/red-teamer.md` is a subagent that reads a bot's system prompt and
 returns three attack cases — one per axis — as a YAML fragment.
 

@@ -1,4 +1,6 @@
 # CSV-driven test data
+
+> **Day 4** · [session index](../../../days/04-metrics-and-model-graded.md)
 Promptfoo can load `tests:` from CSV. Special columns:
 - `__expected` (one assertion), `__expected1/2/3` (several), written as `type: value` in the cell
 - `__metadata:key` (filterable), `__metadata:tags[]` (array), `__description`, `__prefix`, `__suffix`, `__threshold`

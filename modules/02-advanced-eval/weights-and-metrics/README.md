@@ -1,5 +1,7 @@
 # Weights, Thresholds & Named Metrics
 
+> **Day 4** · [session index](../../../days/04-metrics-and-model-graded.md)
+
 ```bash
 npx promptfoo@latest eval -c modules/02-advanced-eval/weights-and-metrics/promptfooconfig.yaml
 npx promptfoo@latest view

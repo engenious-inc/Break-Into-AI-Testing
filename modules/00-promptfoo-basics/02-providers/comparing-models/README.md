@@ -1,5 +1,7 @@
 # Providers 3/3 — Comparing Models
 
+> **Day 3** · [session index](../../../../days/03-prompt-engineering-and-local-models.md)
+
 Run one prompt against all three default Groq models and compare them on the three
 things you can actually measure on a free tier: **latency**, **tokens**, and whether the
 answer is clean.

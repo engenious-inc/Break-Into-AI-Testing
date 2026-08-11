@@ -1,5 +1,7 @@
 # Observability: real OTLP tracing into Arato.ai
 
+> **Day 8** · [session index](../../../days/08-advanced-redteam-sdlc-observability.md) — it lives in Module 2 because it is *shaped* like a Module 2 lesson, not because it is taught with them
+
 > **This is a Day 8 lesson**, taught with Arato.ai and Agenta.ai — not part of the
 > Day 4 metrics exercises. It lives in Module 2 because it is shaped like a Module 2
 > lesson (single provider, ordinary pass=good assertions), not because it is taught

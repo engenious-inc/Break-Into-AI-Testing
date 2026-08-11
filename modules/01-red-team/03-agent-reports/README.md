@@ -1,5 +1,7 @@
 # 03 — The agent runs it and reports
 
+> **Day 5** · [session index](../../../days/05-red-teaming.md)
+
 `.claude/skills/run-and-summarize/` runs an eval and produces the per-provider
 verdict table by hand-filling nothing.
 

@@ -88,16 +88,33 @@ while IFS= read -r cfg; do
   fi
 done < <(find . -name 'promptfooconfig*.yaml' -not -path './node_modules/*' | sort)
 
+# A student who lands in modules/ directly — from a search, or a link in a deck — needs
+# to know which session they are in without going back to days/. Every lesson README
+# carries a badge naming its day.
+echo ""
+echo "== Lesson day badges =="
+unbadged=0
+while IFS= read -r rm; do
+  rm="${rm#./}"
+  if ! head -8 "$rm" | grep -q "session index"; then
+    echo "  NO BADGE    $rm"
+    unbadged=$((unbadged + 1))
+  fi
+done < <(find modules -mindepth 2 -name README.md -not -path '*/node_modules/*' | sort)
+[ "$unbadged" -eq 0 ] && echo "  every lesson README names its day"
+
 echo ""
 echo "  $checked configs checked"
 echo "  $unclaimed unclaimed (listed under no day)"
 echo "  $duplicated duplicated (listed under more than one)"
+echo "  $unbadged lesson READMEs with no day badge"
 
-if [ "$unclaimed" -gt 0 ] || [ "$duplicated" -gt 0 ]; then
+if [ "$unclaimed" -gt 0 ] || [ "$duplicated" -gt 0 ] || [ "$unbadged" -gt 0 ]; then
   echo ""
   echo "DAY INDEX CHECK FAILED."
   echo "Add each unclaimed config to the right page in $DAYS_DIR/, or to EXEMPT in this"
   echo "script with a reason. A duplicated config means two days claim it — pick one."
+  echo "A missing badge means a lesson README does not say which session it belongs to."
   exit 1
 fi
 

@@ -1,5 +1,7 @@
 # App testing — remote MCP (DeepWiki)
 
+> **Day 7** · [session index](../../../days/07-testing-an-application.md)
+
 PayFlow points Promptfoo at an HTTP app. This lesson points it at an **MCP server** —
 DeepWiki’s public endpoint — and treats the *tools* as the system under test.
 

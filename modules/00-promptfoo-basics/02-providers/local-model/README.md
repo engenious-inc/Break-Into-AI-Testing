@@ -1,5 +1,7 @@
 # Providers 2/3 — A Local Model (optional)
 
+> **Day 3** · [session index](../../../../days/03-prompt-engineering-and-local-models.md) — optional — needs LM Studio on :1234
+
 Run an open-weights model on your own machine and point Promptfoo at it. Nothing leaves
 the laptop, nothing is billed, and there is no rate limit.
 

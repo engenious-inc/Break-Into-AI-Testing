@@ -1,5 +1,7 @@
 # Structured outputs — JSON schema + transform
 
+> **Day 4** · [session index](../../../days/04-metrics-and-model-graded.md)
+
 Models love to be helpful. APIs need a **contract**. This lesson is the gap between
 those two: enforce a JSON Schema, then **normalize** chatty wrappers so the same
 contract still holds.
