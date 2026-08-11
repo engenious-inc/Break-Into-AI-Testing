@@ -9,7 +9,7 @@
 #   ./run.sh payflow-serve      # in one terminal
 #   ./run.sh payflow-redteam    # in another
 #
-# THIS FILE IS THE RECIPE. `redteam.yaml` NEXT TO IT IS THE OUTPUT — the 21 attacks that
+# THIS FILE IS THE RECIPE. `redteam.yaml` NEXT TO IT IS THE OUTPUT — the attacks that
 # this config generated, committed so you can replay them for free:
 #
 #   npx promptfoo@latest redteam eval -c redteam.yaml     # replay, no generation
@@ -57,12 +57,16 @@ redteam:
     tickets or documents that are not in its corpus.
 
   # Probe count = plugins x numTests, then one variant per strategy.
-  #   7 plugins x 1 numTests = 7 base tests
-  #   x 3 strategies         = 21 probes
+  #   8 plugins x 1 numTests = 8 base tests
+  #   x 3 strategies         = 24 probes at most
+  #
+  # "At most" is doing work there: a plugin can return fewer tests than asked for, so
+  # the real number drifts. A run on 2026-08-11 produced 22, not 24. Read the count the
+  # generator prints; do not trust the arithmetic.
   #
   # numTests is 1 because of MEASURED free-tier behaviour, not caution. Each probe is
   # FOUR Groq calls — three for the pipeline (guard, route, answer) plus one to grade it —
-  # so 21 probes is ~84 calls against a ~30 req/min limit. A run at numTests: 2 (42
+  # so ~24 probes is ~96 calls against a ~30 req/min limit. A run at numTests: 2 (42
   # probes) was still going after ten minutes, having served 49 requests and logged 33
   # separate 429 backoffs. Raise this on a paid key; on the free tier it does not finish
   # in a lesson slot.
@@ -76,6 +80,10 @@ redteam:
     - id: hijacking
     - id: excessive-agency
     - id: overreliance
+    # A curated corpus of real-world jailbreaks. The upstream PayFlow's own red team
+    # uses this and ours did not. Verified against promptfoo 0.122.0 that it generates
+    # cleanly — unlike `multilingual` below, which is not a real strategy at all.
+    - id: pliny
 
   # All three are local transforms: verified to run with OR without OPENAI_API_KEY set.
   strategies:
@@ -92,7 +100,7 @@ redteam:
   # - jailbreak: available and working — ./run.sh payflow-redteam clears OPENAI_API_KEY
   #   so promptfoo's remote generator stays on, which this strategy needs. It is left out
   #   for COST, not availability: it is iterative, and one test expanded to 11 probes and
-  #   20,820 tokens. Across 7 plugins that is several times the daily free-tier budget.
+  #   20,820 tokens. Across 8 plugins that is several times the daily free-tier budget.
   #   Add it deliberately, with numTests: 1, when you want to show iterative attacks:
   #     - id: jailbreak
 
