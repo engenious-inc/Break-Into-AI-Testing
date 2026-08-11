@@ -1,5 +1,7 @@
 # 01 — Manual baseline
 
+> **Day 5** · [session index](../../../days/05-red-teaming.md)
+
 You write one attack by hand before an agent writes any for you. This is not
 ceremony: you cannot review an agent's attacks, or judge whether its findings are
 real, at a task you have never performed yourself.

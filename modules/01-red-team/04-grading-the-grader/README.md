@@ -1,5 +1,7 @@
 # 04 — Who grades the grader?
 
+> **Day 5** · [session index](../../../days/05-red-teaming.md) — returns on Day 8
+
 Lesson 02 kept a human in the loop on the *generation* side. This lesson shows why,
 by reproducing a real grading failure from this repo's own history — live, on demand.
 

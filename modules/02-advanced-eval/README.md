@@ -1,5 +1,7 @@
 # Module 2 — Advanced Evaluation
 
+> **Day 4** · [session index](../../days/04-metrics-and-model-graded.md) — every lesson here except `observability/`, which is Day 8
+
 Beyond pass/fail: weighted assertions, named metrics, assertion sets, budgets,
 exact-vs-fuzzy matching, CSV-driven data, F-score classification, temperature
 sensitivity, a hands-on debugging track, and production observability. Defaults use

@@ -8,6 +8,17 @@ The default config is **free-tier-safe**: a curated subset (8 cases per suite) r
   <img src="docs/qr.png" alt="Scan to clone" width="220" />
 </p>
 
+> ### Taking the course? Start at **[`days/`](days/)**
+>
+> The lessons below are organised by **topic**. If you are following the eight-session
+> course, [`days/`](days/) tells you what to run tonight and links to the right lesson —
+> including the two later sessions this page does not describe: **Day 7** points Promptfoo
+> at a running application, and **Day 8** covers generated red teaming and observability.
+>
+> One trap worth knowing up front: `docs/07-metrics-exercises.md` is **Day 4**, not Day 7.
+> Document numbers and day numbers are different things, and [`days/README.md`](days/README.md)
+> lists every case where they disagree.
+
 > **New here?** Skim the one-page visual [repo map](docs/repo-map.pdf) — how the prompts, tests, providers, and configs fit together — before you dive in.
 
 ## Quickstart (≈ 3 minutes)

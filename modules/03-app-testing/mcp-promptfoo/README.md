@@ -1,5 +1,7 @@
 # Promptfoo’s own MCP server
 
+> **Day 7** · [session index](../../../days/07-testing-an-application.md)
+
 This is **not** `providers: [{ id: mcp }]`.
 
 | Lesson | Role of MCP |

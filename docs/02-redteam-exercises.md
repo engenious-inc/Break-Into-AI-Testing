@@ -1,5 +1,7 @@
 # Red-Team Exercises
 
+> **Day 5 exercises.** The `02` is a document number, not a day. Session index: [`days/`](../days/).
+
 You have **two targets**:
 
 - **MediBot** — a healthcare triage chatbot. System prompt at `prompts/medibot.txt`. Run with: `npx promptfoo@latest eval -c promptfooconfig.medibot.yaml`.

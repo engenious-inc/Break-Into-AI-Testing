@@ -1,5 +1,7 @@
 # Module 1 — Red-Team Fundamentals
 
+> **Day 5** · [session index](../../days/05-red-teaming.md)
+
 Break MediBot and FinanceBot, then hand the repetitive half of the job to an agent.
 
 Module 1's runnable artifacts live at the **repo root** (`prompts/`, `tests/`,

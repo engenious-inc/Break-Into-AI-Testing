@@ -1,5 +1,7 @@
 # App testing — local stdio MCP
 
+> **Day 7** · [session index](../../../days/07-testing-an-application.md)
+
 [`mcp-deepwiki/`](../mcp-deepwiki/) hits a **remote URL**. This lesson hits a **local
 server Promptfoo spawns** (`command` + `args` over stdio). You own the tools, so you can
 assert on happy paths *and* on security refusals — without waiting on a third-party model.

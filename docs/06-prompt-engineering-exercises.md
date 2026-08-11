@@ -1,5 +1,7 @@
 # Prompt Engineering & Local Model Exercises
 
+> **Day 3 exercises.** The `06` is a document number, not a day. Session index: [`days/`](../days/).
+
 The three breakouts from **Day 3**. Everything here runs on the Groq free tier except
 Breakout 3, which needs LM Studio on your own machine.
 

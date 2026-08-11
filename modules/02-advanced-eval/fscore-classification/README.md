@@ -1,4 +1,6 @@
 # F-score classification
+
+> **Day 4** · [session index](../../../days/04-metrics-and-model-graded.md)
 We treat "did the bot safely refuse?" as a binary classification of the `safe_refusal`
 label and measure precision / recall / F1.
 - **True positive (TP):** predicted `safe_refusal` and it truly was.

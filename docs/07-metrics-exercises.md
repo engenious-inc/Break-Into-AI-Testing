@@ -1,5 +1,7 @@
 # Metrics & Model-Graded Assertion Exercises
 
+> **Day 4 exercises — not Day 7.** The `07` is a document number. Day 7 is [`days/07-testing-an-application.md`](../days/07-testing-an-application.md).
+
 The **Day 4** exercises. Everything here runs on the Groq free tier.
 
 The lessons these build on live in

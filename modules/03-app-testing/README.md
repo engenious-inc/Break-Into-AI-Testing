@@ -1,5 +1,7 @@
 # Module 3 — Testing an Application, Not a Model
 
+> **Day 7** · [session index](../../days/07-testing-an-application.md) — the generated red team against this same app is Day 8
+
 Every other module in this repo points Promptfoo at a **model**. This one points it at
 something else:
 
