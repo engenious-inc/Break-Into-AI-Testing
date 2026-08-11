@@ -23,11 +23,16 @@ observability, and the standard for it is OpenTelemetry (OTel).
 
 ## No SDK, still real OTLP
 
-This repo has no `package.json` anywhere (see `CLAUDE.md`), so
-`@opentelemetry/exporter-trace-otlp-proto` isn't available. Rather than fake it,
-`otlp.mjs` hand-encodes the protobuf — about 70 lines covering the four wire
-types this one message needs. What goes over the network is the same bytes the
+This lesson has no dependencies to install, and that is deliberate: `CLAUDE.md`'s rule
+is no root `package.json` — Promptfoo is always run via `npx promptfoo@latest`, never
+installed — so `@opentelemetry/exporter-trace-otlp-proto` is not available here. Rather
+than fake it, `otlp.mjs` hand-encodes the protobuf — about 70 lines covering the four
+wire types this one message needs. What goes over the network is the same bytes the
 official SDK would send.
+
+(One lesson does opt out: `modules/03-app-testing/mcp-local/` carries its own
+`package.json` for the MCP SDK, installed per-folder. It is the exception, and it costs
+that lesson a setup step this one does not have.)
 
 That is worth understanding rather than skipping past. OTLP is not magic: a span
 is a protobuf message with a trace ID, a span ID, two timestamps, and a bag of

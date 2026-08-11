@@ -112,6 +112,12 @@ CONFIGS=(
   # Day 8 lesson. Its Arato POST is optional and skips cleanly when the env vars are
   # unset, so the custom provider still gets exercised here on every run.
   "modules/02-advanced-eval/observability/promptfooconfig.yaml"
+  # Module 1's grader lesson — the 70B grading its own output. Groq-only, so it runs
+  # here like any other. Its assertions are the lesson; only errors count as broken.
+  "modules/01-red-team/04-grading-the-grader/promptfooconfig.yaml"
+  "modules/02-advanced-eval/structured-outputs/promptfooconfig.yaml"
+  "promptfooconfig.medibot-multiturn.yaml"
+  "promptfooconfig.reverse.yaml"
 )
 
 # Opt-in configs needing a key/service not present by default — skipped, not failed.
@@ -124,6 +130,8 @@ SKIPPED=(
   "promptfooconfig.payflow.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
   "promptfooconfig.payflow-multiturn.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
   "promptfooconfig.payflow-redteam.yaml:needs the PayFlow app running, and is a 'redteam run' config rather than an 'eval -c' one"
+  "modules/03-app-testing/mcp-deepwiki/promptfooconfig.yaml:talks to the public DeepWiki MCP server over the network — if it is down or slow that is not a repo-health signal"
+  "modules/03-app-testing/mcp-local/promptfooconfig.yaml:needs a one-time 'npm install --prefix modules/03-app-testing/mcp-local' — the only lesson in the repo with its own dependencies, and it is not wired into setup.sh"
 )
 
 # Intentionally-broken debugger fix-me stages — expected to NOT run clean.
@@ -132,6 +140,33 @@ DEBUGGER_CONFIGS=(
   "modules/02-advanced-eval/debugger/2_moderate/promptfooconfig.yaml"
   "modules/02-advanced-eval/debugger/3_advance/promptfooconfig.yaml"
 )
+
+# Not a suite — the scaffold the new-eval-suite skill copies from.
+NOT_A_SUITE=(
+  ".claude/skills/new-eval-suite/templates/promptfooconfig.template.yaml"
+)
+
+# Every promptfooconfig on disk must appear in exactly one list above: run it, skip it
+# with a reason, or declare it a debugger stage. The lists are hand-maintained and
+# nothing used to compare them against the tree, so a new lesson could land with no
+# coverage at all and nobody would see it — six had already drifted out when this guard
+# was written (structured-outputs, both MCP lessons, grading-the-grader, reverse and
+# medibot-multiturn). Adding a lesson now fails this check until you classify it, which
+# is the point: the decision is cheap, noticing it was missed six weeks later is not.
+unclassified=()
+while IFS= read -r found; do
+  found="${found#./}"
+  known=0
+  for k in "${CONFIGS[@]}" "${DEBUGGER_CONFIGS[@]}" "${NOT_A_SUITE[@]}"; do
+    [ "$k" = "$found" ] && { known=1; break; }
+  done
+  if [ "$known" -eq 0 ]; then
+    for entry in "${SKIPPED[@]}"; do
+      [ "${entry%%:*}" = "$found" ] && { known=1; break; }
+    done
+  fi
+  [ "$known" -eq 0 ] && unclassified+=("$found")
+done < <(find . -name 'promptfooconfig*.yaml' -not -path './node_modules/*' | sort)
 
 # Runs one config, returns 0/1/2 via globals: ${STATUS} = OK | ERRORS:<n> | CRASHED
 run_config() {
@@ -246,16 +281,30 @@ for cfg in "${DEBUGGER_CONFIGS[@]}"; do
 done
 
 echo ""
+if [ "${#unclassified[@]}" -gt 0 ]; then
+  echo "-- Unclassified configs (on disk, in none of the lists above) --"
+  for cfg in "${unclassified[@]}"; do
+    echo "  UNCLASSIFIED  $cfg"
+  done
+  echo "  Add each to CONFIGS, SKIPPED (with a reason) or DEBUGGER_CONFIGS in this script."
+  echo ""
+fi
+
 echo "== Summary =="
 echo "  $pass configs ran clean (0 errors)"
 echo "  $fail configs BROKEN"
+echo "  ${#unclassified[@]} configs UNCLASSIFIED (on disk but in no list — no coverage)"
 echo "  $skip configs skipped (opt-in, documented reason)"
 echo "  $timeout_count configs TIMED OUT (inconclusive — likely Groq throttling, re-run alone later)"
 echo "  $debugger_ok/3 debugger fix-me stages correctly still broken"
 
-if [ "$fail" -gt 0 ]; then
+if [ "$fail" -gt 0 ] || [ "${#unclassified[@]}" -gt 0 ]; then
   echo ""
-  echo "SMOKE CHECK FAILED — see BROKEN entries above."
+  if [ "$fail" -gt 0 ]; then
+    echo "SMOKE CHECK FAILED — see BROKEN entries above."
+  else
+    echo "SMOKE CHECK FAILED — ${#unclassified[@]} config(s) have no coverage. See UNCLASSIFIED above."
+  fi
   exit 1
 fi
 if [ "$timeout_count" -gt 0 ]; then
