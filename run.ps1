@@ -26,15 +26,33 @@ Targets:
   openrouter.medibot  MediBot via the OpenRouter fallback (needs OPENROUTER_API_KEY)
   openrouter.finance  FinanceBot via the OpenRouter fallback
   mybot               Your Challenge-3 build-it bot
+  chat <bot>          Talk to a bot directly (onboardbot, medibot, financebot, mybot)
   view                Open the results web UI
 
 Examples:
   .\run.ps1 medibot
   .\run.ps1 finance --filter-first-n 1
+  .\run.ps1 chat onboardbot    # Day 6 - explore a bot instead of evaluating it
   .\run.ps1 view
 
 Pacing defaults to -j 1 --delay 1000 (override with RUN_JOBS / RUN_DELAY_MS).
 '@ | Write-Host
+}
+
+function Import-DotEnv {
+  if (-not (Test-Path .env)) { return $false }
+  foreach ($line in Get-Content .env) {
+    if ($line -match '^\s*#') { continue }
+    if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') {
+      $name = $Matches[1]; $val = $Matches[2].Trim()
+      if ($val.Length -ge 2 -and
+          ((($val[0] -eq '"') -and ($val[-1] -eq '"')) -or (($val[0] -eq "'") -and ($val[-1] -eq "'")))) {
+        $val = $val.Substring(1, $val.Length - 2)
+      }
+      Set-Item -Path "env:$name" -Value $val
+    }
+  }
+  return $true
 }
 
 $target = if ($args.Count -ge 1) { $args[0] } else { '' }
@@ -42,6 +60,13 @@ if ($target -in @('', '-h', '--help', '--list')) { Show-Usage; exit 0 }
 $rest = if ($args.Count -ge 2) { $args[1..($args.Count - 1)] } else { @() }
 
 if ($target -eq 'view') { & npx --yes promptfoo@latest view @rest; exit $LASTEXITCODE }
+
+# `chat` is an interactive session, not an eval. Day 6 uses it for black-box work.
+if ($target -eq 'chat') {
+  Import-DotEnv | Out-Null
+  & node scripts/chat.mjs @rest
+  exit $LASTEXITCODE
+}
 
 $known = @('medibot','finance','quality.medibot','quality.finance','openrouter.medibot','openrouter.finance','mybot')
 if ($target -notin $known) {
@@ -56,19 +81,7 @@ if (-not (Test-Path $cfg)) {
 }
 
 # Load .env so GROQ_API_KEY / OPENROUTER_API_KEY reach Promptfoo.
-if (Test-Path .env) {
-  foreach ($line in Get-Content .env) {
-    if ($line -match '^\s*#') { continue }
-    if ($line -match '^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$') {
-      $name = $Matches[1]; $val = $Matches[2].Trim()
-      if ($val.Length -ge 2 -and
-          ((($val[0] -eq '"') -and ($val[-1] -eq '"')) -or (($val[0] -eq "'") -and ($val[-1] -eq "'")))) {
-        $val = $val.Substring(1, $val.Length - 2)
-      }
-      Set-Item -Path "env:$name" -Value $val
-    }
-  }
-} else {
+if (-not (Import-DotEnv)) {
   Write-Host "! No .env found - run .\setup.ps1 first (or set GROQ_API_KEY)." -ForegroundColor Yellow
 }
 
