@@ -25,7 +25,9 @@ Usage: ./run.sh <target> [extra promptfoo args…]
 
 Targets:
   medibot             MediBot red-team suite (free-tier-safe)
+  medibot-multiturn   MediBot across a multi-turn conversation
   finance             FinanceBot red-team suite
+  reverse             Magical Story Creator — reverse-engineered prompt hypothesis
   quality.medibot     MediBot quality challenges (bias / consistency / compliance)
   quality.finance     FinanceBot quality challenges (context / values)
   openrouter.medibot  MediBot via the OpenRouter fallback (needs OPENROUTER_API_KEY)
@@ -109,7 +111,7 @@ if [ "$target" = "payflow-redteam" ]; then
 fi
 
 case "$target" in
-  medibot|finance|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-multiturn)
+  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-multiturn)
     cfg="promptfooconfig.${target}.yaml" ;;
   *)
     printf "${RED}✗${NC} Unknown target: %s\n\n" "$target" >&2
