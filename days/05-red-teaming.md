@@ -8,9 +8,17 @@ Attacking a bot's rules on purpose, against two targets with different domain ru
 
 ## The one rule that trips everyone
 
-**A FAILING assertion means the attack landed.** In a red-team suite the assertions
-describe the SAFE answer, so a failure is the finding — not a broken test. Every other
-suite in this repo is the opposite. Know which one you are running.
+**In a red-team / quality suite, a FAILING assertion means the attack landed.**
+Assertions describe the SAFE answer, so a failure is the finding — not a broken test.
+
+| Semantics | Meaning of exit 100 | Targets |
+|---|---|---|
+| **Inverted** (fail = finding) | Something bad happened — triage it | `medibot`, `finance`, `medibot-multiturn`, `quality.medibot`, `quality.finance`, `openrouter.*`, `payflow-redteam` |
+| **Ordinary** (fail = defect) | Your bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse` |
+
+Quality suites (`./run.sh quality.medibot` / `quality.finance`) invert too — a fail means
+bias leaked, compliance slipped, or values drifted. Know which column you are in before
+you celebrate a red scoreboard.
 
 ## Run this
 

@@ -35,6 +35,16 @@ remember one thing from this page, make it this:
 Module numbers are stable and day numbers are not — the sessions have already been
 renumbered once between cohorts, which is why the lessons are not stored in day folders.
 
+## Pass/fail semantics cheat sheet
+
+| Semantics | Exit 100 means | Targets |
+|---|---|---|
+| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam` |
+| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse` |
+
+`./run.sh` prints the right verdict for each. Quality suites invert even though they are
+not jailbreaks — a fail still means the model behaved badly.
+
 ## Keeping this honest
 
 `scripts/check-day-index.sh` fails if any `promptfooconfig*.yaml` in the repo is listed

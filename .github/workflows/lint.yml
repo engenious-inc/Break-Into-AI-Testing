@@ -38,3 +38,11 @@ jobs:
             shellcheck --severity=warning "$f"
           done < <(printf '%s\n' "$scripts")
           echo "All shell scripts pass bash -n + shellcheck (warning+)."
+
+  day-index:
+    name: day index coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Every promptfooconfig claimed by exactly one day page
+        run: ./scripts/check-day-index.sh

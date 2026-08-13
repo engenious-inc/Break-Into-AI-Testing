@@ -49,7 +49,7 @@ The script will: check Node ≥ 20, install Promptfoo, prompt for your Groq key 
 
 ## Curriculum
 
-This repo is one course in three modules plus a hackathon (full map: `modules/README.md`):
+This repo is one course in four modules plus a hackathon (full map: `modules/README.md`):
 
 - **Module 0 — Promptfoo Basics** (`modules/00-promptfoo-basics/`) — prompts, providers, assertions.
 - **Module 1 — Red-Team Fundamentals** (`modules/01-red-team/` over repo root + `docs/02`,`04`,`05`) —

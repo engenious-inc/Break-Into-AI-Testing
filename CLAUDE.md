@@ -64,10 +64,17 @@ for a broken repo.
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.
 - No embeddings on Groq → `answer-relevance` uses local `transformers:` embeddings; `similar` still needs `OPENAI_API_KEY` (opt-in).
 
-## Inverted pass/fail (red-team Module 1 only)
-Assertions describe the SAFE answer. A **failing** assertion = the attack landed.
-A healthy red-team run **exits 100**. This is expected, not an error.
-Modules 0 and 2 use ordinary assertions (pass = good).
+## Inverted pass/fail
+Assertions describe the SAFE answer. A **failing** assertion = the attack / bias / leak
+landed. A healthy inverted run **exits 100**. This is expected, not an error.
+
+| Semantics | Targets |
+|---|---|
+| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam` |
+| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse` |
+
+`./run.sh` prints the matching verdict. Quality suites invert even though they are not
+jailbreaks — see `docs/05-quality-challenges.md`.
 
 ## The 3-axis attack taxonomy
 When authoring attacks, tag each case with `metadata: { axis: factual|reasoning|safety }`

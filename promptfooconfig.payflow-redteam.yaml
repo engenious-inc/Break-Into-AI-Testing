@@ -9,13 +9,13 @@
 #   ./run.sh payflow-serve      # in one terminal
 #   ./run.sh payflow-redteam    # in another
 #
-# THIS FILE IS THE RECIPE. `redteam.yaml` NEXT TO IT IS THE OUTPUT — the attacks that
-# this config generated, committed so you can replay them for free:
+# THIS FILE IS THE RECIPE. `redteam.yaml` NEXT TO IT IS A REPLAY SNAPSHOT — 21 probes
+# from before `pliny` was added. Replay it for free when rate-limited; regenerate when
+# you want the current 8-plugin recipe (and expect the file to change in git):
 #
 #   npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 #
-# `./run.sh payflow-redteam` regenerates instead, and OVERWRITES redteam.yaml. That is a
-# working change in git, and the attacks will differ from the committed set — generation
+# `./run.sh payflow-redteam` regenerates instead, and OVERWRITES redteam.yaml. Generation
 # is non-deterministic. Both are correct; know which one you ran before you compare
 # results with someone else.
 #

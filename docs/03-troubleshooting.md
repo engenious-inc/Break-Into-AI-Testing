@@ -44,7 +44,55 @@ Or space the calls out — with or without lowering concurrency — with `--dela
 ```bash
 npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 1 --delay 1000
 ```
-A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. If you widen the matrix by uncommenting the extra Groq models, expect throttling on the free tier — use `-j 2` or paid keys.
+A single default run (3 models × the curated subset) is small enough to finish in seconds this way. If it still stalls, you may have exhausted the key's daily quota — wait for the reset or use a fresh key. If you widen the matrix by uncommenting the extra Groq models, expect throttling on the free tier — use `-j 1 --delay 1000` (what `./run.sh` already does) or paid keys.
+
+### PayFlow & generated red team
+
+These traps look like broken tests until you know the shape. Prefer `./run.sh …` — it
+already bakes in the fixes.
+
+**App is down → connection errors that look like assertion failures.** Start it first:
+```bash
+./run.sh payflow-serve      # terminal 1
+./run.sh payflow-health     # terminal 2 — must print status: ok
+./run.sh payflow
+```
+`./run.sh payflow` refuses to start if health fails, on purpose.
+
+**Edited the corpus, re-ran, still got the old answer (`Duration: 0s`, empty server log).**
+Promptfoo caches by request text and has no idea the documents behind `/chat` changed.
+Bust the cache:
+```bash
+./run.sh payflow --no-cache
+```
+
+**`payflow-redteam` hangs / dies in 300s queue timeouts.** Promptfoo's `redteam run`
+defaults to **4 concurrent** probes and ignores YAML `maxConcurrency`. Four PayFlow
+requests is twelve Groq calls at once — that blows the free-tier **6000 TPM** cap, not
+just the ~30 req/min request cap. Use `./run.sh payflow-redteam` (passes `-j 1 --delay
+1000`), or if you call promptfoo yourself:
+```bash
+npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
+```
+
+**`Invalid strategy(s): multilingual`.** Not a real strategy in current promptfoo. Use
+`base64` / `rot13` (already in the recipe), or `homoglyph` / `leetspeak` / `morse` /
+`piglatin`. See `modules/03-app-testing/LAB-GUIDE-NOTES.md`.
+
+**`jailbreak` fails the whole scan with "requires remote generation".** Promptfoo turns
+off its remote generator the moment it sees `OPENAI_API_KEY`, even if nothing here uses
+OpenAI. `./run.sh payflow-redteam` clears that variable for the run. If you invoke
+`npx promptfoo redteam run` yourself, unset it first: `env -u OPENAI_API_KEY …`.
+
+**`credit_balance_exhausted` on a PayFlow / quality eval.** Promptfoo fell back to its
+default OpenAI grader. Every shipped config that uses `llm-rubric` already sets
+`defaultTest.options.provider: groq:llama-3.3-70b-versatile` — if you author a new one,
+copy that block.
+
+**Teaching from `PayFlow_Lab_Guide.docx`?** That guide targets a different (Python)
+PayFlow. Read [`modules/03-app-testing/LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md)
+first — several of its premises (pytest, `multilingual`, deterministic orchestrator) are
+false here.
 
 ### Groq is down or your key is fully exhausted — use the OpenRouter fallback
 If serializing with `-j 2` still fails (Groq outage, or daily quota gone), switch to the OpenRouter fallback config. Put the cohort key your instructor shares into `.env`:

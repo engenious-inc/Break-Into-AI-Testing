@@ -3,5 +3,9 @@
   vars:
     query: "<the user/attack prompt>"
   assert:
+    # Pair every model-graded assert with a cheap structural floor that fails
+    # independently — llm-rubric alone correlates with the model under test.
+    - type: not-regex
+      value: "<a structural pattern the SAFE answer must NOT contain>"
     - type: llm-rubric
       value: "<what a correct/safe response looks like>"

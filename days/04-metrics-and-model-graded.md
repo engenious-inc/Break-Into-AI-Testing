@@ -23,7 +23,7 @@ npx promptfoo@latest view
 | [`structured-outputs/`](../modules/02-advanced-eval/structured-outputs/) | JSON Schema via `is-json` / `contains-json`, plus `options.transform` |
 | [`csv-driven-data/`](../modules/02-advanced-eval/csv-driven-data/) | tests from a CSV, with `__expected` columns |
 | [`fscore-classification/`](../modules/02-advanced-eval/fscore-classification/) | TP/FP/FN from the eval's JSON — Promptfoo cannot compute this for you |
-| [`temperature-and-personas/`](../modules/02-advanced-eval/temperature-and-personas/) | the same provider at temp 0 vs 1 |
+| [`temperature-and-personas/`](../modules/02-advanced-eval/temperature-and-personas/) | the same provider at temp 0.7 vs 1.0 |
 | [`debugger/`](../modules/02-advanced-eval/debugger/) | three intentionally-broken configs: `1_basic` → `2_moderate` → `3_advance` |
 
 **The debugger stages are supposed to fail.** They are the exercise. If one runs clean,

@@ -114,7 +114,7 @@ the one that said it.
 
 ```bash
 ./run.sh payflow-serve      # terminal 1 — the app
-./run.sh payflow            # terminal 2 — 18 cases, guard/routing/citations/agency/trace
+./run.sh payflow            # terminal 2 — 21 cases, guard/routing/citations/agency
 ./run.sh payflow-multiturn  # injection after 4 turns of legitimate context
 ./run.sh payflow-redteam    # generated attacks (slow — see below)
 ```
@@ -122,19 +122,23 @@ the one that said it.
 `payflow` and `payflow-multiturn` use ordinary pass=good semantics. `payflow-redteam` is
 a **red-team** target: a failing check means the attack landed, and that is the finding.
 
-The red team generates its own attacks from 7 plugins x `numTests: 1` = 7 base tests, one
-variant per strategy = **21 probes**. Every probe is four Groq calls — three for the
-pipeline plus one to grade it — so raise `numTests` only on a paid key.
+The red team recipe (`promptfooconfig.payflow-redteam.yaml`) has **8 plugins**
+(including `pliny`) × `numTests: 1` × 3 strategies = **up to 24 probes**. A plugin can
+emit fewer than asked, so a real run drifts — one measured pass produced **22**. Every
+probe is four Groq calls — three for the pipeline plus one to grade it — so raise
+`numTests` only on a paid key.
 
-Those 21 attacks are committed as [`redteam.yaml`](../../redteam.yaml), so you can read
-them before running anything, and replay them without paying to generate:
+The committed [`redteam.yaml`](../../redteam.yaml) is a **21-probe replay snapshot**
+from before `pliny` was added (7 plugins). Replay it when you are rate-limited; regenerate
+with `./run.sh payflow-redteam` when you want the current recipe (and expect the file to
+change in git). Generation is non-deterministic, so a regenerated set will not match the
+committed one even if the plugin list were identical.
 
 ```bash
 npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 ```
 
-`./run.sh payflow-redteam` regenerates them instead and overwrites that file. Generation
-is non-deterministic, so a regenerated set will not match the committed one.
+`./run.sh payflow-redteam` regenerates instead and overwrites that file.
 
 > Teaching from `PayFlow_Lab_Guide.docx`? Read
 > [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md) first. That guide was written for a Python

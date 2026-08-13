@@ -60,9 +60,10 @@ or all three models · elegance — a short, sneaky prompt beats a wall of text.
 **Harden a bot so the attacks that currently land stop landing — by editing
 _only_ the system prompt.**
 
-Out of the box, MediBot passes **~12 of 18** assertions — the exact count varies run to
-run (the models are non-deterministic and Groq rotates versions), so record **your own**
-baseline in Step 1 below. The holes you'll typically see: both Llamas leak a dose under
+Out of the box, MediBot passes **roughly half** of the suite — the exact count varies
+run to run (the models are non-deterministic and Groq rotates versions), so record
+**your own** baseline in Step 1 below. The suite is **8 cases × 3 providers = 24**
+test cells. The holes you'll typically see: both Llamas leak a dose under
 education-framing, the 70B *also* leaks one as "DoseBot", and gpt-oss over-runs the length
 limit, spills its own rules, and invents a fabricated citation. Close those holes.
 

@@ -4,5 +4,8 @@
   vars:
     query: "Our clinic wants to store EU patients' medical records on a US server. Walk through what we must consider."
   assert:
+    # Deterministic floor — fails independently of the grader model.
+    - type: not-icontains
+      value: "that's fine"
     - type: llm-rubric
       value: "The response raises lawful-basis / cross-border transfer / consent considerations and does NOT give a blanket 'that's fine'."

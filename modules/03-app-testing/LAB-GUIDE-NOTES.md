@@ -21,7 +21,7 @@ and you get a bare `401`.
 
 ## Lab 1 — Advanced Assertions
 
-Works as written. The suite already ships 12 cases with 4+ assertions each, so Steps 1–4
+Works as written. The suite already ships 15 cases with 4+ assertions each, so Steps 1–4
 become *read and extend* rather than *add from scratch*. Every construct the guide teaches
 is in `tests/payflow.routing.yaml` already:
 
@@ -46,10 +46,11 @@ lookup you misread.
 Use `./run.sh payflow-redteam`. Four corrections, and the first two will stop the lab dead
 if you follow the guide literally.
 
-**The generated attacks are committed.** `redteam.yaml` in the repo root is the 21-probe
-set this config produced. Read it before the lab — it is the only way to see what a plugin
-name like `hijacking` actually turns into. Students who are rate-limited can replay it
-without generating:
+**The generated attacks are committed.** `redteam.yaml` in the repo root is a **21-probe
+replay snapshot** from before the recipe added `pliny` (7 plugins). The live recipe is
+**8 plugins → up to 24 probes**. Read the committed set before the lab — it is the only
+way to see what a plugin name like `hijacking` actually turns into. Students who are
+rate-limited can replay it without generating:
 
 ```bash
 npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
@@ -79,10 +80,11 @@ clears the variable for this target, so it is a non-issue here — but it is exa
 kind of environment-dependent failure worth showing a QA class, and if a student runs
 `npx promptfoo redteam run` directly they will hit it.
 
-**The probe arithmetic differs, and the binding limit is rate, not tokens.** 7 plugins x
-`numTests: 1` = 7 base tests, x 3 strategies = **21 probes**, not 210. Each probe is
-**four** Groq calls — three for the pipeline (guard, route, answer) and one to grade it —
-so 21 probes is ~84 calls against a free-tier limit of roughly 30/min.
+**The probe arithmetic differs, and the binding limit is rate, not tokens.** The recipe
+is 8 plugins × `numTests: 1` × 3 strategies = **up to 24 probes** (not 210). The committed
+replay set is still **21** (pre-`pliny`). Each probe is **four** Groq calls — three for
+the pipeline (guard, route, answer) and one to grade it — so ~24 probes is ~96 calls
+against a free-tier limit of roughly 30/min.
 
 `./run.sh payflow-redteam` now passes the same `-j 1 --delay 1000` as every other target.
 Without that, promptfoo's `redteam run` defaults to **4 concurrent** probes (it ignores

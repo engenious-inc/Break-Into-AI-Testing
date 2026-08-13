@@ -11,8 +11,13 @@ description: Run a Promptfoo eval for a config and produce the day-01-style refl
 3. Emit a Markdown table with one column per provider the run actually used
    (a single-provider config yields one provider column):
    `| Case | Axis | <provider…> | Key difference |`.
-4. For a Module 1 (red-team) config, REMEMBER inverted semantics: a failed assertion =
-   the attack LANDED; label that cell ⚠️ and a passed assertion ✅.
+4. Inverted vs ordinary semantics (label cells accordingly):
+   - **Inverted** (failed assertion = finding ⚠️; passed = ✅): `medibot`,
+     `medibot-multiturn`, `finance`, `quality.medibot`, `quality.finance`,
+     `openrouter.medibot`, `openrouter.finance`, `payflow-redteam`, and any other
+     Module 1 smoke/quality red-team config.
+   - **Ordinary** (failed assertion = defect ❌; passed = ✅): Modules 0 and 2
+     lessons, `payflow`, `payflow-multiturn`, `mybot`, `reverse`.
 5. Close with a 3–5 sentence reflection on accuracy, reasoning, safety consistency.
 
 Never edit configs or tests. Read-only + report.

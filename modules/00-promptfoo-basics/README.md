@@ -1,6 +1,8 @@
 # Module 0 — Promptfoo Basics
 
-> **Days 2 and 3** · [session index](../../days/02-promptfoo-basics.md) — assertions are Day 2; prompts and providers are Day 3
+> **Days 2 and 3** · [session index](../../days/) ·
+> [Day 2](../../days/02-promptfoo-basics.md) (assertions) ·
+> [Day 3](../../days/03-prompt-engineering-and-local-models.md) (prompts + providers)
 
 Learn the three Promptfoo pillars before red-teaming: **Prompts**, **Providers**,
 **Assertions & Metrics**. Every lesson is a runnable config using the Groq free tier —

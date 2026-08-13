@@ -36,6 +36,9 @@ Most real AI defects are routing and retrieval defects, and they are invisible i
 - [`payflow/corpus/`](../modules/03-app-testing/payflow/corpus/) — 20 fixture documents.
   **Read them before writing cases.** Knowing the ground truth is what lets you tell a
   grounded answer from a fluent one.
+- Teaching from `PayFlow_Lab_Guide.docx`? Read
+  [`LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md) first — that guide
+  targets a different (Python) PayFlow.
 
 **MCP — the provider does not have to be an app either**
 

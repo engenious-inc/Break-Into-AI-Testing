@@ -147,17 +147,26 @@ fi
 
 printf "${BLUE}▶${NC} Running ${BLUE}%s${NC}  ${YELLOW}(-j %s --delay %sms)${NC}\n" "$target" "$JOBS" "$DELAY_MS"
 
-# PayFlow is an ordinary suite — pass means good. Every other target here is a red-team
-# suite where a failing assertion IS the finding. Saying the wrong one teaches the
-# opposite of the lesson, so the two verdicts are kept apart.
-if [ "$target" = "payflow" ] || [ "$target" = "payflow-multiturn" ]; then
-  if ! node -e "fetch('${PAYFLOW_URL}/health').then(()=>process.exit(0)).catch(()=>process.exit(1))" 2>/dev/null; then
-    printf "${RED}✗${NC} PayFlow app is not answering at %s.\n" "$PAYFLOW_URL" >&2
-    printf "  Start it in another terminal first:  ${BLUE}./run.sh payflow-serve${NC}\n" >&2
-    printf "  Without it every case fails with a connection error that looks like a bug in your tests.\n" >&2
-    exit 2
+# Ordinary suites (pass = good): PayFlow app evals and Challenge-3 mybot.
+# Everything else here is inverted (fail = finding). Saying the wrong one teaches
+# the opposite of the lesson, so the two verdicts are kept apart.
+ordinary=0
+if [ "$target" = "payflow" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "mybot" ]; then
+  ordinary=1
+fi
+
+if [ "$ordinary" = 1 ]; then
+  if [ "$target" = "payflow" ] || [ "$target" = "payflow-multiturn" ]; then
+    if ! node -e "fetch('${PAYFLOW_URL}/health').then(()=>process.exit(0)).catch(()=>process.exit(1))" 2>/dev/null; then
+      printf "${RED}✗${NC} PayFlow app is not answering at %s.\n" "$PAYFLOW_URL" >&2
+      printf "  Start it in another terminal first:  ${BLUE}./run.sh payflow-serve${NC}\n" >&2
+      printf "  Without it every case fails with a connection error that looks like a bug in your tests.\n" >&2
+      exit 2
+    fi
+    printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n"
+  else
+    printf "  Ordinary suite — a ${YELLOW}failing${NC} check is a defect in your bot, not a finding.\n\n"
   fi
-  printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n"
 else
   printf "  Reminder: these are red-team suites — a ${YELLOW}failing${NC} check means the model did the thing you were testing for. That's the finding, not an error.\n\n"
 fi
@@ -167,14 +176,22 @@ ec=0
 npx --yes promptfoo@latest eval -c "$cfg" -j "$JOBS" --delay "$DELAY_MS" "$@" || ec=$?
 
 echo
-if [ "$target" = "payflow" ] || [ "$target" = "payflow-multiturn" ]; then
+if [ "$ordinary" = 1 ]; then
   case "$ec" in
-    0)   printf "${GREEN}✓ Exit 0 — the pipeline behaved on every case.${NC}\n"
-         printf "  Guard fired where it should, routing picked the right specialist, citations lined up.\n" ;;
+    0)   printf "${GREEN}✓ Exit 0 — every case passed.${NC}\n"
+         if [ "$target" = "mybot" ]; then
+           printf "  Guardrails held where they should; benign and gray-area cases behaved.\n"
+         else
+           printf "  Guard fired where it should, routing picked the right specialist, citations lined up.\n"
+         fi ;;
     100) printf "${YELLOW}✗ Exit 100 — one or more checks failed. Here that IS a defect.${NC}\n"
          printf "  Look at which assertion broke:  ${BLUE}./run.sh view${NC}\n" ;;
     *)   printf "${RED}✗ Exit %s — an actual error.${NC}\n" "$ec"
-         printf "  Is the app still up?  ${BLUE}./run.sh payflow-health${NC}\n" ;;
+         if [ "$target" = "payflow" ] || [ "$target" = "payflow-multiturn" ]; then
+           printf "  Is the app still up?  ${BLUE}./run.sh payflow-health${NC}\n"
+         else
+           printf "  Usually a key / network / throttle issue — see docs/03-troubleshooting.md.\n"
+         fi ;;
   esac
   exit "$ec"
 fi

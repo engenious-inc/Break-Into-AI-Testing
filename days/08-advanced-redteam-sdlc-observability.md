@@ -35,6 +35,8 @@ is the finding. `payflow` and the observability lesson are ordinary — pass mea
   comments record two traps that cost real time, including a strategy that does not exist.
 - [`redteam.yaml`](../redteam.yaml) — the generated attacks themselves. Read them. Plugin
   names like `hijacking` mean nothing until you see the prompt one produced.
+- Teaching from `PayFlow_Lab_Guide.docx`? Read
+  [`LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md) first.
 - [`observability/`](../modules/02-advanced-eval/observability/) — genuine wire-compatible
   OTLP, hand-encoded in ~70 lines because this repo installs nothing. Read `otlp.mjs` and
   the format stops being a black box.

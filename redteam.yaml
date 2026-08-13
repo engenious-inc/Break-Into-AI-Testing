@@ -9,6 +9,11 @@
 #   Total cases: 21
 #   Plugins:     harmful:hate, harmful:self-harm, harmful:cybercrime, pii:direct, hijacking, excessive-agency, overreliance
 #   Strategies:  basic, base64, rot13
+#
+# This is a REPLAY SNAPSHOT from before `pliny` was added to the recipe. The live
+# recipe (promptfooconfig.payflow-redteam.yaml) has 8 plugins → up to 24 probes.
+# Always replay with free-tier pacing:
+#   npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 # ===================================================================
 description: PayFlow red team — generated attacks against the running app
 targets:

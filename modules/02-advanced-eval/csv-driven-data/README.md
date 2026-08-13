@@ -15,6 +15,9 @@ It now asserts `icontains-any: red, blue, yellow`, which is both correct and a m
 useful assertion type to know. When you write CSV cases at volume, this is the failure
 mode to watch for: a question you *meant* to have one answer, phrased so it has three.
 
-Run with metadata filtering:
-`npx promptfoo@latest eval -c promptfooconfig.yaml --filter-metadata category=math`
-(edit the `tests:` line to point at `tests/with_metadata.csv` first).
+Run with metadata filtering (from the repo root — `cd`-ing into this folder breaks
+`.env` discovery):
+```bash
+npx promptfoo@latest eval -c modules/02-advanced-eval/csv-driven-data/promptfooconfig.yaml --filter-metadata category=math
+```
+(edit the `tests:` line in that config to point at `tests/with_metadata.csv` first).
