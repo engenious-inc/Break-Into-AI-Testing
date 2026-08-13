@@ -23,10 +23,8 @@ Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.
 >
 > It is also the only module with **both** semantics: `payflow` and `payflow-multiturn`
 > are ordinary pass=good suites, while `payflow-redteam` generates its own attacks and
-> inverts them, like Module 1. Teaching from `PayFlow_Lab_Guide.docx`? Start with
-> [`modules/03-app-testing/LAB-GUIDE-NOTES.md`](03-app-testing/LAB-GUIDE-NOTES.md) —
-> that guide targets a different (Python) PayFlow and several of its premises are false
-> against this one.
+> inverts them, like Module 1. Lab-slot checklist:
+> [`LAB-GUIDE-NOTES.md`](03-app-testing/LAB-GUIDE-NOTES.md).
 
 > **Module 1's runnable artifacts still live at the repo root** — `prompts/`, `tests/`,
 > `promptfooconfig.*.yaml`, and `docs/02`/`04`/`05`. `modules/01-red-team/` is a

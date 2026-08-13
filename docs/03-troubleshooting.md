@@ -89,10 +89,8 @@ default OpenAI grader. Every shipped config that uses `llm-rubric` already sets
 `defaultTest.options.provider: groq:llama-3.3-70b-versatile` — if you author a new one,
 copy that block.
 
-**Teaching from `PayFlow_Lab_Guide.docx`?** That guide targets a different (Python)
-PayFlow. Read [`modules/03-app-testing/LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md)
-first — several of its premises (pytest, `multilingual`, deterministic orchestrator) are
-false here.
+**PayFlow lab checklist.** Commands, inverted vs ordinary semantics, and redteam
+gotchas: [`modules/03-app-testing/LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md).
 
 ### Groq is down or your key is fully exhausted — use the OpenRouter fallback
 If serializing with `-j 2` still fails (Groq outage, or daily quota gone), switch to the OpenRouter fallback config. Put the cohort key your instructor shares into `.env`:

@@ -140,10 +140,8 @@ npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 
 `./run.sh payflow-redteam` regenerates instead and overwrites that file.
 
-> Teaching from `PayFlow_Lab_Guide.docx`? Read
-> [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md) first. That guide was written for a Python
-> PayFlow with a `pytest` suite and a regex guard; several of its premises are false
-> here, including which attack it promises will succeed.
+> Lab-slot checklist (commands, pacing, redteam traps):
+> [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md).
 
 or directly:
 
@@ -285,10 +283,8 @@ exactly what `output.citations` assertions exist to catch.
 1. **PayFlow** — `payflow/` + root `promptfooconfig.payflow.yaml`, plus
    `promptfooconfig.payflow-multiturn.yaml` and `promptfooconfig.payflow-redteam.yaml`.
    Start the server, then assert on `output.route` and `output.citations`.
-   `tests/payflow.agency.yaml` adds the overreliance/excessive-agency cases. Teaching from
-   `PayFlow_Lab_Guide.docx`? Start with
-   [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md) — that guide targets a different (Python)
-   PayFlow and several of its premises are false against this one.
+   `tests/payflow.agency.yaml` adds the overreliance/excessive-agency cases. Lab-slot
+   checklist: [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md).
 2. **Remote MCP** — [`mcp-deepwiki/`](./mcp-deepwiki/). No local server. Three cases teach
    when to use deterministic vs `llm-rubric` vs error-path asserts against tool output.
 3. **Local MCP** — [`mcp-local/`](./mcp-local/). Promptfoo spawns a tiny stdio server
