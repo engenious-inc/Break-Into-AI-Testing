@@ -130,7 +130,7 @@ Those 21 attacks are committed as [`redteam.yaml`](../../redteam.yaml), so you c
 them before running anything, and replay them without paying to generate:
 
 ```bash
-npx promptfoo@latest redteam eval -c redteam.yaml
+npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 ```
 
 `./run.sh payflow-redteam` regenerates them instead and overwrites that file. Generation

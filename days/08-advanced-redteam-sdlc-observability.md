@@ -12,14 +12,15 @@ find out what the thing reports once it is deployed.
 ./run.sh payflow-redteam
 
 # or replay the committed attacks, free — no generation step
-npx promptfoo@latest redteam eval -c redteam.yaml
+npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 
 # observability: a real OTLP span per LLM call
 npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
 ```
 
-**The red team is slow and rate-limited.** ~24 probes, four Groq calls each. If your key is
-exhausted, use the replay command — the attacks are committed in
+**The red team is slow and rate-limited.** ~24 probes, four Groq calls each.
+`./run.sh payflow-redteam` paces at `-j 1 --delay 1000` so a free-tier key survives the
+slot. If your key is exhausted, use the replay command — the attacks are committed in
 [`redteam.yaml`](../redteam.yaml) precisely so you can.
 
 ## Inverted scoreboard, again

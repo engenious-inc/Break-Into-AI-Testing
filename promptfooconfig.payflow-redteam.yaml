@@ -12,7 +12,7 @@
 # THIS FILE IS THE RECIPE. `redteam.yaml` NEXT TO IT IS THE OUTPUT — the attacks that
 # this config generated, committed so you can replay them for free:
 #
-#   npx promptfoo@latest redteam eval -c redteam.yaml     # replay, no generation
+#   npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 #
 # `./run.sh payflow-redteam` regenerates instead, and OVERWRITES redteam.yaml. That is a
 # working change in git, and the attacks will differ from the committed set — generation
@@ -104,4 +104,7 @@ redteam:
   #   Add it deliberately, with numTests: 1, when you want to show iterative attacks:
   #     - id: jailbreak
 
-  maxConcurrency: 2
+  # A hint. promptfoo's redteam run has been seen to ignore this and default to 4.
+  # ./run.sh payflow-redteam passes -j 1 --delay 1000, which is what actually stays
+  # under Groq's free-tier TPM. Raise via RUN_JOBS on a paid key.
+  maxConcurrency: 1

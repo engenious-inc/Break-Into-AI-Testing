@@ -98,7 +98,7 @@ if [ "$target" = "payflow-redteam" ]; then
     printf "  Start it in another terminal first:  ${BLUE}./run.sh payflow-serve${NC}\n" >&2
     exit 2
   fi
-  printf "${BLUE}▶${NC} Generating and running the PayFlow red team.\n"
+  printf "${BLUE}▶${NC} Generating and running the PayFlow red team.  ${YELLOW}(-j %s --delay %sms)${NC}\n" "$JOBS" "$DELAY_MS"
   printf "  Every probe runs the full pipeline — three Groq calls each. Expect this to take a while.\n"
   printf "  Reminder: a ${YELLOW}failing${NC} check means the attack landed. That's the finding.\n\n"
   ec=0
@@ -108,7 +108,13 @@ if [ "$target" = "payflow-redteam" ]; then
   # dies with "requires remote generation". The key is optional in this repo (only the
   # paid comparison block in promptfooconfig.medibot.yaml reads it), so dropping it here
   # costs nothing and keeps every strategy available.
-  env -u OPENAI_API_KEY npx --yes promptfoo@latest redteam run -c promptfooconfig.payflow-redteam.yaml "$@" || ec=$?
+  #
+  # -j / --delay are passed explicitly. redteam.maxConcurrency in the YAML is a hint
+  # promptfoo has been seen to ignore (redteam run defaulted to 4), and four concurrent
+  # probes each make three Groq calls — that blows Groq's free-tier TPM and the scan
+  # dies in 300s queue timeouts. Same defaults as every other target; override with
+  # RUN_JOBS / RUN_DELAY_MS on a paid key.
+  env -u OPENAI_API_KEY npx --yes promptfoo@latest redteam run -c promptfooconfig.payflow-redteam.yaml -j "$JOBS" --delay "$DELAY_MS" "$@" || ec=$?
   echo
   case "$ec" in
     0)   printf "${GREEN}🛡  Exit 0 — nothing landed on this run.${NC}\n" ;;

@@ -52,7 +52,7 @@ name like `hijacking` actually turns into. Students who are rate-limited can rep
 without generating:
 
 ```bash
-npx promptfoo@latest redteam eval -c redteam.yaml
+npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 ```
 
 `./run.sh payflow-redteam` regenerates and overwrites it, which shows up as a working
@@ -83,6 +83,13 @@ kind of environment-dependent failure worth showing a QA class, and if a student
 `numTests: 1` = 7 base tests, x 3 strategies = **21 probes**, not 210. Each probe is
 **four** Groq calls — three for the pipeline (guard, route, answer) and one to grade it —
 so 21 probes is ~84 calls against a free-tier limit of roughly 30/min.
+
+`./run.sh payflow-redteam` now passes the same `-j 1 --delay 1000` as every other target.
+Without that, promptfoo's `redteam run` defaults to **4 concurrent** probes (it ignores
+`redteam.maxConcurrency` in the YAML). Four in-flight PayFlow requests is twelve Groq
+calls at once, and the free-tier 6000 TPM cap turns the rest of the scan into 300s queue
+timeouts. If a student runs `npx promptfoo redteam run` / `redteam eval` directly, they
+need the same flags.
 
 Measured, so you can plan the slot: a `numTests: 2` run (42 probes) was **still going
 after ten minutes**, having served 49 requests and logged **33 separate 429 backoffs**.
