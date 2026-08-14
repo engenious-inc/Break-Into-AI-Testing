@@ -79,7 +79,7 @@ Sample output (Arato unset):
   "tokens": { "prompt_tokens": 12, "completion_tokens": 34, "total_tokens": 46 },
   "prompt.sha256": "8f3a2b1c..."
 }
-[arato] skipped — OTEL_EXPORTER_OTLP_ENDPOINT/ARATO_API_KEY not set
+[otlp] skipped — set ARATO_API_KEY (+OTEL_EXPORTER_OTLP_ENDPOINT) or AGENTA_API_KEY to export for real
 ```
 
 With a real Arato account, take both values from **Observe → your dashboard →
@@ -96,6 +96,27 @@ The endpoint already contains your project slug. Don't append `/v1/traces` —
 ```
 [arato] OTLP 200 trace_id=054d11ec990cdcf906d7d4e9af2ae647
 ```
+
+### Or Agenta — same bytes, different envelope
+
+[Agenta](https://agenta.ai) ingests the **identical protobuf**. One key, and
+`AGENTA_HOST` only if you are not on EU cloud:
+
+```env
+AGENTA_API_KEY=...
+# AGENTA_HOST=https://eu.cloud.agenta.ai   # the default
+```
+
+```
+[agenta] OTLP 200 trace_id=2ee37dbdf73e4cd093bb91cc05586765
+```
+
+Set both and the span goes to both, encoded once. That is the lesson hiding in
+this lesson: `provider.mjs` gained Agenta support in about twenty lines, and not
+one of them touches how the span is built. OTLP is a standard, so adding a vendor
+is a URL and an auth header — Arato wants `Bearer` at `<endpoint>/v1/traces`,
+Agenta wants `ApiKey` at `<host>/api/otlp/v1/traces`. Everything a vendor tells
+you is proprietary about their "integration" is usually just those two lines.
 
 Copy that `trace_id` and find it in the Arato UI. **Do that at least once.** A
 `200` proves the request was accepted, not that the span was stored the way you

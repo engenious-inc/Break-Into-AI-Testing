@@ -1,12 +1,12 @@
 // Custom Promptfoo provider that wraps a REAL Groq chat-completion call and
-// exports a REAL OpenTelemetry span to Arato.ai over OTLP/HTTP.
+// exports a REAL OpenTelemetry span to Arato.ai and/or Agenta.ai over OTLP/HTTP.
 //
 // Zero npm dependencies — this repo has no package.json anywhere, so the OTLP
 // protobuf is hand-encoded in ./otlp.mjs. The span that leaves this file is
 // wire-compatible OTLP, not a print-out shaped like one.
 //
-// Skips the export gracefully when OTEL_EXPORTER_OTLP_ENDPOINT/ARATO_API_KEY
-// are unset, so the lesson still runs with no account.
+// Skips whichever backends are unconfigured, so the lesson still runs with no
+// account at all.
 
 import { createHash } from 'node:crypto';
 import { encodeTrace, newTraceId, newSpanId } from './otlp.mjs';
@@ -26,31 +26,68 @@ function redactForTelemetry(text) {
   return `sha256:${sha256(text)} (len=${text.length})`;
 }
 
-async function exportSpan(params) {
-  const endpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
-  const key = process.env.ARATO_API_KEY;
-  if (!endpoint || !key) {
-    console.log('[arato] skipped — OTEL_EXPORTER_OTLP_ENDPOINT/ARATO_API_KEY not set');
-    return;
-  }
+// Two vendors, one payload. Both accept the exact same protobuf bytes — verified
+// against both live endpoints — so all that differs is where it goes and how the
+// request is signed. That is the point worth teaching: OTLP is a standard, and
+// "supporting a new observability vendor" is a URL and an auth header, not an SDK.
+//
+// Arato:  <OTEL_EXPORTER_OTLP_ENDPOINT>/v1/traces      Authorization: Bearer <key>
+// Agenta: <AGENTA_HOST>/api/otlp/v1/traces             Authorization: ApiKey <key>
+const BACKENDS = [
+  {
+    name: 'arato',
+    keyVar: 'ARATO_API_KEY',
+    hostVar: 'OTEL_EXPORTER_OTLP_ENDPOINT',
+    defaultHost: null, // no sensible default — Arato endpoints are per-tenant
+    path: '/v1/traces',
+    auth: (k) => `Bearer ${k}`,
+  },
+  {
+    name: 'agenta',
+    keyVar: 'AGENTA_API_KEY',
+    hostVar: 'AGENTA_HOST',
+    defaultHost: 'https://eu.cloud.agenta.ai',
+    path: '/api/otlp/v1/traces',
+    auth: (k) => `ApiKey ${k}`,
+  },
+];
 
-  const url = `${endpoint.replace(/\/+$/, '')}/v1/traces`;
+async function sendTo(backend, body, traceId) {
+  const host = (process.env[backend.hostVar] || backend.defaultHost).replace(/\/+$/, '');
+  const url = host + backend.path;
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-protobuf',
-        Authorization: `Bearer ${key}`,
+        Authorization: backend.auth(process.env[backend.keyVar]),
       },
-      body: encodeTrace(params),
+      body,
     });
     const detail = res.ok ? '' : ` — ${(await res.text()).replace(/\s+/g, ' ').slice(0, 200)}`;
-    console.log(`[arato] OTLP ${res.status} trace_id=${params.traceId.toString('hex')}${detail}`);
+    console.log(`[${backend.name}] OTLP ${res.status} trace_id=${traceId}${detail}`);
   } catch (err) {
     // Loud, not silent — but a telemetry outage must not fail the eval it is
     // only observing.
-    console.error(`[arato] OTLP export to ${url} failed: ${err.message}`);
+    console.error(`[${backend.name}] OTLP export to ${url} failed: ${err.message}`);
   }
+}
+
+async function exportSpan(params) {
+  // Encode once; both vendors get identical bytes.
+  const body = encodeTrace(params);
+  const traceId = params.traceId.toString('hex');
+
+  const active = BACKENDS.filter((b) => process.env[b.keyVar]
+    && (process.env[b.hostVar] || b.defaultHost));
+
+  if (active.length === 0) {
+    console.log('[otlp] skipped — set ARATO_API_KEY (+OTEL_EXPORTER_OTLP_ENDPOINT) '
+      + 'or AGENTA_API_KEY to export for real');
+    return;
+  }
+
+  await Promise.all(active.map((b) => sendTo(b, body, traceId)));
 }
 
 export default class ObservedGroqProvider {
