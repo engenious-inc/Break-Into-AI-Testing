@@ -208,6 +208,57 @@
     - type: javascript
       value: output.citations.some((c) => c.id === 'BK-003')
 
+# Deterministic ID-prefix pre-route. Bare "what is BK-001" looks like a Jira key to the
+# router LLM; BK lives under basic, so misrouting yields an empty retrieval. Same class
+# of failure for PF/CF/FG if they land on the wrong specialist.
+- description: BK id lookup pre-routes to the basic specialist
+  vars:
+    query: what is BK-001
+  assert:
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: output.route.selected_specialists.includes('basic')
+    - type: javascript
+      value: output.route.orchestrator_decision === 'basic_general'
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'BK-001' && c.source === 'basic')
+    - type: icontains
+      value: BK-001
+
+- description: PF id lookup pre-routes to the jira specialist
+  vars:
+    query: what is PF-104
+  assert:
+    - type: javascript
+      value: output.route.selected_specialists.includes('jira')
+    - type: javascript
+      value: output.route.orchestrator_decision === 'jira_general'
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'PF-104' && c.source === 'jira')
+
+- description: CF id lookup pre-routes to the confluence specialist
+  vars:
+    query: what is CF-001
+  assert:
+    - type: javascript
+      value: output.route.selected_specialists.includes('confluence')
+    - type: javascript
+      value: output.route.orchestrator_decision === 'confluence_docs_query'
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'CF-001' && c.source === 'confluence')
+
+- description: FG id lookup pre-routes to the figma specialist
+  vars:
+    query: what is FG-012
+  assert:
+    - type: javascript
+      value: output.route.selected_specialists.includes('figma')
+    - type: javascript
+      value: output.route.orchestrator_decision === 'figma_design_query'
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'FG-012' && c.source === 'figma')
+
 # A second cross-source pair. The first (confluence+jira) is the one that used to be
 # broken, so a fix that only worked for that pairing would still have gone green.
 - description: Cross-source question spanning figma and jira

@@ -1,11 +1,12 @@
 // PayFlow GenAI demo — the pipeline behind POST /chat.
 //
-//   user -> guard LLM -> orchestrator LLM -> retrieval -> answer LLM -> user
+//   user -> guard LLM -> orchestrator (ID prefix | LLM) -> retrieval -> answer LLM -> user
 //
-// Three of those four steps are an LLM call, which is the point: the routing decision is
-// itself model output, so it can be wrong, and a test suite can catch it being wrong.
-// Retrieval is deterministic keyword scoring — no embeddings, so no second API key and
-// no vector store to install.
+// Three of those four steps are normally an LLM call, which is the point: the routing
+// decision is itself model output, so it can be wrong, and a test suite can catch it
+// being wrong. Corpus id prefixes are the one deterministic exception (see
+// routeFromIdPrefix). Retrieval is deterministic keyword scoring — no embeddings, so no
+// second API key and no vector store to install.
 
 const fs = require('fs');
 const path = require('path');
@@ -230,7 +231,43 @@ Reply with ONLY a JSON object:
 {"specialists": ["confluence", "jira"], "intent": "docs_query"}
 {"specialists": ["basic"], "intent": "general"}`;
 
+// Ticket-shaped IDs (BK-001, PF-104, …) look like Jira to the router LLM, but each
+// prefix lives under a different specialist. When exactly one known prefix appears,
+// skip the LLM and lock the specialist — otherwise BK-* retrieval searches jira and
+// returns "documents do not contain an answer." Multiple distinct prefixes fall through
+// to ROUTE_PROMPT (it may emit cross_source_comparison).
+const ID_PREFIX_ROUTES = {
+  BK: { specialists: ['basic'], intent: 'general' },
+  PF: { specialists: ['jira'], intent: 'general' },
+  CF: { specialists: ['confluence'], intent: 'docs_query' },
+  FG: { specialists: ['figma'], intent: 'design_query' },
+};
+
+function routeFromIdPrefix(message) {
+  const prefixes = [...message.matchAll(/\b(BK|PF|CF|FG)-\d+\b/gi)]
+    .map((m) => m[1].toUpperCase());
+  const unique = [...new Set(prefixes)];
+  if (unique.length !== 1) return null;
+  const mapped = ID_PREFIX_ROUTES[unique[0]];
+  const specialists = [...mapped.specialists];
+  return {
+    specialists,
+    intent: mapped.intent,
+    orchestrator_decision: `${specialists[0]}_${mapped.intent}`,
+  };
+}
+
+function decisionFromRoute(specialists, intent) {
+  // Two or more sources is its own decision, not the first source's decision. Tests
+  // that assert a single-source route must not silently pass on a cross-source answer.
+  if (specialists.length > 1) return 'cross_source_comparison';
+  return `${specialists[0]}_${intent}`;
+}
+
 async function route(apiKey, message) {
+  const byId = routeFromIdPrefix(message);
+  if (byId) return byId;
+
   return structured(apiKey, FAST_MODEL, [
     { role: 'system', content: ROUTE_PROMPT },
     { role: 'user', content: message },
@@ -242,12 +279,7 @@ async function route(apiKey, message) {
       throw new Error(`model selected no known specialist. Raw: ${JSON.stringify(parsed)}`);
     }
     const intent = INTENTS.includes(parsed.intent) ? parsed.intent : 'general';
-    // Two or more sources is its own decision, not the first source's decision. Tests
-    // that assert a single-source route must not silently pass on a cross-source answer.
-    const orchestrator_decision = specialists.length > 1
-      ? 'cross_source_comparison'
-      : `${specialists[0]}_${intent}`;
-    return { specialists, intent, orchestrator_decision };
+    return { specialists, intent, orchestrator_decision: decisionFromRoute(specialists, intent) };
   });
 }
 

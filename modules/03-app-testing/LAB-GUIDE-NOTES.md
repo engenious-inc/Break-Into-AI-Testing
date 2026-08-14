@@ -15,9 +15,9 @@ discovery → bare `401`):
 ./run.sh payflow-health     # terminal 2 — must print status: ok before any eval
 ```
 
-App listens on `http://localhost:8000`. `./run.sh payflow` and
-`./run.sh payflow-multiturn` refuse to start if health fails — connection errors look
-like assertion failures otherwise.
+App listens on `http://localhost:8000` — open that URL for the chat UI after
+`payflow-serve`. `./run.sh payflow` and `./run.sh payflow-multiturn` refuse to start
+if health fails — connection errors look like assertion failures otherwise.
 
 | Target | Command | Semantics |
 |---|---|---|
@@ -28,7 +28,7 @@ like assertion failures otherwise.
 ## Lab 1 — Advanced assertions / routing
 
 ```bash
-./run.sh payflow            # 21 cases: tests/payflow.routing.yaml + payflow.agency.yaml
+./run.sh payflow            # 25 cases: tests/payflow.routing.yaml + payflow.agency.yaml
 ```
 
 The suite already ships multi-assertion cases. Treat Steps as *read and extend*, not
@@ -38,13 +38,15 @@ The suite already ships multi-assertion cases. Treat Steps as *read and extend*,
 - citations → `output.citations.every((c) => c.source === 'jira')`
 - ID prefix → `output.citations[0].id.startsWith('PF-')`
 - debug trace → `output.debug.steps.some((s) => s.includes('Guard check'))`
+- corpus id pre-route → `what is BK-001` → `basic_general` (also PF/CF/FG)
 
 Cross-source routing (`cross_source_comparison` + per-specialist citation slots) is
 fixed and covered. History of the old defect is in the module README.
 
-**Routing is an LLM call** (`ROUTE_PROMPT` in `pipeline.js`), not a keyword map. A
-"predict first" exercise still works — predictions come from the prompt; mismatches are
-model behaviour.
+**Routing is mostly an LLM call** (`ROUTE_PROMPT` in `pipeline.js`). Corpus IDs are the
+exception: `BK`/`PF`/`CF`/`FG` prefixes map deterministically to a specialist when exactly
+one known id appears in the message. A "predict first" exercise still works for open
+questions — predictions come from the prompt; mismatches are model behaviour.
 
 **Locked contract:** every `orchestrator_decision` name is a fixed string the UI and
 tests depend on — assert on it deliberately. Same for `guard_reason`: fixed vocabulary

@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PayFlow GenAI demo</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #fff;
+      --border: #d8dde6;
+      --text: #1a1f2a;
+      --muted: #5b6575;
+      --accent: #1f4b99;
+      --user: #e8eef8;
+      --bot: #f0f2f5;
+      --err: #8b1e1e;
+      --err-bg: #f8e8e8;
+      --block: #7a4a00;
+      --block-bg: #fff3e0;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: system-ui, -apple-system, Segoe UI, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 15px/1.45 var(--sans);
+      color: var(--text);
+      background: var(--bg);
+    }
+    header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 650;
+    }
+    header p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: calc(100vh - 72px);
+    }
+    #log {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      padding-bottom: 8px;
+    }
+    .msg {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      background: var(--bot);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .msg.user { background: var(--user); }
+    .msg.error { background: var(--err-bg); color: var(--err); }
+    .msg.blocked { background: var(--block-bg); }
+    .msg .role {
+      font-size: 0.75rem;
+      font-weight: 650;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .meta {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    .meta div { margin-top: 2px; }
+    .citations { margin-top: 6px; }
+    .citations code {
+      display: inline-block;
+      margin: 2px 4px 0 0;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--panel);
+      font-size: 0.78rem;
+    }
+    details.debug {
+      margin-top: 8px;
+      font-size: 0.82rem;
+    }
+    details.debug summary {
+      cursor: pointer;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+    details.debug pre {
+      margin: 6px 0 0;
+      padding: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.75rem;
+    }
+    form {
+      display: flex;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      position: sticky;
+      bottom: 12px;
+    }
+    #message {
+      flex: 1;
+      resize: vertical;
+      min-height: 44px;
+      max-height: 160px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font: inherit;
+    }
+    button {
+      padding: 0 16px;
+      border: 0;
+      border-radius: 6px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PayFlow GenAI demo</h1>
+    <p>Workshop chat UI → <code>POST /chat</code> (each send is a new request — no session). Inspect route, citations, and guard fields below each answer.</p>
+  </header>
+  <main>
+    <div id="log" aria-live="polite"></div>
+    <form id="chat-form">
+      <textarea id="message" rows="2" placeholder="Ask about PayFlow (Jira, Confluence, Figma)…" required></textarea>
+      <button type="submit" id="send">Send</button>
+    </form>
+  </main>
+  <script>
+    const log = document.getElementById('log');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message');
+    const sendBtn = document.getElementById('send');
+
+    function addBubble(role, html, className) {
+      const el = document.createElement('div');
+      el.className = 'msg' + (className ? ' ' + className : '') + (role === 'You' ? ' user' : '');
+      el.innerHTML = '<div class="role">' + role + '</div>' + html;
+      log.appendChild(el);
+      el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      return el;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderResult(data) {
+      const route = data.route || {};
+      const blocked = route.guard_status === 'blocked';
+      const parts = [];
+      parts.push('<div>' + escapeHtml(data.answer || '(empty answer)') + '</div>');
+      parts.push('<div class="meta">');
+      parts.push('<div>route: ' + escapeHtml(route.orchestrator_decision || '—') + '</div>');
+      parts.push('<div>guard: ' + escapeHtml(route.guard_status || '—')
+        + (route.guard_reason ? ' (' + escapeHtml(route.guard_reason) + ')' : '')
+        + '</div>');
+      if (Array.isArray(route.selected_specialists) && route.selected_specialists.length) {
+        parts.push('<div>specialists: ' + escapeHtml(route.selected_specialists.join(', ')) + '</div>');
+      }
+      if (data.debug && typeof data.debug.latency_ms === 'number') {
+        parts.push('<div>latency: ' + data.debug.latency_ms + ' ms</div>');
+      }
+      parts.push('</div>');
+
+      if (Array.isArray(data.citations) && data.citations.length) {
+        parts.push('<div class="citations">citations: '
+          + data.citations.map((c) =>
+            '<code>' + escapeHtml(c.id) + ' · ' + escapeHtml(c.source) + '</code>'
+          ).join('')
+          + '</div>');
+      }
+
+      if (data.debug && Array.isArray(data.debug.steps) && data.debug.steps.length) {
+        parts.push(
+          '<details class="debug"><summary>debug.steps</summary><pre>'
+          + escapeHtml(data.debug.steps.join('\n'))
+          + '</pre></details>'
+        );
+      }
+
+      addBubble('PayFlow', parts.join(''), blocked ? 'blocked' : '');
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+
+      addBubble('You', escapeHtml(message));
+      input.value = '';
+      sendBtn.disabled = true;
+
+      let res;
+      try {
+        res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message }),
+        });
+      } catch (err) {
+        addBubble('Error', escapeHtml('Could not reach the server. Is payflow-serve running?\n' + err.message), 'error');
+        sendBtn.disabled = false;
+        input.focus();
+        return;
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        addBubble('Error', escapeHtml('HTTP ' + res.status + ': response was not JSON'), 'error');
+        sendBtn.disabled = false;
+        input.focus();
+        return;
+      }
+
+      if (!res.ok) {
+        addBubble('Error', escapeHtml('HTTP ' + res.status + ': ' + (data.error || JSON.stringify(data))), 'error');
+      } else {
+        renderResult(data);
+      }
+
+      sendBtn.disabled = false;
+      input.focus();
+    });
+
+    input.focus();
+  </script>
+</body>
+</html>

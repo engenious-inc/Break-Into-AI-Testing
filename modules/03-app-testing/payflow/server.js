@@ -1,17 +1,29 @@
 #!/usr/bin/env node
 // PayFlow GenAI demo — HTTP surface.
 //
+//   GET  /        -> workshop chat UI (public/index.html)
 //   GET  /health  -> {"status":"ok", ...}   run this before an eval
 //   POST /chat    -> {answer, route, citations, debug}
 //
 // Usage: node modules/03-app-testing/payflow/server.js   (or ./run.sh payflow-serve)
 // Port:  PAYFLOW_PORT, default 8000.
 
+const fs = require('fs');
 const http = require('http');
+const path = require('path');
 const { loadKey, loadCorpus, handleChat } = require('./pipeline');
 
 const PORT = Number(process.env.PAYFLOW_PORT || 8000);
 const MAX_BODY_BYTES = 64 * 1024;
+const PUBLIC_DIR = path.join(__dirname, 'public');
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.ico': 'image/x-icon',
+};
 
 function send(res, status, payload) {
   const body = JSON.stringify(payload, null, 2);
@@ -20,6 +32,29 @@ function send(res, status, payload) {
     'Content-Length': Buffer.byteLength(body),
   });
   res.end(body);
+}
+
+function sendFile(res, filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  const type = MIME[ext] || 'application/octet-stream';
+  const body = fs.readFileSync(filePath);
+  res.writeHead(200, {
+    'Content-Type': type,
+    'Content-Length': body.length,
+  });
+  res.end(body);
+}
+
+function resolvePublic(pathname) {
+  const rel = pathname === '/' ? 'index.html' : pathname.replace(/^\//, '');
+  const resolved = path.resolve(PUBLIC_DIR, rel);
+  if (!resolved.startsWith(PUBLIC_DIR + path.sep) && resolved !== PUBLIC_DIR) {
+    return null;
+  }
+  if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile()) {
+    return null;
+  }
+  return resolved;
 }
 
 function readBody(req) {
@@ -56,6 +91,11 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  if (req.method === 'GET') {
+    const filePath = resolvePublic(url.pathname);
+    if (filePath) return sendFile(res, filePath);
+  }
+
   if (req.method === 'POST' && url.pathname === '/chat') {
     let payload;
     try {
@@ -83,5 +123,5 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`PayFlow GenAI demo listening on http://localhost:${PORT}`);
   console.log(`  ${docCount} documents across ${Object.keys(corpus).join(', ')}`);
-  console.log(`  GET  /health   POST /chat`);
+  console.log(`  GET  /         GET /health   POST /chat`);
 });

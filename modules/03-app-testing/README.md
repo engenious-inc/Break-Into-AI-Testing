@@ -24,16 +24,20 @@ PayFlow is a fictional fintech product. The demo answers questions about it from
 fixture corpus of Jira tickets, Confluence pages, and Figma screens.
 
 ```
-user ──▶ guard LLM ──▶ orchestrator LLM ──▶ retrieval ──▶ answer LLM ──▶ user
-           │                  │                  │
-      allow/block      pick specialist     keyword scoring over
-                       + intent            that specialist's docs
+user ──▶ guard LLM ──▶ orchestrator ──▶ retrieval ──▶ answer LLM ──▶ user
+           │                  │              │
+      allow/block    ID prefix map, else  keyword scoring over
+                     LLM pick specialist  that specialist's docs
+                     + intent
 ```
 
-Three of those four steps are an LLM call. **The routing decision is model output**, which
-means it can be wrong — and a test suite can catch it being wrong. Retrieval is
-deterministic keyword scoring, so there are no embeddings, no vector store, and no second
-API key. The same free Groq key you have been using since Day 1 runs the whole thing.
+Three of those four steps are an LLM call. **Most routing decisions are model output**,
+which means they can be wrong — and a test suite can catch them being wrong. Corpus ID
+prefixes (`BK` / `PF` / `CF` / `FG`) are an exception: a deterministic pre-route selects
+the owning specialist before the router LLM runs, so `"what is BK-001"` does not land on
+jira just because the id looks ticket-shaped. Retrieval is deterministic keyword scoring,
+so there are no embeddings, no vector store, and no second API key. The same free Groq key
+you have been using since Day 1 runs the whole thing.
 
 ### Start it
 
@@ -41,7 +45,7 @@ API key. The same free Groq key you have been using since Day 1 runs the whole t
 node modules/03-app-testing/payflow/server.js     # or: ./run.sh payflow-serve
 ```
 
-It listens on `http://localhost:8000`. Check it before evaluating:
+It listens on `http://localhost:8000`. Open that URL for the workshop chat UI, then check health before evaluating:
 
 ```bash
 ./run.sh payflow-health
@@ -114,7 +118,7 @@ the one that said it.
 
 ```bash
 ./run.sh payflow-serve      # terminal 1 — the app
-./run.sh payflow            # terminal 2 — 21 cases, guard/routing/citations/agency
+./run.sh payflow            # terminal 2 — 25 cases, guard/routing/citations/agency
 ./run.sh payflow-multiturn  # injection after 4 turns of legitimate context
 ./run.sh payflow-redteam    # generated attacks (slow — see below)
 ```
@@ -176,6 +180,11 @@ consistent on purpose, and they contain deliberate traps:
 
 Read them before you write test cases. Knowing the ground truth is what lets you tell a
 grounded answer from a fluent one.
+
+Need an answer from the corpus without memorizing it? Ask Claude Code to use the
+`payflow-guide` agent (`.claude/agents/payflow-guide.md`) — it Reads those JSON files
+and cites real `BK` / `PF` / `CF` / `FG` IDs. It does not invent docs, and it is not the
+`red-teamer` attack drafter.
 
 ## Refusing is not correcting
 
@@ -277,6 +286,12 @@ exactly what `output.citations` assertions exist to catch.
 > specialist gets a second. Ranking one merged pool looked correct and wasn't — Jira's
 > many tickets simply out-scored Confluence's single change log, so the Confluence source
 > it had just routed to never appeared in the citations.
+
+> **Also fixed.** Bare ID lookups like *"what is BK-001"* used to follow the router LLM
+> into `jira` (ticket-shaped keys), miss the basic corpus, and answer that the documents
+> do not contain an answer. A small prefix → specialist map (`BK`→basic, `PF`→jira,
+> `CF`→confluence, `FG`→figma) now pre-routes when exactly one known id appears; otherwise
+> `ROUTE_PROMPT` still decides.
 
 ## Lessons
 

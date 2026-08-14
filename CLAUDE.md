@@ -92,9 +92,10 @@ keep default live-eval request volume low.
 - `modules/02-advanced-eval/` — Module 2 (weights, metrics, CSV, F-score, debugging)
 - `modules/03-app-testing/` — Module 3 (PayFlow `http` app, plus an MCP track:
   `mcp-deepwiki/`, `mcp-local/`, `mcp-promptfoo/`)
-- `.claude/` — the Claude Code workflow (red-teamer agent, new-eval-suite +
-  run-and-summarize skills). In Module 1 these are the student's path, not optional
-  authoring aids; Modules 0 and 2 use them only for scaffolding.
+- `.claude/` — the Claude Code workflow (`red-teamer` + Module 3 `payflow-guide`
+  agents, new-eval-suite + run-and-summarize skills). In Module 1 these are the
+  student's path, not optional authoring aids; Modules 0 and 2 use them only for
+  scaffolding.
 
 ## Agent boundaries (Module 1)
 `red-teamer` has `Read, Grep, Glob` and no write access, on purpose. An agent that
