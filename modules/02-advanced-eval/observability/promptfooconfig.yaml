@@ -1,7 +1,7 @@
-description: "Module 2 — Observability: real Arato.ai logging + OTel-shaped tracing (single provider, zero npm dependencies)"
+description: "Module 2 — Observability: real OTLP tracing to Arato and/or Agenta (single provider, zero npm dependencies)"
 
 prompts:
-  - file://prompts/prompt.txt
+  - file://../../../prompts/tutorbot.txt
 
 providers:
   - id: file://provider.mjs

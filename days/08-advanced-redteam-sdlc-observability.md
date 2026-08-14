@@ -14,9 +14,22 @@ find out what the thing reports once it is deployed.
 # or replay the committed attacks, free — no generation step
 npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 
-# observability: a real OTLP span per LLM call
+# observability: a real OTLP span per LLM call, one per subject
 npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
 ```
+
+**Want to see them land somewhere?** [Agenta](https://agenta.ai) cloud is free and speaks
+OTLP. Sign up, then one line in `.env`:
+
+```env
+AGENTA_API_KEY=...
+```
+
+Three traces appear, one per subject. Open one and look for `tutor.subject` — that
+attribute is the difference between a span you can read and a span you can *query*.
+
+Without a key the lesson still runs and tells you it skipped the POST. The span is real
+either way; only the network call is optional.
 
 **The red team is slow and rate-limited.** ~24 probes, four Groq calls each.
 `./run.sh payflow-redteam` paces at `-j 1 --delay 1000` so a free-tier key survives the

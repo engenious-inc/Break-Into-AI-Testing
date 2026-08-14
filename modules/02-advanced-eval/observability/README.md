@@ -15,13 +15,18 @@ observability, and the standard for it is OpenTelemetry (OTel).
 ## What's real here
 
 - **Trace/span IDs, latency, token counts** — genuinely measured from a real
-  Groq API call, not simulated.
-- **The prompt hash** — a real SHA-256 of the actual prompt, computed at
-  request time.
+  Groq API call to **TutorBot** (`prompts/tutorbot.txt`), not simulated.
+- **The prompt hash** — a real SHA-256 of the student's question, computed at
+  request time. It hashes the *question*, not the whole rendered prompt, so it
+  stays stable when only `subject` or `level` changes.
+- **`tutor.subject` and `tutor.level`** — custom span attributes taken from each
+  test case's vars. They are the reason this lesson traces a tutor rather than a
+  bare question: a span you cannot slice is a latency number, and *"is Physics
+  slower than Algebra?"* is the first thing anyone actually asks in production.
 - **The span leaving the process** — genuine, wire-compatible OTLP over HTTP,
-  POSTed to [Arato.ai](https://www.arato.ai) if you set
-  `OTEL_EXPORTER_OTLP_ENDPOINT`/`ARATO_API_KEY` in `.env` (both optional —
-  sample output below shows what happens either way).
+  POSTed to [Arato.ai](https://www.arato.ai) and/or [Agenta](https://agenta.ai)
+  if you set their keys in `.env` (all optional — sample output below shows what
+  happens either way).
 
 ## No SDK, still real OTLP
 
@@ -79,7 +84,7 @@ Sample output (Arato unset):
   "tokens": { "prompt_tokens": 12, "completion_tokens": 34, "total_tokens": 46 },
   "prompt.sha256": "8f3a2b1c..."
 }
-[arato] skipped — OTEL_EXPORTER_OTLP_ENDPOINT/ARATO_API_KEY not set
+[otlp] skipped — set ARATO_API_KEY (+OTEL_EXPORTER_OTLP_ENDPOINT) or AGENTA_API_KEY to export for real
 ```
 
 With a real Arato account, take both values from **Observe → your dashboard →
@@ -96,6 +101,40 @@ The endpoint already contains your project slug. Don't append `/v1/traces` —
 ```
 [arato] OTLP 200 trace_id=054d11ec990cdcf906d7d4e9af2ae647
 ```
+
+### Or Agenta — same bytes, different envelope
+
+[Agenta](https://agenta.ai) ingests the **identical protobuf**. One key, and
+`AGENTA_HOST` only if you are not on EU cloud:
+
+```env
+AGENTA_API_KEY=...
+# AGENTA_HOST=https://eu.cloud.agenta.ai   # the default
+```
+
+```
+[agenta] OTLP 200 trace_id=2ee37dbdf73e4cd093bb91cc05586765
+```
+
+Set both and the span goes to both, encoded once. That is the lesson hiding in
+this lesson: `provider.mjs` gained Agenta support in about twenty lines, and not
+one of them touches how the span is built. OTLP is a standard, so adding a vendor
+is a URL and an auth header — Arato wants `Bearer` at `<endpoint>/v1/traces`,
+Agenta wants `ApiKey` at `<host>/api/otlp/v1/traces`. Everything a vendor tells
+you is proprietary about their "integration" is usually just those two lines.
+
+**Agenta unflattens dotted attribute names.** You send `tutor.subject`; you get
+back:
+
+```json
+"attributes": { "tutor": { "subject": "Mathematics", "level": "Beginner" } }
+```
+
+Read it with `GET /api/tracing/traces/<trace_id>`. This is the whole "ingested is
+not the same as visible" point in miniature, with a happy ending: the value
+survived, but not under the key you sent. If you had asserted on a flat
+`attributes["tutor.subject"]` you would have concluded the attribute was dropped
+and gone looking for a bug that does not exist.
 
 Copy that `trace_id` and find it in the Arato UI. **Do that at least once.** A
 `200` proves the request was accepted, not that the span was stored the way you

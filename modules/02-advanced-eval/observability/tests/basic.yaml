@@ -1,13 +1,38 @@
-- description: "Simple factual question"
+# The assertions are deliberately cheap. This lesson is about the span, not the answer —
+# every second spent grading prose is a second not spent reading telemetry.
+#
+# The regex is also the point of a joke worth making out loud: the old Agenta deck gave
+# "does it end with a question?" 20% of an LLM judge's rubric, billed per call. It is one
+# line of regex, deterministic and free.
+- description: "Beginner maths — fractions"
   vars:
-    query: "What is HTTP?"
+    subject: "Mathematics"
+    level: "Beginner"
+    query: "Can you explain what fractions are and how to add them?"
   assert:
     - type: icontains
-      value: "protocol"
+      value: "denominator"
+    - type: regex
+      value: '\?\s*$'
 
-- description: "Simple definitional question"
+- description: "Intermediate biology — photosynthesis"
   vars:
-    query: "In one sentence, what is OpenTelemetry?"
+    subject: "Biology"
+    level: "Intermediate"
+    query: "What is photosynthesis and why is it important?"
   assert:
     - type: icontains-any
-      value: ["trace", "observability", "telemetry"]
+      value: ["sunlight", "light", "glucose", "oxygen"]
+    - type: regex
+      value: '\?\s*$'
+
+- description: "Advanced maths — the quadratic formula"
+  vars:
+    subject: "Mathematics"
+    level: "Advanced"
+    query: "How do I solve a quadratic equation using the quadratic formula?"
+  assert:
+    - type: icontains
+      value: "discriminant"
+    - type: regex
+      value: '\?\s*$'
