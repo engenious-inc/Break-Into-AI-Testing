@@ -123,6 +123,19 @@ is a URL and an auth header — Arato wants `Bearer` at `<endpoint>/v1/traces`,
 Agenta wants `ApiKey` at `<host>/api/otlp/v1/traces`. Everything a vendor tells
 you is proprietary about their "integration" is usually just those two lines.
 
+**Agenta unflattens dotted attribute names.** You send `tutor.subject`; you get
+back:
+
+```json
+"attributes": { "tutor": { "subject": "Mathematics", "level": "Beginner" } }
+```
+
+Read it with `GET /api/tracing/traces/<trace_id>`. This is the whole "ingested is
+not the same as visible" point in miniature, with a happy ending: the value
+survived, but not under the key you sent. If you had asserted on a flat
+`attributes["tutor.subject"]` you would have concluded the attribute was dropped
+and gone looking for a bug that does not exist.
+
 Copy that `trace_id` and find it in the Arato UI. **Do that at least once.** A
 `200` proves the request was accepted, not that the span was stored the way you
 meant — and the whole reason this lesson exists is that "it returned 200" and
