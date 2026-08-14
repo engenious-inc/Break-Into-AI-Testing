@@ -90,6 +90,23 @@ async function exportSpan(params) {
   await Promise.all(active.map((b) => sendTo(b, body, traceId)));
 }
 
+// Promptfoo hands `callApi` the rendered prompt as a string. Bots in prompts/ are JSON
+// chat arrays; a bare question is also valid. Support both — students are invited to point
+// this provider at their own prompt, and a JSON parse error there would read as a bug in
+// the lesson rather than in their file.
+function parseMessages(prompt) {
+  try {
+    const parsed = JSON.parse(prompt);
+    if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(
+      (m) => m && typeof m.role === 'string' && typeof m.content === 'string')) {
+      return parsed;
+    }
+  } catch {
+    // Not JSON. A plain question is the other supported shape.
+  }
+  return [{ role: 'user', content: prompt }];
+}
+
 export default class ObservedGroqProvider {
   constructor(options) {
     this.providerId = options.id || 'observed-groq';
@@ -100,11 +117,14 @@ export default class ObservedGroqProvider {
     return this.providerId;
   }
 
-  async callApi(prompt) {
+  async callApi(prompt, context) {
     const model = this.config.model || 'llama-3.3-70b-versatile';
     const traceId = newTraceId();
     const spanId = newSpanId();
     const startMs = Date.now();
+
+    const messages = parseMessages(prompt);
+    const question = [...messages].reverse().find((m) => m.role === 'user')?.content ?? prompt;
 
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
@@ -114,7 +134,7 @@ export default class ObservedGroqProvider {
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'user', content: prompt }],
+        messages,
         temperature: this.config.temperature ?? 0,
         max_tokens: this.config.max_tokens ?? 400,
       }),
@@ -128,7 +148,10 @@ export default class ObservedGroqProvider {
     }
 
     const output = data.choices[0].message.content;
-    const promptHash = sha256(prompt);
+    // Hash the question, not the whole rendered prompt: the breakout asks students to
+    // confirm the hash is stable across runs, and it must not change just because the
+    // subject var did.
+    const promptHash = sha256(question);
 
     console.log(JSON.stringify({
       span: 'llm.chat.completion',
@@ -157,13 +180,20 @@ export default class ObservedGroqProvider {
         'llm.token_count.prompt': data.usage?.prompt_tokens ?? 0,
         'llm.token_count.completion': data.usage?.completion_tokens ?? 0,
         'llm.token_count.total': data.usage?.total_tokens ?? 0,
-        'llm.input_messages.0.message.role': 'user',
-        'llm.input_messages.0.message.content': redactForTelemetry(prompt),
+        ...Object.fromEntries(messages.flatMap((m, i) => [
+          [`llm.input_messages.${i}.message.role`, m.role],
+          [`llm.input_messages.${i}.message.content`, redactForTelemetry(m.content)],
+        ])),
         'llm.output_messages.0.message.role': 'assistant',
         'llm.output_messages.0.message.content': redactForTelemetry(output),
-        'input.value': redactForTelemetry(prompt),
+        'input.value': redactForTelemetry(question),
         'output.value': redactForTelemetry(output),
         'prompt.sha256': promptHash,
+        // The two that make a span worth slicing. Dimensions you filter by are safe to
+        // ship raw — they are parameters of the exercise. The payload above is not, and
+        // stays hashed unless LOG_RAW_PROMPTS=true.
+        'tutor.subject': context?.vars?.subject ?? 'unknown',
+        'tutor.level': context?.vars?.level ?? 'unknown',
       },
     });
 

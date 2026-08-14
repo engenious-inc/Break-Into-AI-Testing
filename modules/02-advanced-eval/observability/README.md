@@ -15,13 +15,18 @@ observability, and the standard for it is OpenTelemetry (OTel).
 ## What's real here
 
 - **Trace/span IDs, latency, token counts** — genuinely measured from a real
-  Groq API call, not simulated.
-- **The prompt hash** — a real SHA-256 of the actual prompt, computed at
-  request time.
+  Groq API call to **TutorBot** (`prompts/tutorbot.txt`), not simulated.
+- **The prompt hash** — a real SHA-256 of the student's question, computed at
+  request time. It hashes the *question*, not the whole rendered prompt, so it
+  stays stable when only `subject` or `level` changes.
+- **`tutor.subject` and `tutor.level`** — custom span attributes taken from each
+  test case's vars. They are the reason this lesson traces a tutor rather than a
+  bare question: a span you cannot slice is a latency number, and *"is Physics
+  slower than Algebra?"* is the first thing anyone actually asks in production.
 - **The span leaving the process** — genuine, wire-compatible OTLP over HTTP,
-  POSTed to [Arato.ai](https://www.arato.ai) if you set
-  `OTEL_EXPORTER_OTLP_ENDPOINT`/`ARATO_API_KEY` in `.env` (both optional —
-  sample output below shows what happens either way).
+  POSTed to [Arato.ai](https://www.arato.ai) and/or [Agenta](https://agenta.ai)
+  if you set their keys in `.env` (all optional — sample output below shows what
+  happens either way).
 
 ## No SDK, still real OTLP
 
