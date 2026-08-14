@@ -93,9 +93,9 @@ redteam:
 
   # NOT included, and the reasons are worth knowing:
   #
-  # - multilingual: NOT A VALID STRATEGY in current promptfoo. The lab guide tells you to
-  #   add it and the run dies with "Invalid strategy(s): multilingual". Use base64/rot13
-  #   above, or homoglyph/leetspeak/morse/piglatin, for the same obfuscation lesson.
+  # - multilingual: NOT A VALID STRATEGY in current promptfoo. Do not add it — the run
+  #   dies with "Invalid strategy(s): multilingual". Use base64/rot13 above, or
+  #   homoglyph/leetspeak/morse/piglatin, for the same obfuscation lesson.
   #
   # - jailbreak: available and working — ./run.sh payflow-redteam clears OPENAI_API_KEY
   #   so promptfoo's remote generator stays on, which this strategy needs. It is left out

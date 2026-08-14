@@ -11,7 +11,7 @@ Every config before tonight pointed at a **model**. Tonight one points at a runn
 
 ```bash
 ./run.sh payflow-health     # terminal 2 — confirm it answers before you eval
-./run.sh payflow            # 21 cases: routing, citations, guard, agency
+./run.sh payflow            # 25 cases: routing, citations, guard, agency
 ./run.sh payflow-multiturn  # injection after four turns of legitimate context
 ./run.sh view               # read the results
 ```
