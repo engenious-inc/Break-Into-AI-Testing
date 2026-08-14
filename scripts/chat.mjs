@@ -45,10 +45,37 @@ if (!apiKey) {
   process.exit(2);
 }
 
-const parsed = JSON.parse(fs.readFileSync(promptFile, 'utf8'));
+// Not every file in prompts/ is a chat prompt. payflow-multiturn.txt is deliberately
+// plain text, because PayFlow's POST /chat takes a single string field and a JSON array
+// there makes promptfoo substitute a structure the server rejects. Chatting to it is a
+// category error, and an unhandled JSON.parse stack trace is a terrible way to say so.
+let parsed;
+try {
+  parsed = JSON.parse(fs.readFileSync(promptFile, 'utf8'));
+} catch {
+  console.error(`${bot} is not a chat-format prompt — ${promptFile} is plain text.`);
+  console.error('chat needs a JSON array of {role, content} messages. This one feeds an');
+  console.error('http provider through its own suite instead.');
+  process.exit(2);
+}
 const system = parsed.find((m) => m.role === 'system')?.content;
 if (!system) {
   console.error(`${promptFile} has no system message.`);
+  process.exit(2);
+}
+
+// The chat loop only ever substitutes the user turn. A system prompt with other variables
+// would reach the model with {{subject}} in it verbatim, and the bot would answer as if
+// that were the subject — confusing in a way that looks like a bad model rather than the
+// wrong tool. Say so instead.
+const unfilled = [...new Set(
+  [...system.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((m) => m[1]),
+)].filter((v) => v !== 'query');
+
+if (unfilled.length > 0) {
+  console.error(`${bot} needs variables chat cannot supply: ${unfilled.join(', ')}`);
+  console.error('It is a suite subject, not a chat subject — its cases live in');
+  console.error('modules/02-advanced-eval/observability/tests/basic.yaml');
   process.exit(2);
 }
 
