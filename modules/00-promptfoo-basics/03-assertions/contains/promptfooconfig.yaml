@@ -2,8 +2,8 @@ description: "Assertions 1/5 — deterministic contains"
 prompts:
   - "Greet the user in French."
 providers:
-  - id: groq:llama-3.3-70b-versatile
-    config: { temperature: 0, max_tokens: 400 }
+  - id: groq:qwen/qwen3.6-27b
+    config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
 tests:
   - assert:
       - type: icontains

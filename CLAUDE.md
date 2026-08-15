@@ -30,18 +30,18 @@ Copy this block verbatim into the root-level red-team triplet configs
 (self-contained, no includes):
 ```yaml
 providers:
-  - id: groq:llama-3.1-8b-instant
-    config: { temperature: 0, max_tokens: 400 }
-  - id: groq:llama-3.3-70b-versatile
-    config: { temperature: 0, max_tokens: 400 }
+  - id: groq:qwen/qwen3.6-27b
+    config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden }
+  - id: groq:openai/gpt-oss-120b
+    config: { temperature: 0, max_tokens: 400, include_reasoning: false }
   - id: groq:openai/gpt-oss-20b
     config: { temperature: 0, max_tokens: 400 }
 ```
-Model-graded assertions use the 70B as grader:
+Model-graded assertions use Qwen 3.6 27B as grader (reasoning off):
 ```yaml
 defaultTest:
   options:
-    provider: groq:llama-3.3-70b-versatile
+    provider: groq:qwen/qwen3.6-27b
 ```
 **Opt-in** providers (paid/local/cross-vendor) ship commented-out with a one-line note.
 Single-provider by design (NOT the 3-model block): most Module 0 and Module 2 lesson
@@ -106,5 +106,5 @@ Keep the human paste-and-review step when adding agent-driven lessons.
 
 Corollary for authoring: **pair every model-graded assertion with a deterministic one
 that fails for structural reasons.** `llm-rubric` / `factuality` fail in ways correlated
-with the model under test — often literally the same model, since the 70B is the default
-grader. A cheap `not-regex` fails independently, and independence is the point.
+with the model under test — often literally the same model, since Qwen 3.6 27B is the
+default grader. A cheap `not-regex` fails independently, and independence is the point.

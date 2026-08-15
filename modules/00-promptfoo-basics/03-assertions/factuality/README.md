@@ -2,7 +2,7 @@
 
 > **Day 2** · [session index](../../../../days/02-promptfoo-basics.md)
 
-Model-graded `factuality` against a reference answer (uses the Groq 70B grader).
+Model-graded `factuality` against a reference answer (uses the Groq Qwen grader).
 
 ```bash
 npx promptfoo@latest eval -c modules/00-promptfoo-basics/03-assertions/factuality/promptfooconfig.yaml

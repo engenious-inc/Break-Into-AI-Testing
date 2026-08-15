@@ -26,8 +26,8 @@ That model prefixes its visible answer with its own chain of thought:
 > assets to…
 
 This is not a hypothetical. It reproduced on every topic we tried. The reasoning tokens
-show up in the usage numbers too — 85 reasoning tokens across two calls, where the two
-Llama models report zero.
+show up in the usage numbers too — the 20B reports reasoning tokens, while Qwen
+(`reasoning_effort: none`) and GPT-OSS 120B (`include_reasoning: false`) answer clean.
 
 The neighbouring `configuration/` lesson runs the *same three models on the same prompt*
 and reports **3 passed (100%)** — because it has no assertions at all. A green run and a
@@ -58,7 +58,7 @@ provider block. `modules/02-advanced-eval/assert-sets-and-budgets/` shows that p
 
 ## Try it
 
-1. Raise `max_tokens` and watch the completion-token gap between the 8B and the 20B widen.
+1. Raise `max_tokens` and watch the completion-token gap between Qwen and the 20B widen.
 2. Drop the `latency` threshold to 200 ms and see which models start failing — then decide
    whether that is a real budget or an arbitrary one.
 3. Add a third topic and check whether the leak reproduces there too.

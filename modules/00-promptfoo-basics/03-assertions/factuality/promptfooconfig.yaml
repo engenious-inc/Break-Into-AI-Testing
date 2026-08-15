@@ -2,11 +2,11 @@ description: "Assertions 3/5 — model-graded factuality"
 prompts:
   - "What is the capital of California?"
 providers:
-  - id: groq:llama-3.3-70b-versatile
-    config: { temperature: 0, max_tokens: 400 }
+  - id: groq:qwen/qwen3.6-27b
+    config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
 defaultTest:
   options:
-    provider: groq:llama-3.3-70b-versatile
+    provider: groq:qwen/qwen3.6-27b
 tests:
   - assert:
       - type: factuality

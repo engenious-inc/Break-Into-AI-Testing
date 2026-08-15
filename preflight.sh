@@ -113,7 +113,7 @@ if [ "$key_ok" -eq 1 ]; then
     -X POST "$GROQ_API_BASE/chat/completions" \
     -H "Authorization: Bearer $key" \
     -H "Content-Type: application/json" \
-    -d '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}' 2>/dev/null)"
+    -d '{"model":"qwen/qwen3.6-27b","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}' 2>/dev/null)"
   curl_exit=$?
   if [ "$curl_exit" -ne 0 ]; then
     bad "Couldn't reach ${GROQ_API_BASE} (curl exit ${curl_exit}) — check your network / VPN"; fail=1

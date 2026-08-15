@@ -2,7 +2,7 @@
 
 Hands-on AI bug-bounty workshop. You'll red-team two chatbots — **MediBot** (healthcare triage) and **FinanceBot** (retail brokerage) — using [Promptfoo](https://www.promptfoo.dev). Both are built the way most production AI assistants are built: an open-weight LLM + a guardrail system prompt, served via Groq's free tier. Same attack surface, different domain rules.
 
-The default config is **free-tier-safe**: a curated subset (8 cases per suite) run against three Groq models — a small Llama (`llama-3.1-8b-instant`), a large Llama (`llama-3.3-70b-versatile`), and an OpenAI open-weight (`gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
+The default config is **free-tier-safe**: a curated subset (8 cases per suite) run against three Groq models — a non-thinking Qwen (`qwen/qwen3.6-27b`), a hidden-reasoning GPT-OSS (`openai/gpt-oss-120b`), and a visible-CoT GPT-OSS (`openai/gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
 
 <p align="center">
   <img src="docs/qr.png" alt="Scan to clone" width="220" />
@@ -155,8 +155,8 @@ All cases live in `tests/smoke.medibot.yaml` (MediBot, 8 cases) and `tests/smoke
 ### Notes on the default lineup
 
 - The configs run **three** providers over a curated subset (8 cases each, so 24 responses per suite), so a full pass stays well under Groq's free-tier rate limit (~30 req/min per key) and finishes in under a minute at the default pacing. Adding all six Groq models can queue behind the shared grader and hit request timeouts on the free tier — widen the matrix only with paid keys or `-j 2`.
-- gpt-oss models emit hidden reasoning tokens, so they spend ~2× the tokens of the Llama models per response. The `javascript` length assertion (≤ 40 words) can fail for the more verbose gpt-oss models — that's intentional, it's a signal you're meant to spot. (Note: `cost` assertions are avoided — Groq's free tier returns no cost field, which makes them *error* rather than pass.)
-- The grader (judge LLM for `llm-rubric` assertions) is `groq:llama-3.3-70b-versatile`, set via `defaultTest.options.provider`. Workshop attendees don't need an OpenAI key for grading.
+- gpt-oss models emit reasoning tokens (especially with `include_reasoning` left on), so the 20B can spend ~2× the tokens of Qwen per response. The `javascript` length assertion (≤ 40 words) can fail for the more verbose gpt-oss models — that's intentional, it's a signal you're meant to spot. (Note: `cost` assertions are avoided — Groq's free tier returns no cost field, which makes them *error* rather than pass.)
+- The grader (judge LLM for `llm-rubric` assertions) is `groq:qwen/qwen3.6-27b`, set via `defaultTest.options.provider`. Workshop attendees don't need an OpenAI key for grading.
 
 ## Hackathon challenges
 

@@ -79,7 +79,7 @@ Sample output (Arato unset):
   "span": "llm.chat.completion",
   "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
   "span_id": "00f067aa0ba902b7",
-  "model": "llama-3.3-70b-versatile",
+  "model": "qwen/qwen3.6-27b",
   "duration_ms": 412,
   "tokens": { "prompt_tokens": 12, "completion_tokens": 34, "total_tokens": 46 },
   "prompt.sha256": "8f3a2b1c..."
@@ -166,7 +166,7 @@ Build a dashboard against these — they're what `provider.mjs` sends:
 | instrumentation scope | `openinference.instrumentation.openai` |
 | span name | `llm.chat.completion` |
 | `openinference.span.kind` | `LLM` |
-| `llm.model_name` | `llama-3.3-70b-versatile` |
+| `llm.model_name` | `qwen/qwen3.6-27b` |
 | `llm.provider` / `llm.system` | `groq` |
 | `llm.token_count.prompt` / `.completion` / `.total` | integers |
 | `input.value` / `output.value` | prompt/response, or their hash when `LOG_RAW_PROMPTS` is off |

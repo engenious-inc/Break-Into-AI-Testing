@@ -15,7 +15,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 
-const MODEL = process.env.CHAT_MODEL || 'llama-3.3-70b-versatile';
+const MODEL = process.env.CHAT_MODEL || 'qwen/qwen3.6-27b';
 const BASE = process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1';
 
 // Deliberately NOT 0. Every other config in this repo pins temperature to 0 for

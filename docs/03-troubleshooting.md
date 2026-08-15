@@ -86,7 +86,7 @@ OpenAI. `./run.sh payflow-redteam` clears that variable for the run. If you invo
 
 **`credit_balance_exhausted` on a PayFlow / quality eval.** Promptfoo fell back to its
 default OpenAI grader. Every shipped config that uses `llm-rubric` already sets
-`defaultTest.options.provider: groq:llama-3.3-70b-versatile` — if you author a new one,
+`defaultTest.options.provider: groq:qwen/qwen3.6-27b` — if you author a new one,
 copy that block.
 
 **PayFlow lab checklist.** Commands, inverted vs ordinary semantics, and redteam

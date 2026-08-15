@@ -43,7 +43,7 @@ rather than repeated within each file:
 Each config defaults to a single Groq model. Uncomment the two extra Groq models in the
 config for a cross-model comparison (watch free-tier rate limits if you do) — compare
 where they diverge (which model leaks bias, which drifts). To have one model grade
-another, that is already how `llm-rubric`/`factuality` work (the 70B is the grader).
+another, that is already how `llm-rubric`/`factuality` work (Qwen is the grader).
 
 ## Reflection
 Use the `run-and-summarize` Claude Code skill to auto-produce the per-provider verdict

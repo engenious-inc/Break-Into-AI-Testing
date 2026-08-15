@@ -2,11 +2,11 @@ description: "Advanced 2 — assert-set (OR via threshold) + latency budget (cos
 prompts:
   - "Greet the user in French in one short sentence."
 providers:
-  - id: groq:llama-3.3-70b-versatile
-    config: { temperature: 0, max_tokens: 120 }
+  - id: groq:qwen/qwen3.6-27b
+    config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden }
 defaultTest:
   options:
-    provider: groq:llama-3.3-70b-versatile
+    provider: groq:qwen/qwen3.6-27b
 tests:
   - threshold: 0.5
     assert:

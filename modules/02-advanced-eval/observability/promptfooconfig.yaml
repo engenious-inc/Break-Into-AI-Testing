@@ -6,7 +6,7 @@ prompts:
 providers:
   - id: file://provider.mjs
     config:
-      model: llama-3.3-70b-versatile
+      model: qwen/qwen3.6-27b
       temperature: 0
       max_tokens: 400
 

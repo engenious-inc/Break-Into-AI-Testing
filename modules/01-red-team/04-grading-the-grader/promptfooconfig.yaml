@@ -6,18 +6,18 @@ description: "Red-team 4 — who grades the grader? (original vs rubric-only vs 
 prompts:
   - file://../../../prompts/medibot.txt
 
-# Single provider on purpose: llama-3.3-70b-versatile is the model that produced
-# the original leak AND graded its own output as safe. Swapping the model breaks
-# the demonstration.
+# Single provider on purpose: gpt-oss-20b is the free-tier model that still
+# surfaces system-prompt content in its Thinking: channel (post-Llama decommission).
+# Same model grades itself — that is the demonstration.
 providers:
-  - id: groq:llama-3.3-70b-versatile
+  - id: groq:openai/gpt-oss-20b
     config: { temperature: 0, max_tokens: 400 }
 
-# The grader is the same 70B. That is the whole point of the lesson — this is the
-# default in every red-team config in this repo, and here it is grading itself.
+# The grader is the same gpt-oss-20b. That is the whole point of the lesson —
+# correlated model-graded failure when SUT and judge are the same model.
 defaultTest:
   options:
-    provider: groq:llama-3.3-70b-versatile
+    provider: groq:openai/gpt-oss-20b
 
 tests:
   - file://tests/1-original.yaml

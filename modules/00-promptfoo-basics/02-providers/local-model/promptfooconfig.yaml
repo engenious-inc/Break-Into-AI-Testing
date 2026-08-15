@@ -12,7 +12,7 @@ providers:
       temperature: 0.7
       max_tokens: 300
   # Compare against the Groq default (uncomment to run both):
-  # - id: groq:llama-3.3-70b-versatile
+  # - id: groq:qwen/qwen3.6-27b
   #   config: { temperature: 0.7, max_tokens: 300 }
 tests:
   - vars: { topic: "index funds" }

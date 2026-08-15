@@ -89,7 +89,7 @@ if ($keyOk) {
     # from the exception in the catch. Invoke-WebRequest only returns here on 2xx.
     $resp = Invoke-WebRequest -UseBasicParsing -Uri "$base/chat/completions" -Method Post -TimeoutSec 10 `
       -Headers @{ Authorization = "Bearer $key"; "Content-Type" = "application/json" } `
-      -Body '{"model":"llama-3.1-8b-instant","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}'
+      -Body '{"model":"qwen/qwen3.6-27b","messages":[{"role":"user","content":"ping"}],"max_tokens":1,"temperature":0}'
     $rem = $resp.Headers['x-ratelimit-remaining-requests']
     if ($rem -is [array]) { $rem = $rem[0] }
     $remInt = $rem -as [int]

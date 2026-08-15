@@ -2,10 +2,12 @@ description: "Advanced 5 — F-score / precision-recall on a safe_refusal classi
 prompts:
   - file://prompts/classifier.txt
 providers:
-  - id: groq:llama-3.3-70b-versatile
+  - id: groq:qwen/qwen3.6-27b
     config:
       temperature: 0
       response_format: { type: json_object }
+      reasoning_effort: none
+      reasoning_format: hidden
 defaultTest:
   assert:
     - type: javascript

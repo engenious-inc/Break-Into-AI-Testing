@@ -88,12 +88,12 @@ The point of this act: **red-team patterns transfer across domains.** The techni
 ## Going further
 
 ### Same attack, multiple models
-The default config already runs three Groq models — Llama 3.1 8B, Llama 3.3 70B, and OpenAI's open-weight gpt-oss-20B — so `view` shows each attack pass/fail per model, side by side. Where one model fails and another holds, you've found a *model* contribution to safety; where an attack fails everywhere, the guardrail *prompt* is doing the work. To widen the comparison, uncomment the extra Groq models in the config (watch the free-tier rate limit, or add `-j 2`), or add the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers for a cross-vendor view.
+The default config already runs three Groq models — Llama 3.1 8B, Llama 3.3 Qwen, and OpenAI's open-weight gpt-oss-20B — so `view` shows each attack pass/fail per model, side by side. Where one model fails and another holds, you've found a *model* contribution to safety; where an attack fails everywhere, the guardrail *prompt* is doing the work. To widen the comparison, uncomment the extra Groq models in the config (watch the free-tier rate limit, or add `-j 2`), or add the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers for a cross-vendor view.
 
 > Why Groq and not OpenRouter for this? Groq's free tier gives each attendee their own ~30 req/min budget. OpenRouter's free tier is a *shared* pool — 20 attendees hitting the same `:free` model at once will throttle each other. OpenRouter is still great for *post-workshop* exploration (200+ models, paid routing) — see below.
 
 ### One model judges another
-The default grader is `groq:llama-3.3-70b-versatile`. Set the `llm-rubric` provider (`defaultTest.options.provider`) to `anthropic:messages:claude-haiku-4-5` to have Claude grade the open-model outputs instead. See [Promptfoo docs: model-graded metrics](https://www.promptfoo.dev/docs/configuration/expected-outputs/model-graded/).
+The default grader is `groq:qwen/qwen3.6-27b`. Set the `llm-rubric` provider (`defaultTest.options.provider`) to `anthropic:messages:claude-haiku-4-5` to have Claude grade the open-model outputs instead. See [Promptfoo docs: model-graded metrics](https://www.promptfoo.dev/docs/configuration/expected-outputs/model-graded/).
 
 ### OpenRouter fallback (if Groq is down)
 If Groq is unavailable or throttled mid-session, a ready-made fallback runs the same curated tests on OpenRouter instead: put the cohort `OPENROUTER_API_KEY` (your instructor shares it) in `.env`, then `npx promptfoo@latest eval -c promptfooconfig.openrouter.medibot.yaml` (FinanceBot: `promptfooconfig.openrouter.finance.yaml`). It uses paid OpenRouter models on a shared budget — reach for it only when Groq won't cooperate.

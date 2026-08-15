@@ -18,7 +18,7 @@ prompts:
 # Grader for llm-rubric only — MCP tool calls need no Groq key.
 defaultTest:
   options:
-    provider: groq:llama-3.3-70b-versatile
+    provider: groq:qwen/qwen3.6-27b
 
 tests:
   # Shape A — stable structure → deterministic asserts

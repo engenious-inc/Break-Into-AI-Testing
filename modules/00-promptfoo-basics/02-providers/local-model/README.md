@@ -56,7 +56,7 @@ the config is fine, the server is not up. Start it and re-run.
 
 ## What to look for
 
-Run the same prompt against the local model and `groq:llama-3.3-70b-versatile` and
+Run the same prompt against the local model and `groq:qwen/qwen3.6-27b` and
 compare latency, answer quality, and refusal behaviour. The local 3B model will be slower
 on a laptop and weaker on reasoning. The useful question is not which one wins — it is
 **which categories of test you would be comfortable running entirely offline**, and why.

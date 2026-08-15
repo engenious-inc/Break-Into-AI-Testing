@@ -112,7 +112,7 @@ CONFIGS=(
   # Day 8 lesson. Its Arato POST is optional and skips cleanly when the env vars are
   # unset, so the custom provider still gets exercised here on every run.
   "modules/02-advanced-eval/observability/promptfooconfig.yaml"
-  # Module 1's grader lesson — the 70B grading its own output. Groq-only, so it runs
+  # Module 1's grader lesson — gpt-oss-20b grading its own output. Groq-only, so it runs
   # here like any other. Its assertions are the lesson; only errors count as broken.
   "modules/01-red-team/04-grading-the-grader/promptfooconfig.yaml"
   "modules/02-advanced-eval/structured-outputs/promptfooconfig.yaml"
