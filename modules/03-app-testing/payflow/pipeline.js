@@ -59,7 +59,15 @@ function loadCorpus() {
 
 // ---------------------------------------------------------------- Groq
 async function groq(apiKey, model, messages, maxTokens, jsonMode) {
-  const payload = { model, messages, temperature: 0, max_tokens: maxTokens };
+  const payload = {
+    model,
+    messages,
+    temperature: 0,
+    max_tokens: maxTokens,
+    // Qwen 3.6 otherwise emits <think> into the visible answer and can empty out
+    // json_object responses (guard/route then fail closed or 502).
+    reasoning_effort: 'none',
+  };
   // The guard and orchestrator must return one object and nothing else. Without this the
   // model will happily emit its verdict AND then a second object answering the question —
   // see the note above parseJsonObject.
