@@ -13,6 +13,8 @@ Every config before tonight pointed at a **model**. Tonight one points at a runn
 ./run.sh payflow-health     # terminal 2 — confirm it answers before you eval
 ./run.sh payflow            # 25 cases: routing, citations, guard, agency
 ./run.sh payflow-api        # HTTP contract + two planted defects (those two fail on purpose)
+./run.sh financebot-serve   # optional second app on :8001
+./run.sh financebot-api     # HTTP contract + three planted defects (those three fail on purpose)
 ./run.sh payflow-multiturn  # injection after four turns of legitimate context
 ./run.sh view               # read the results
 ```

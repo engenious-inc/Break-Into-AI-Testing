@@ -17,8 +17,8 @@ description: Run a Promptfoo eval for a config and produce the day-01-style refl
      `openrouter.medibot`, `openrouter.finance`, `payflow-redteam`,
      `financebot-redteam`, and any other Module 1 smoke/quality red-team config.
    - **Ordinary** (failed assertion = defect ❌; passed = ✅): Modules 0 and 2
-     lessons, `payflow`, `payflow-multiturn`, `financebot`, `financebot-multiturn`,
-     `mybot`, `reverse`.
+     lessons, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`,
+     `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`.
 5. Close with a 3–5 sentence reflection on accuracy, reasoning, safety consistency.
 
 Never edit configs or tests. Read-only + report.

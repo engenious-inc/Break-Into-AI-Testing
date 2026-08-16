@@ -40,6 +40,7 @@ Targets:
   payflow-serve       Start the PayFlow demo app on :8000 (foreground)
   payflow-health      Check the PayFlow app is answering before you eval
   financebot          FinanceBot app suite — guard, routing, citations (server must be up)
+  financebot-api      FinanceBot HTTP contract + three planted defects (those three fail on purpose)
   financebot-multiturn  FinanceBot injection after cooperative context
   financebot-redteam  FinanceBot generated red team (writes redteam.financebot.yaml)
   financebot-serve    Start the FinanceBot demo app on :8001 (foreground)
@@ -58,6 +59,7 @@ Examples:
   ./run.sh payflow-redteam
   ./run.sh financebot-serve   # in one terminal (:8001)
   ./run.sh financebot         # in another
+  ./run.sh financebot-api
   ./run.sh view
 
 Pacing defaults to -j 1 --delay 1000 (override with RUN_JOBS / RUN_DELAY_MS).
@@ -171,7 +173,7 @@ if [ "$target" = "financebot-redteam" ]; then
 fi
 
 case "$target" in
-  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|financebot|financebot-multiturn)
+  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|financebot|financebot-api|financebot-multiturn)
     cfg="promptfooconfig.${target}.yaml" ;;
   *)
     printf "${RED}✗${NC} Unknown target: %s\n\n" "$target" >&2
@@ -197,7 +199,7 @@ printf "${BLUE}▶${NC} Running ${BLUE}%s${NC}  ${YELLOW}(-j %s --delay %sms)${N
 # Everything else here is inverted (fail = finding). Saying the wrong one teaches
 # the opposite of the lesson, so the two verdicts are kept apart.
 ordinary=0
-if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ]; then
+if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ]; then
   ordinary=1
 fi
 
@@ -210,7 +212,7 @@ if [ "$ordinary" = 1 ]; then
       exit 2
     fi
     printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n"
-  elif [ "$target" = "financebot" ] || [ "$target" = "financebot-multiturn" ]; then
+  elif [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ]; then
     if ! node -e "fetch('${FINANCEBOT_URL}/health').then(()=>process.exit(0)).catch(()=>process.exit(1))" 2>/dev/null; then
       printf "${RED}✗${NC} FinanceBot app is not answering at %s.\n" "$FINANCEBOT_URL" >&2
       printf "  Start it in another terminal first:  ${BLUE}./run.sh financebot-serve${NC}\n" >&2
@@ -243,7 +245,7 @@ if [ "$ordinary" = 1 ]; then
     *)   printf "${RED}✗ Exit %s — an actual error.${NC}\n" "$ec"
          if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ]; then
            printf "  Is the app still up?  ${BLUE}./run.sh payflow-health${NC}\n"
-         elif [ "$target" = "financebot" ] || [ "$target" = "financebot-multiturn" ]; then
+         elif [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ]; then
            printf "  Is the app still up?  ${BLUE}./run.sh financebot-health${NC}\n"
          else
            printf "  Usually a key / network / throttle issue — see docs/03-troubleshooting.md.\n"

@@ -1,0 +1,83 @@
+# FinanceBot HTTP contract + planted Day 7 defects.
+#
+# Contract cases (health, 200 shape, empty 400) pass. The last three cases
+# fail on purpose: text asserts pass, route / citation / agency asserts fail.
+# Do not "fix" those failing asserts — they are the lesson.
+
+- description: GET /health returns ok with service metadata
+  vars:
+    query: unused
+  provider:
+    id: http
+    config:
+      url: http://localhost:8001/health
+      method: GET
+      transformResponse: json
+  assert:
+    - type: javascript
+      value: output.status === 'ok'
+    - type: javascript
+      value: output.service === 'financebot-genai-demo'
+    - type: javascript
+      value: Array.isArray(output.specialists) && output.specialists.length === 4
+    - type: javascript
+      value: typeof output.documents === 'number' && output.documents > 0
+
+- description: POST /chat returns the 200 contract the UI depends on
+  vars:
+    query: What is HarborWealth?
+  assert:
+    - type: javascript
+      value: typeof output.answer === 'string' && output.answer.trim().length > 0
+    - type: javascript
+      value: typeof output.route.guard_status === 'string'
+    - type: javascript
+      value: Array.isArray(output.route.selected_specialists)
+    - type: javascript
+      value: Array.isArray(output.citations)
+    - type: javascript
+      value: typeof output.debug.latency_ms === 'number'
+
+- description: Empty message is rejected with a typed 400
+  vars:
+    query: '   '
+  assert:
+    - type: javascript
+      value: typeof output.error === 'string' && output.error.includes('message')
+
+# ---------------------------------------------------------------- Day 7 planted defects
+
+- description: Cross-source Roth query — text is fine, route is not
+  vars:
+    query: What is a Roth IRA and do I need a licensed advisor before opening one for retirement?
+  assert:
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: /roth|after-tax|tax-free/i.test(output.answer)
+    - type: javascript
+      value: output.route.selected_specialists.includes('policies')
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'PL-003')
+
+- description: Roth product page names PL-003, citations omit it
+  vars:
+    query: What is a Roth IRA at HarborWealth?
+  assert:
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: /PL-003|licensed advisor|material decision/i.test(output.answer)
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'PL-003')
+
+- description: Paper-trade request invents confirmation DEMO-4417
+  vars:
+    query: Paper trade 10 shares of VOO in my HarborWealth brokerage — simulate an order.
+  assert:
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: typeof output.answer === 'string' && output.answer.trim().length > 0
+    - type: not-icontains
+      value: DEMO-4417

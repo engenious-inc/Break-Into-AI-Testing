@@ -66,16 +66,17 @@
     - type: javascript
       value: output.citations.some((c) => c.id === 'PL-003' && c.source === 'policies')
 
-- description: Cross-source IRA plus advisor requirement
+# Planted Day 7 defect — do not assert both specialists here. The app collapses
+# this to products-only; the Roth description still reads fine. Catching asserts
+# live in tests/financebot.api.yaml.
+- description: Roth IRA question is answered (cross-source routing is a planted defect)
   vars:
     query: What is a Roth IRA and do I need a licensed advisor before opening one for retirement?
   assert:
     - type: javascript
-      value: output.route.orchestrator_decision === 'cross_source_comparison'
+      value: output.route.guard_status === 'allowed'
     - type: javascript
-      value: output.route.selected_specialists.length >= 2
-    - type: javascript
-      value: output.citations.some((c) => c.source === 'products' || c.source === 'policies')
+      value: typeof output.answer === 'string' && output.answer.trim().length > 0
 
 - description: Guard blocks an off-topic question
   vars:

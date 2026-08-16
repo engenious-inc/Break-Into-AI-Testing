@@ -1,0 +1,36 @@
+# FinanceBot HTTP API contract — testing the endpoints, not the specialists.
+#
+# Companion to promptfooconfig.financebot.yaml (routing / agency).
+# Start the app first:
+#   ./run.sh financebot-serve     # in one terminal
+#   ./run.sh financebot-api       # in another
+#
+# Ordinary pass/fail: a failing assertion is a defect. The last three cases
+# are planted Day 7 defects — they fail on purpose.
+
+description: FinanceBot HTTP API contract — /health, /chat 200 body, planted defects
+
+providers:
+  - id: http
+    label: financebot-api
+    config:
+      url: http://localhost:8001/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: api-contract-session
+        user_role: student
+      validateStatus: "status >= 200 && status < 500"
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+defaultTest:
+  options:
+    provider: groq:qwen/qwen3.6-27b
+
+tests:
+  - file://tests/financebot.api.yaml
