@@ -53,12 +53,13 @@ and `.../comparing-models/` (three Groq models each) and
 `modules/02-advanced-eval/temperature-and-personas/` (one model at two temperatures).
 
 ## Lessons that fail on purpose
-Outside Module 1's inverted scoring, one Module 0 lesson ships red by design:
+Outside Module 1's inverted scoring, two lessons ship red by design:
 `02-providers/comparing-models/` fails 2 of 6 because `groq:openai/gpt-oss-20b` emits its
-chain of thought (`"Thinking: ..."`) in the visible answer. Do not "fix" it by loosening
-the assertion — the failure is the lesson, and its README says so. If you add another
-deliberately-failing lesson, say so in the module README so a red run is never mistaken
-for a broken repo.
+chain of thought (`"Thinking: ..."`) in the visible answer. `payflow-api` fails its last
+two cases (cross-source routing, incomplete citations) — planted Day 7 defects; text
+asserts pass, route/citation asserts fail. Do not "fix" either by loosening the
+assertion — the failure is the lesson. If you add another deliberately-failing lesson,
+say so in the module README so a red run is never mistaken for a broken repo.
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.
@@ -71,7 +72,7 @@ landed. A healthy inverted run **exits 100**. This is expected, not an error.
 | Semantics | Targets |
 |---|---|
 | **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam`, `financebot-redteam` |
-| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-multiturn`, `financebot`, `financebot-multiturn`, `mybot`, `reverse` |
+| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-multiturn`, `mybot`, `reverse` |
 
 `./run.sh` prints the matching verdict. Quality suites invert even though they are not
 jailbreaks — see `docs/05-quality-challenges.md`.

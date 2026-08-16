@@ -24,7 +24,8 @@
       value: output.citations.length > 0 && output.citations[0].id.startsWith('PF-')
     - type: javascript
       # PF-104 and PF-105 are the real blockers; PF-106 is the decoy that is open,
-      # HIGH priority, and explicitly NOT a blocker.
+      # HIGH priority, and explicitly NOT a blocker. Do not also require PF-105
+      # in citations — that incompleteness is the other planted Day 7 defect.
       value: output.answer.includes('PF-104') && output.answer.includes('PF-105')
 
 - description: Documentation query routes to confluence
@@ -68,22 +69,17 @@
         The answer describes PayFlow as an app for sending payments, managing cards, and
         tracking transaction history. It does not invent features beyond that.
 
-- description: Cross-source question routes to both confluence and jira
+# Planted Day 7 defect — do not assert the correct route here. The app collapses
+# this to jira-only; the answer still reads fine. Students add the route /
+# CF-009 assertions in tests/payflow.api.yaml (and as homework).
+- description: Login-flow question is answered (cross-source routing is a planted defect)
   vars:
     query: What changed in the login flow and is there a related Jira bug?
   assert:
     - type: javascript
-      value: output.route.orchestrator_decision === 'cross_source_comparison'
+      value: output.route.guard_status === 'allowed'
     - type: javascript
-      value: output.route.selected_specialists.length >= 2
-    - type: javascript
-      value: output.citations.some((c) => c.source === 'confluence')
-    - type: javascript
-      value: output.citations.some((c) => c.source === 'jira')
-    - type: javascript
-      # CF-009 is the login change log. It lives in Confluence, not Jira — routing to
-      # jira alone produces a grounded answer from the wrong corpus.
-      value: output.citations.some((c) => c.id === 'CF-009')
+      value: typeof output.answer === 'string' && output.answer.trim().length > 0
 
 - description: Guard blocks an off-topic question
   vars:
@@ -259,18 +255,16 @@
     - type: javascript
       value: output.citations.some((c) => c.id === 'FG-012' && c.source === 'figma')
 
-# A second cross-source pair. The first (confluence+jira) is the one that used to be
-# broken, so a fix that only worked for that pairing would still have gone green.
-- description: Cross-source question spanning figma and jira
+# Same planted collapse as the login-flow case ("ticket" → jira-only). Text-only
+# so ./run.sh payflow stays green; the catching asserts live in payflow.api.yaml.
+- description: Freeze-card question is answered (cross-source routing is a planted defect)
   vars:
     query: Which Figma screen shows the freeze card toggle, and is there a ticket for it?
   assert:
     - type: javascript
-      value: output.route.selected_specialists.length > 1
+      value: output.route.guard_status === 'allowed'
     - type: javascript
-      value: output.route.orchestrator_decision === 'cross_source_comparison'
-    - type: javascript
-      value: output.citations.some((c) => c.source === 'figma')
+      value: typeof output.answer === 'string' && output.answer.trim().length > 0
 
 # The error shape is part of the contract. server.js returns a typed 400 for an empty
 # message and nothing exercised that path — see validateStatus in the config.

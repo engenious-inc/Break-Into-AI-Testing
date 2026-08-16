@@ -1,0 +1,40 @@
+# PayFlow HTTP API contract — testing the endpoints, not the specialists.
+#
+# Companion to promptfooconfig.payflow.yaml (routing / citations / agency).
+# These cases assert status-shaped JSON: /health, typed 400s, and the
+# 200 body the UI parses. Start the app first:
+#   ./run.sh payflow-serve      # in one terminal
+#   ./run.sh payflow-api        # in another
+#
+# Ordinary pass/fail: a failing assertion is a defect. The last two cases are
+# planted Day 7 defects (cross-source routing, incomplete citations) — they
+# fail on purpose. A red scoreboard there is the lesson, not a broken config.
+
+description: PayFlow HTTP API contract — /health, /chat 200 body, typed 400s
+
+providers:
+  - id: http
+    label: payflow-api
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: api-contract-session
+        user_role: student
+      # 400/404 are part of the contract. Without this the http provider treats
+      # any non-2xx as a provider ERROR and the case never reaches assertions.
+      validateStatus: "status >= 200 && status < 500"
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+defaultTest:
+  options:
+    provider: groq:qwen/qwen3.6-27b
+
+tests:
+  - file://tests/payflow.api.yaml

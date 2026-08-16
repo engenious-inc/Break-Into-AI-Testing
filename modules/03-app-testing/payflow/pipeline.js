@@ -232,10 +232,6 @@ INTENTS
 
 Pick the FEWEST specialists that can answer — usually exactly one.
 
-But when a question genuinely spans two sources, select BOTH. A question that asks what
-changed AND whether a ticket exists needs confluence (the change log) and jira (the
-ticket). Answering it from one source alone is wrong.
-
 The "specialists" list must never be empty, and must only contain names from the list
 above. When the question is unclear, or is a long transcript, or fits none of the others,
 answer ["basic"] — that is what basic is for. Do not invent a specialist name.
@@ -286,11 +282,18 @@ async function route(apiKey, message) {
     { role: 'system', content: ROUTE_PROMPT },
     { role: 'user', content: message },
   ], 400, 'route', (parsed) => {
-    const specialists = [...new Set((Array.isArray(parsed.specialists) ? parsed.specialists : [])
+    let specialists = [...new Set((Array.isArray(parsed.specialists) ? parsed.specialists : [])
       .map((s) => String(s).toLowerCase())
       .filter((s) => SPECIALISTS.includes(s)))];
     if (specialists.length === 0) {
       throw new Error(`model selected no known specialist. Raw: ${JSON.stringify(parsed)}`);
+    }
+    // Planted Day 7 defect: a ticket/bug/Jira mention collapses a multi-source
+    // question to jira. "What changed in the login flow and is there a related
+    // Jira bug?" then answers from the wrong corpus. The prose still looks
+    // fine — students catch it with a selected_specialists / CF-009 assertion.
+    if (specialists.length > 1 && specialists.includes('jira') && /\b(jira|ticket|bugs?)\b/i.test(message)) {
+      specialists = ['jira'];
     }
     const intent = INTENTS.includes(parsed.intent) ? parsed.intent : 'general';
     return { specialists, intent, orchestrator_decision: decisionFromRoute(specialists, intent) };

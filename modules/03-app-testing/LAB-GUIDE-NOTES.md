@@ -46,10 +46,11 @@ The suite already ships multi-assertion cases. **Extend** `tests/payflow.routing
 After editing corpus or tests, re-run with `./run.sh payflow --no-cache` — a stale
 Promptfoo cache looks like `Duration: 0s` and false failures.
 
-**Homework defect to find:** README
-[Known defects — Citations are incomplete](README.md#known-defects--these-are-the-exercise)
-(PF-105 named in the answer but missing from `citations`). Cross-source routing is
-already fixed; history of that old defect is in the same README section.
+**Homework defects (both planted, both live):** README
+[Known defects](README.md#known-defects--these-are-the-exercise).
+Cross-source routing collapses *"login flow … related Jira bug?"* to `jira` (misses
+CF-009). Citations omit PF-105 from the blocker answer. `./run.sh payflow-api` fails
+those two catching asserts on purpose; `./run.sh payflow` stays green.
 
 **Routing is mostly an LLM call** (`ROUTE_PROMPT` in `pipeline.js`). Corpus IDs are the
 exception: `BK`/`PF`/`CF`/`FG` prefixes map deterministically to a specialist when exactly

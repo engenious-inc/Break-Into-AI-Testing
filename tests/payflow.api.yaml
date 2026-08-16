@@ -1,0 +1,187 @@
+# PayFlow HTTP contract — status codes, error shapes, and the /chat body.
+#
+# The routing suite asserts on pipeline decisions. These cases assert on the
+# HTTP surface: GET /health, typed 400s, 404s, and the 200 JSON the UI parses.
+# `output` is the parsed response body (transformResponse: json).
+#
+# Cases that change method, URL, or body set `provider:` on the test so they
+# do not inherit the default POST /chat template. options.provider is the
+# grader, not the target — do not put the http override there.
+
+- description: GET /health returns ok with service metadata
+  vars:
+    query: unused
+  provider:
+    id: http
+    config:
+      url: http://localhost:8000/health
+      method: GET
+      transformResponse: json
+  assert:
+    - type: javascript
+      value: output.status === 'ok'
+    - type: javascript
+      value: output.service === 'payflow-genai-demo'
+    - type: javascript
+      value: Array.isArray(output.specialists) && output.specialists.length === 4
+    - type: javascript
+      value: typeof output.documents === 'number' && output.documents > 0
+
+- description: POST /chat returns the 200 contract the UI depends on
+  vars:
+    query: What is PayFlow?
+  assert:
+    - type: javascript
+      value: typeof output.answer === 'string' && output.answer.trim().length > 0
+    - type: javascript
+      value: typeof output.route === 'object' && output.route !== null
+    - type: javascript
+      value: typeof output.route.guard_status === 'string'
+    - type: javascript
+      value: Array.isArray(output.route.selected_specialists)
+    - type: javascript
+      value: typeof output.route.orchestrator_decision === 'string'
+    - type: javascript
+      value: Array.isArray(output.citations)
+    - type: javascript
+      value: typeof output.debug === 'object' && typeof output.debug.latency_ms === 'number'
+    - type: javascript
+      value: output.session_id === 'api-contract-session'
+
+- description: POST /chat echoes the caller session_id and ignores unknown fields
+  vars:
+    query: What is PayFlow?
+  provider:
+    id: http
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: echoed-session-42
+        user_role: student
+        extra_field: should-be-ignored
+      transformResponse: json
+  assert:
+    - type: javascript
+      value: output.session_id === 'echoed-session-42'
+    - type: javascript
+      value: typeof output.answer === 'string' && output.answer.length > 0
+    - type: javascript
+      value: output.extra_field === undefined
+
+- description: Empty message is rejected with a typed 400
+  vars:
+    query: '   '
+  assert:
+    - type: javascript
+      value: typeof output.error === 'string' && output.error.includes('message')
+
+- description: Missing message field is rejected with a typed 400
+  vars:
+    query: unused
+  provider:
+    id: http
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        session_id: api-contract-session
+        user_role: student
+      validateStatus: "status >= 200 && status < 500"
+      transformResponse: json
+  assert:
+    - type: javascript
+      value: typeof output.error === 'string' && output.error.includes('message')
+
+- description: Non-string message is rejected with a typed 400
+  vars:
+    query: unused
+  provider:
+    id: http
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: 42
+        session_id: api-contract-session
+      validateStatus: "status >= 200 && status < 500"
+      transformResponse: json
+  assert:
+    - type: javascript
+      value: typeof output.error === 'string' && output.error.includes('non-empty string')
+
+- description: Invalid JSON body is rejected with a typed 400
+  vars:
+    query: unused
+  provider:
+    id: http
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: '{"message":'
+      validateStatus: "status >= 200 && status < 500"
+      transformResponse: json
+  assert:
+    - type: javascript
+      value: typeof output.error === 'string' && output.error.includes('invalid JSON')
+
+# 404s are not in this suite. Promptfoo treats HTTP 404 as "target gone" and
+# aborts the rest of the eval, even with validateStatus allowing 4xx. Probe
+# unknown paths with curl, not an eval case.
+
+- description: Guard block still returns the 200 JSON contract, not a 5xx
+  vars:
+    query: What is the weather in London today?
+  assert:
+    - type: javascript
+      value: typeof output.answer === 'string' && output.answer.length > 0
+    - type: javascript
+      value: output.route.guard_status === 'blocked'
+    - type: javascript
+      value: output.route.guard_reason === 'off_topic'
+    - type: javascript
+      value: output.route.orchestrator_decision === 'guard_blocked'
+    - type: javascript
+      value: output.route.selected_specialists.length === 0
+    - type: javascript
+      value: output.citations.length === 0
+    - type: javascript
+      value: output.error === undefined
+
+# ---------------------------------------------------------------- Day 7 planted defects
+# Text assertions pass. Route / citation assertions fail. Do not "fix" the
+# failing asserts — they are the lesson. ./run.sh payflow-api is red on these
+# two cases on purpose.
+
+- description: Cross-source login query — text is fine, route is not
+  vars:
+    query: What changed in the login flow and is there a related Jira bug?
+  assert:
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: /login|biometric|PF-130/i.test(output.answer)
+    - type: javascript
+      value: output.route.selected_specialists.includes('confluence')
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'CF-009')
+
+- description: Release blockers — answer names PF-105, citations omit it
+  vars:
+    query: What open Jira bugs are blocking the payment release?
+  assert:
+    - type: javascript
+      value: output.route.guard_status === 'allowed'
+    - type: javascript
+      value: output.answer.includes('PF-104') && output.answer.includes('PF-105')
+    - type: javascript
+      value: output.citations.some((c) => c.id === 'PF-105')

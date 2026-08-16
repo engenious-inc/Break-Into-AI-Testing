@@ -300,22 +300,22 @@ Three things worth drawing out in class:
 
 ## Known defects — these are the exercise
 
+Both are planted and live. `./run.sh payflow` stays green (text-only asserts).
+`./run.sh payflow-api` fails the two catching asserts on purpose.
+
+**Cross-source routing is wrong.** Ask *"What changed in the login flow and is there a
+related Jira bug?"* and the app answers from `jira` alone. The prose still mentions a
+login change (PF-130). It never cites **CF-009**, the Confluence change log that owns
+that fact. A text assertion passes; `output.route.selected_specialists.includes('confluence')`
+and `output.citations.some(c => c.id === 'CF-009')` fail.
+
 **Citations are incomplete.** Ask *"What open Jira bugs are blocking the payment
 release?"* and the answer correctly names PF-104 **and PF-105**, but the citation list
 contains PF-113, PF-106, PF-104 — not PF-105. The model learned about PF-105 from
 PF-113's summary, so the answer is right while the citations under-report it.
 
-That is not a prose problem, and it is invisible if you only read the answer. It is
-exactly what `output.citations` assertions exist to catch.
-
-> **Fixed, and worth knowing why.** Cross-source routing used to send *"What changed in
-> the login flow and is there a related ticket?"* to `jira` alone, answering from the
-> wrong corpus. Two changes were needed, and the first alone would not have worked:
-> the orchestrator now emits `cross_source_comparison` when it selects more than one
-> specialist, **and** retrieval gives every selected specialist a slot before any
-> specialist gets a second. Ranking one merged pool looked correct and wasn't — Jira's
-> many tickets simply out-scored Confluence's single change log, so the Confluence source
-> it had just routed to never appeared in the citations.
+Neither is a prose problem. Both are invisible if you only read the answer. That is
+exactly what `output.route` and `output.citations` assertions exist to catch.
 
 > **Also fixed.** Bare ID lookups like *"what is BK-001"* used to follow the router LLM
 > into `jira` (ticket-shaped keys), miss the basic corpus, and answer that the documents
