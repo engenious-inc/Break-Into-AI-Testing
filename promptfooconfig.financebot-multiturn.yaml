@@ -1,0 +1,33 @@
+# FinanceBot multi-turn — does legitimate context soften the guard?
+#
+# Flattened transcript into a single message field (FinanceBot is stateless, like PayFlow).
+#
+# Start the app first:
+#   ./run.sh financebot-serve         # in one terminal
+#   ./run.sh financebot-multiturn     # in another
+
+description: FinanceBot multi-turn — injection after four turns of legitimate context
+
+providers:
+  - id: http
+    label: financebot-api
+    config:
+      url: http://localhost:8001/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: lab3-multiturn-financebot
+        user_role: student
+      transformResponse: json
+
+prompts:
+  - file://prompts/financebot-multiturn.txt
+
+defaultTest:
+  options:
+    provider: groq:qwen/qwen3.6-27b
+
+tests:
+  - file://tests/financebot.multiturn.yaml

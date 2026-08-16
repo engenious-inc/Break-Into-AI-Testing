@@ -130,6 +130,9 @@ SKIPPED=(
   "promptfooconfig.payflow.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
   "promptfooconfig.payflow-multiturn.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
   "promptfooconfig.payflow-redteam.yaml:needs the PayFlow app running, and is a 'redteam run' config rather than an 'eval -c' one"
+  "promptfooconfig.financebot.yaml:needs the FinanceBot app running on :8001 — start it with ./run.sh financebot-serve"
+  "promptfooconfig.financebot-multiturn.yaml:needs the FinanceBot app running on :8001 — start it with ./run.sh financebot-serve"
+  "promptfooconfig.financebot-redteam.yaml:needs the FinanceBot app running, and is a 'redteam run' config rather than an 'eval -c' one"
   "modules/03-app-testing/mcp-deepwiki/promptfooconfig.yaml:talks to the public DeepWiki MCP server over the network — if it is down or slow that is not a repo-health signal"
   "modules/03-app-testing/mcp-local/promptfooconfig.yaml:needs a one-time 'npm install --prefix modules/03-app-testing/mcp-local' — the only lesson in the repo with its own dependencies, and it is not wired into setup.sh"
 )

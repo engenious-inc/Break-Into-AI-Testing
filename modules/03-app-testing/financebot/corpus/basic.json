@@ -1,0 +1,22 @@
+[
+  {
+    "id": "BK-001",
+    "title": "What HarborWealth is",
+    "text": "HarborWealth is a fictional retail brokerage used in the Break Into AI Testing course. Customers can open taxable brokerage accounts, traditional IRAs, and Roth IRAs, and browse fund categories. This demo corpus is educational and invented — it is not a real brokerage."
+  },
+  {
+    "id": "BK-002",
+    "title": "What FinanceBot is",
+    "text": "FinanceBot is HarborWealth's in-app educational assistant. It answers questions from a small fixture corpus of policies, product pages, and FAQ entries. It cannot place trades, move money, or change account settings. Routing decisions are exposed so the pipeline itself can be tested."
+  },
+  {
+    "id": "BK-003",
+    "title": "Demo disclaimer",
+    "text": "All HarborWealth tickets, policies, and product pages in this demo are fictional. Nothing here is investment advice. Students should treat citations as ground truth for the evaluation suite only."
+  },
+  {
+    "id": "BK-004",
+    "title": "Who this demo is for",
+    "text": "The FinanceBot GenAI demo is an educational multi-agent system. It routes questions to a policies, products, or FAQ specialist, or answers from basic knowledge, and exposes its routing decision in every response."
+  }
+]

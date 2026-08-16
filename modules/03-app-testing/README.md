@@ -8,6 +8,7 @@ something else:
 | Lesson | Provider / surface | Target |
 |--------|-------------------|--------|
 | PayFlow (below) | `http` | Local multi-agent app — assert on **route + citations** |
+| FinanceBot (below) | `http` | HarborWealth multi-agent app on `:8001` — same contract |
 | [`mcp-deepwiki/`](./mcp-deepwiki/) | `mcp` (`url:`) | Remote DeepWiki — **tool output shapes** |
 | [`mcp-local/`](./mcp-local/) | `mcp` (`command:`) | Local stdio server — happy path + **path-traversal guard** |
 | [`mcp-promptfoo/`](./mcp-promptfoo/) | Promptfoo **is** the MCP server | IDE agents get `validate` / `run` / `list` eval tools |
@@ -153,6 +154,35 @@ or directly:
 npx promptfoo@latest eval -c promptfooconfig.payflow.yaml -j 2
 npx promptfoo@latest view
 ```
+
+## The app: FinanceBot GenAI demo (HarborWealth)
+
+Same pipeline shape as PayFlow, different domain. **HarborWealth** is a fictional retail
+brokerage; **FinanceBot** is its in-app assistant. Specialists and ID prefixes:
+
+| Specialist | Prefix | Owns |
+|------------|--------|------|
+| `basic` | `BK-*` | What HarborWealth / FinanceBot is, demo disclaimer |
+| `policies` | `PL-*` | No ticker picks, no predictions, advisor on material decisions |
+| `products` | `PR-*` | Brokerage / IRA / Roth, fund categories, rollover overview |
+| `faq` | `FQ-*` | Support hours, advisor consult steps |
+
+Port **8001** (`FINANCEBOT_PORT`) so both apps can run at once. Module 1's prompt-only
+FinanceBot (`prompts/financebot.txt` + `promptfooconfig.finance.yaml`) is unchanged —
+this is the Module 3 application track.
+
+```bash
+./run.sh financebot-serve      # terminal 1 — http://localhost:8001
+./run.sh financebot-health
+./run.sh financebot            # ordinary: routing + agency
+./run.sh financebot-multiturn
+./run.sh financebot-redteam    # inverted; writes redteam.financebot.yaml (not redteam.yaml)
+```
+
+The HTTP contract matches PayFlow (`POST /chat` → `{answer, route, citations, debug}`).
+Answer-stage prompts embed FinanceBot's non-negotiable finance rules (no specific
+securities, no price predictions, advisor on material decisions) on top of grounded
+citation rules.
 
 > **Editing the corpus? Add `--no-cache`.** Promptfoo caches by request, and the request
 > here is just your question — it has no idea the documents behind the app changed. Edit a
@@ -300,11 +330,16 @@ exactly what `output.citations` assertions exist to catch.
    Start the server, then assert on `output.route` and `output.citations`.
    `tests/payflow.agency.yaml` adds the overreliance/excessive-agency cases. Lab-slot
    checklist: [`LAB-GUIDE-NOTES.md`](LAB-GUIDE-NOTES.md).
-2. **Remote MCP** — [`mcp-deepwiki/`](./mcp-deepwiki/). No local server. Three cases teach
+2. **FinanceBot** — `financebot/` + root `promptfooconfig.financebot.yaml`, plus
+   multiturn and redteam configs. Same HTTP contract as PayFlow on port **8001**.
+   HarborWealth specialists: `policies` / `products` / `faq` / `basic`
+   (`PL-*` / `PR-*` / `FQ-*` / `BK-*`). Module 1's prompt-only FinanceBot
+   (`promptfooconfig.finance.yaml`) is unchanged — this is the app-testing track.
+3. **Remote MCP** — [`mcp-deepwiki/`](./mcp-deepwiki/). No local server. Three cases teach
    when to use deterministic vs `llm-rubric` vs error-path asserts against tool output.
-3. **Local MCP** — [`mcp-local/`](./mcp-local/). Promptfoo spawns a tiny stdio server
+4. **Local MCP** — [`mcp-local/`](./mcp-local/). Promptfoo spawns a tiny stdio server
    (`npm install` once). Happy-path tools plus a path-traversal refusal you assert on.
-4. **Promptfoo’s MCP** — [`mcp-promptfoo/`](./mcp-promptfoo/). Promptfoo exposes eval tools
+5. **Promptfoo’s MCP** — [`mcp-promptfoo/`](./mcp-promptfoo/). Promptfoo exposes eval tools
    to Cursor/Claude (`validate_promptfoo_config`, `run_evaluation`, …). Not a provider
    lesson — a control-plane lesson. Shared config: root `.cursor/mcp.json` (`npx -y
    promptfoo@latest …`, no machine-specific paths).

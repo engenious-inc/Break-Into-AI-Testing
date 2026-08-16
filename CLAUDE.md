@@ -70,8 +70,8 @@ landed. A healthy inverted run **exits 100**. This is expected, not an error.
 
 | Semantics | Targets |
 |---|---|
-| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam` |
-| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse` |
+| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam`, `financebot-redteam` |
+| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-multiturn`, `financebot`, `financebot-multiturn`, `mybot`, `reverse` |
 
 `./run.sh` prints the matching verdict. Quality suites invert even though they are not
 jailbreaks — see `docs/05-quality-challenges.md`.
@@ -90,10 +90,10 @@ keep default live-eval request volume low.
   `04-grading-the-grader/` ships its own triplet)
 - `modules/00-promptfoo-basics/` — Module 0 (Promptfoo pillars)
 - `modules/02-advanced-eval/` — Module 2 (weights, metrics, CSV, F-score, debugging)
-- `modules/03-app-testing/` — Module 3 (PayFlow `http` app, plus an MCP track:
+- `modules/03-app-testing/` — Module 3 (PayFlow + FinanceBot `http` apps, plus an MCP track:
   `mcp-deepwiki/`, `mcp-local/`, `mcp-promptfoo/`)
-- `.claude/` — the Claude Code workflow (`red-teamer` + Module 3 `payflow-guide`
-  agents, new-eval-suite + run-and-summarize skills). In Module 1 these are the
+- `.claude/` — the Claude Code workflow (`red-teamer` + Module 3 `payflow-guide` /
+  `financebot-guide` agents, new-eval-suite + run-and-summarize skills). In Module 1 these are the
   student's path, not optional authoring aids; Modules 0 and 2 use them only for
   scaffolding.
 

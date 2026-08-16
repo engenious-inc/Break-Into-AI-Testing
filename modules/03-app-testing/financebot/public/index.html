@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FinanceBot — HarborWealth</title>
+  <style>
+    /* Layout and palette adapted from Jaimeman84/financial-chat-bot (globals.css).
+       Still a single static file — no Next.js / npm — so Module 3 stays zero-dep. */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --warning-bg: #fef3c7;
+      --warning-border: #f59e0b;
+      --assistant-bg: #f0f4ff;
+      --user-bg: #e0e7ff;
+      --error-bg: #fee2e2;
+      --block-bg: #fff7ed;
+      --radius: 8px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .header h1 {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .header .sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .new-chat-btn {
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      cursor: pointer;
+      color: var(--text);
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .new-chat-btn:hover { background: var(--bg); }
+
+    .disclaimer {
+      padding: 10px 20px;
+      font-size: 0.82rem;
+      background: var(--warning-bg);
+      border-bottom: 2px solid var(--warning-border);
+      color: #92400e;
+      text-align: center;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      max-width: 85%;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      word-break: break-word;
+      line-height: 1.6;
+    }
+    .message.user {
+      align-self: flex-end;
+      background: var(--user-bg);
+      white-space: pre-wrap;
+    }
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--assistant-bg);
+    }
+    .message.assistant.blocked {
+      background: var(--block-bg);
+    }
+    .message.error {
+      align-self: center;
+      background: var(--error-bg);
+      color: #991b1b;
+      font-size: 0.85rem;
+      text-align: center;
+      white-space: pre-wrap;
+    }
+
+    .message .role {
+      font-size: 0.72rem;
+      font-weight: 650;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .message.assistant p { margin: 0.4em 0; }
+    .message.assistant p:first-child { margin-top: 0; }
+    .message.assistant p:last-child { margin-bottom: 0; }
+    .message.assistant ul, .message.assistant ol {
+      margin: 0.4em 0;
+      padding-left: 1.4em;
+    }
+    .message.assistant code {
+      background: rgba(0, 0, 0, 0.06);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.88em;
+      font-family: var(--mono);
+    }
+
+    .pipeline {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-family: var(--mono);
+    }
+    .pipeline div { margin-top: 2px; }
+    .citations { margin-top: 6px; }
+    .citations code {
+      display: inline-block;
+      margin: 2px 4px 0 0;
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--surface);
+      font-size: 0.75rem;
+    }
+    details.debug {
+      margin-top: 6px;
+      font-size: 0.75rem;
+    }
+    details.debug summary {
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    details.debug pre {
+      margin: 6px 0 0;
+      padding: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 0.72rem;
+      white-space: pre-wrap;
+    }
+
+    .empty {
+      margin: auto;
+      text-align: center;
+      color: var(--text-muted);
+      max-width: 420px;
+      padding: 24px 12px;
+    }
+    .empty h2 {
+      font-size: 1.05rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .empty p { font-size: 0.9rem; margin-bottom: 16px; }
+    .suggestions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .suggestions button {
+      text-align: left;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .suggestions button:hover {
+      border-color: var(--primary);
+      background: var(--assistant-bg);
+    }
+
+    .input-area {
+      padding: 12px 16px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .input-area form {
+      display: flex;
+      gap: 8px;
+    }
+    .input-area textarea {
+      flex: 1;
+      resize: none;
+      min-height: 44px;
+      max-height: 140px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font: inherit;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: var(--bg);
+    }
+    .input-area textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .input-area button[type="submit"] {
+      padding: 0 18px;
+      border: 0;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .input-area button[type="submit"]:hover { background: var(--primary-hover); }
+    .input-area button[type="submit"]:disabled {
+      opacity: 0.55;
+      cursor: wait;
+    }
+    .hint {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div>
+        <h1>FinanceBot</h1>
+        <div class="sub">HarborWealth educational assistant · <code>POST /chat</code></div>
+      </div>
+      <button type="button" class="new-chat-btn" id="new-chat">New chat</button>
+    </header>
+
+    <div class="disclaimer">
+      This chatbot provides general financial education only — not personalized
+      financial advice. Always consult a qualified financial advisor for decisions
+      about your specific situation.
+    </div>
+
+    <div class="messages" id="log" aria-live="polite">
+      <div class="empty" id="empty">
+        <h2>Ask about HarborWealth</h2>
+        <p>Policies, account types, and support — each reply shows route and citations so you can test the pipeline.</p>
+        <div class="suggestions">
+          <button type="button" data-q="What does HarborWealth policy say about recommending specific stocks?">What does policy say about recommending stocks?</button>
+          <button type="button" data-q="What is a traditional IRA at HarborWealth?">What is a traditional IRA?</button>
+          <button type="button" data-q="What are HarborWealth's support hours?">What are support hours?</button>
+          <button type="button" data-q="How do I request a licensed advisor consult?">How do I request an advisor consult?</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-area">
+      <form id="chat-form">
+        <textarea id="message" rows="1" placeholder="Ask a personal-finance question…" required></textarea>
+        <button type="submit" id="send">Send</button>
+      </form>
+      <div class="hint">Each send is a new request (no server session). Pipeline metadata appears under assistant replies.</div>
+    </div>
+  </div>
+
+  <script>
+    const log = document.getElementById('log');
+    const empty = document.getElementById('empty');
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('message');
+    const sendBtn = document.getElementById('send');
+    const newChatBtn = document.getElementById('new-chat');
+
+    function hideEmpty() {
+      if (empty && empty.parentNode) empty.remove();
+      const current = document.getElementById('empty');
+      if (current) current.remove();
+    }
+
+    function buildEmpty() {
+      const wrap = document.createElement('div');
+      wrap.className = 'empty';
+      wrap.id = 'empty';
+      wrap.innerHTML =
+        '<h2>Ask about HarborWealth</h2>' +
+        '<p>Policies, account types, and support — each reply shows route and citations so you can test the pipeline.</p>' +
+        '<div class="suggestions">' +
+        '<button type="button" data-q="What does HarborWealth policy say about recommending specific stocks?">What does policy say about recommending stocks?</button>' +
+        '<button type="button" data-q="What is a traditional IRA at HarborWealth?">What is a traditional IRA?</button>' +
+        '<button type="button" data-q="What are HarborWealth\'s support hours?">What are support hours?</button>' +
+        '<button type="button" data-q="How do I request a licensed advisor consult?">How do I request an advisor consult?</button>' +
+        '</div>';
+      wrap.querySelectorAll('[data-q]').forEach((btn) => {
+        btn.addEventListener('click', () => sendMessage(btn.getAttribute('data-q')));
+      });
+      return wrap;
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Minimal markdown-ish rendering for assistant prose (bold, code, paragraphs, lists).
+    function formatAnswer(text) {
+      const escaped = escapeHtml(text);
+      const withCode = escaped.replace(/`([^`]+)`/g, '<code>$1</code>');
+      const withBold = withCode.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      const lines = withBold.split(/\n+/);
+      const blocks = [];
+      let list = null;
+      for (const line of lines) {
+        const bullet = /^\s*[-*]\s+(.+)$/.exec(line);
+        if (bullet) {
+          if (!list) { list = []; blocks.push(list); }
+          list.push(bullet[1]);
+          continue;
+        }
+        list = null;
+        if (line.trim()) blocks.push(line);
+      }
+      return blocks.map((b) => {
+        if (Array.isArray(b)) {
+          return '<ul>' + b.map((li) => '<li>' + li + '</li>').join('') + '</ul>';
+        }
+        return '<p>' + b + '</p>';
+      }).join('');
+    }
+
+    function addBubble(role, html, className) {
+      hideEmpty();
+      const el = document.createElement('div');
+      const isUser = role === 'You';
+      el.className = 'message '
+        + (isUser ? 'user' : (role === 'Error' ? 'error' : 'assistant'))
+        + (className ? ' ' + className : '');
+      el.innerHTML = '<div class="role">' + escapeHtml(role) + '</div>' + html;
+      log.appendChild(el);
+      el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      return el;
+    }
+
+    function renderResult(data) {
+      const route = data.route || {};
+      const blocked = route.guard_status === 'blocked';
+      const parts = [];
+      parts.push('<div class="body">' + formatAnswer(data.answer || '(empty answer)') + '</div>');
+      parts.push('<div class="pipeline">');
+      parts.push('<div>route: ' + escapeHtml(route.orchestrator_decision || '—') + '</div>');
+      parts.push('<div>guard: ' + escapeHtml(route.guard_status || '—')
+        + (route.guard_reason ? ' (' + escapeHtml(route.guard_reason) + ')' : '')
+        + '</div>');
+      if (Array.isArray(route.selected_specialists) && route.selected_specialists.length) {
+        parts.push('<div>specialists: ' + escapeHtml(route.selected_specialists.join(', ')) + '</div>');
+      }
+      if (data.debug && typeof data.debug.latency_ms === 'number') {
+        parts.push('<div>latency: ' + data.debug.latency_ms + ' ms</div>');
+      }
+      parts.push('</div>');
+
+      if (Array.isArray(data.citations) && data.citations.length) {
+        parts.push('<div class="citations">citations: '
+          + data.citations.map((c) =>
+            '<code>' + escapeHtml(c.id) + ' · ' + escapeHtml(c.source) + '</code>'
+          ).join('')
+          + '</div>');
+      }
+
+      if (data.debug && Array.isArray(data.debug.steps) && data.debug.steps.length) {
+        parts.push(
+          '<details class="debug"><summary>debug.steps</summary><pre>'
+          + escapeHtml(data.debug.steps.join('\n'))
+          + '</pre></details>'
+        );
+      }
+
+      addBubble('FinanceBot', parts.join(''), blocked ? 'blocked' : '');
+    }
+
+    async function sendMessage(message) {
+      const text = String(message || '').trim();
+      if (!text || sendBtn.disabled) return;
+
+      addBubble('You', escapeHtml(text));
+      input.value = '';
+      sendBtn.disabled = true;
+
+      let res;
+      try {
+        res = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text }),
+        });
+      } catch (err) {
+        addBubble('Error', escapeHtml('Could not reach the server. Is financebot-serve running?\n' + err.message), 'error');
+        sendBtn.disabled = false;
+        input.focus();
+        return;
+      }
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (err) {
+        addBubble('Error', escapeHtml('HTTP ' + res.status + ': response was not JSON'), 'error');
+        sendBtn.disabled = false;
+        input.focus();
+        return;
+      }
+
+      if (!res.ok) {
+        addBubble('Error', escapeHtml('HTTP ' + res.status + ': ' + (data.error || JSON.stringify(data))), 'error');
+      } else {
+        renderResult(data);
+      }
+
+      sendBtn.disabled = false;
+      input.focus();
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendMessage(input.value);
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage(input.value);
+      }
+    });
+
+    newChatBtn.addEventListener('click', () => {
+      log.innerHTML = '';
+      log.appendChild(buildEmpty());
+      input.value = '';
+      sendBtn.disabled = false;
+      input.focus();
+    });
+
+    document.querySelectorAll('#empty [data-q]').forEach((btn) => {
+      btn.addEventListener('click', () => sendMessage(btn.getAttribute('data-q')));
+    });
+
+    input.focus();
+  </script>
+</body>
+</html>

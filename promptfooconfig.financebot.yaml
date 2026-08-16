@@ -1,0 +1,36 @@
+# FinanceBot GenAI demo — testing an APPLICATION, not a model.
+#
+# Same http-provider pattern as PayFlow. Start the app first:
+#   node modules/03-app-testing/financebot/server.js     # or ./run.sh financebot-serve
+#
+# Then:
+#   ./run.sh financebot
+#   npx promptfoo@latest eval -c promptfooconfig.financebot.yaml -j 2
+
+description: FinanceBot GenAI demo — guard, routing, retrieval and grounding
+
+providers:
+  - id: http
+    label: financebot-api
+    config:
+      url: http://localhost:8001/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: eval-session-promptfoo
+        user_role: student
+      validateStatus: "status >= 200 && status < 500"
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+defaultTest:
+  options:
+    provider: groq:qwen/qwen3.6-27b
+
+tests:
+  - file://tests/financebot.routing.yaml
+  - file://tests/financebot.agency.yaml
