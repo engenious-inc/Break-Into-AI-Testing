@@ -222,12 +222,11 @@
       addBubble('PayFlow', parts.join(''), blocked ? 'blocked' : '');
     }
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const message = input.value.trim();
-      if (!message) return;
+    async function sendMessage(message) {
+      const text = String(message || '').trim();
+      if (!text || sendBtn.disabled) return;
 
-      addBubble('You', escapeHtml(message));
+      addBubble('You', escapeHtml(text));
       input.value = '';
       sendBtn.disabled = true;
 
@@ -236,7 +235,7 @@
         res = await fetch('/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message }),
+          body: JSON.stringify({ message: text }),
         });
       } catch (err) {
         addBubble('Error', escapeHtml('Could not reach the server. Is payflow-serve running?\n' + err.message), 'error');
@@ -263,6 +262,18 @@
 
       sendBtn.disabled = false;
       input.focus();
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendMessage(input.value);
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage(input.value);
+      }
     });
 
     input.focus();
