@@ -36,6 +36,9 @@ Targets:
   payflow             PayFlow app suite — guard, routing, citations (server must be up)
   payflow-api         PayFlow HTTP contract + two planted defects (those two fail on purpose)
   payflow-multiturn   PayFlow injection after 4 turns of legitimate context
+  payflow-rbac        PayFlow access control — user_role is sent, never enforced (5 of 6 fail on purpose)
+  payflow-exposure    PayFlow hidden context exposure, LLM08:2026 (5 of 6 fail on purpose)
+  payflow-poisoning   PayFlow corpus poisoning — retrieved docs are uninspected (3 of 5 fail on purpose)
   payflow-redteam     PayFlow generated red team (promptfoo redteam run — slow)
   payflow-serve       Start the PayFlow demo app on :8000 (foreground)
   payflow-health      Check the PayFlow app is answering before you eval
@@ -56,6 +59,10 @@ Examples:
   ./run.sh payflow            # in another
   ./run.sh payflow-api
   ./run.sh payflow-multiturn
+  ./run.sh payflow-rbac       # Day 7 — access control
+  ./run.sh payflow-exposure   # Day 8 — hidden context exposure
+  PAYFLOW_POISON=1 ./run.sh payflow-serve   # terminal 1 — overlay PF-777
+  ./run.sh payflow-poisoning  # Day 8 — corpus poisoning
   ./run.sh payflow-redteam
   ./run.sh financebot-serve   # in one terminal (:8001)
   ./run.sh financebot         # in another
@@ -173,7 +180,7 @@ if [ "$target" = "financebot-redteam" ]; then
 fi
 
 case "$target" in
-  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|financebot|financebot-api|financebot-multiturn)
+  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|payflow-rbac|payflow-exposure|payflow-poisoning|financebot|financebot-api|financebot-multiturn)
     cfg="promptfooconfig.${target}.yaml" ;;
   *)
     printf "${RED}✗${NC} Unknown target: %s\n\n" "$target" >&2
@@ -203,28 +210,52 @@ if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "
   ordinary=1
 fi
 
-if [ "$ordinary" = 1 ]; then
-  if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ]; then
+# The app suites need the server up whichever semantics they use — payflow-rbac,
+# payflow-exposure and payflow-poisoning are inverted but still point at :8000,
+# and a dead server produces connection errors that look exactly like failing tests.
+case "$target" in
+  payflow|payflow-api|payflow-multiturn|payflow-rbac|payflow-exposure|payflow-poisoning)
     if ! node -e "fetch('${PAYFLOW_URL}/health').then(()=>process.exit(0)).catch(()=>process.exit(1))" 2>/dev/null; then
       printf "${RED}✗${NC} PayFlow app is not answering at %s.\n" "$PAYFLOW_URL" >&2
       printf "  Start it in another terminal first:  ${BLUE}./run.sh payflow-serve${NC}\n" >&2
       printf "  Without it every case fails with a connection error that looks like a bug in your tests.\n" >&2
       exit 2
     fi
-    printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n"
-  elif [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ]; then
+    if [ "$target" = "payflow-poisoning" ]; then
+      if ! node -e "fetch('${PAYFLOW_URL}/health').then(r=>r.json()).then(j=>process.exit(j.poisoned===true?0:1)).catch(()=>process.exit(1))" 2>/dev/null; then
+        printf "${RED}✗${NC} PayFlow is up, but the poisoned corpus is not loaded.\n" >&2
+        printf "  Restart it with:  ${BLUE}PAYFLOW_POISON=1 ./run.sh payflow-serve${NC}\n" >&2
+        printf "  Without the overlay every finding would pass, and the lesson would silently invert.\n" >&2
+        exit 2
+      fi
+    fi ;;
+  financebot|financebot-api|financebot-multiturn)
     if ! node -e "fetch('${FINANCEBOT_URL}/health').then(()=>process.exit(0)).catch(()=>process.exit(1))" 2>/dev/null; then
       printf "${RED}✗${NC} FinanceBot app is not answering at %s.\n" "$FINANCEBOT_URL" >&2
       printf "  Start it in another terminal first:  ${BLUE}./run.sh financebot-serve${NC}\n" >&2
       printf "  Without it every case fails with a connection error that looks like a bug in your tests.\n" >&2
       exit 2
-    fi
-    printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n"
-  else
-    printf "  Ordinary suite — a ${YELLOW}failing${NC} check is a defect in your bot, not a finding.\n\n"
-  fi
+    fi ;;
+esac
+
+if [ "$ordinary" = 1 ]; then
+  case "$target" in
+    payflow|payflow-api|payflow-multiturn|financebot|financebot-api|financebot-multiturn)
+      printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n" ;;
+    *)
+      printf "  Ordinary suite — a ${YELLOW}failing${NC} check is a defect in your bot, not a finding.\n\n" ;;
+  esac
 else
-  printf "  Reminder: these are red-team suites — a ${YELLOW}failing${NC} check means the model did the thing you were testing for. That's the finding, not an error.\n\n"
+  case "$target" in
+    payflow-rbac|payflow-exposure)
+      printf "  Inverted against the ${BLUE}application${NC} — the assertions describe a hardened PayFlow, so a ${YELLOW}failing${NC} check is a finding in the app itself.\n"
+      printf "  One case is a control and passes. Do not relax the others; the fix belongs in pipeline.js.\n\n" ;;
+    payflow-poisoning)
+      printf "  Inverted against the ${BLUE}application${NC} — the assertions describe a PayFlow that inspects retrieved documents the same way it inspects the user message.\n"
+      printf "  Two cases are controls and pass. Do not relax the others; the guard is pointed at the wrong channel.\n\n" ;;
+    *)
+      printf "  Reminder: these are red-team suites — a ${YELLOW}failing${NC} check means the model did the thing you were testing for. That's the finding, not an error.\n\n" ;;
+  esac
 fi
 
 ec=0
@@ -253,6 +284,19 @@ if [ "$ordinary" = 1 ]; then
   esac
   exit "$ec"
 fi
+
+case "$target" in
+  payflow-rbac|payflow-exposure|payflow-poisoning)
+    case "$ec" in
+      0)   printf "${YELLOW}? Exit 0 — nothing failed, which is not what this suite expects.${NC}\n"
+           printf "  Either somebody hardened the pipeline, or the assertions stopped reaching the app.\n" ;;
+      100) printf "${GREEN}✓ Exit 100 — the findings are still there. That's the healthy result.${NC}\n"
+           printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
+      *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"
+           printf "  Is the app still up?  ${BLUE}./run.sh payflow-health${NC}\n" ;;
+    esac
+    exit "$ec" ;;
+esac
 
 case "$ec" in
   0)

@@ -78,6 +78,7 @@ function readBody(req) {
 const apiKey = loadKey();
 const corpus = loadCorpus();
 const docCount = Object.values(corpus).reduce((n, docs) => n + docs.length, 0);
+const poisoned = process.env.PAYFLOW_POISON === '1';
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
@@ -88,6 +89,7 @@ const server = http.createServer(async (req, res) => {
       service: 'payflow-genai-demo',
       specialists: Object.keys(corpus),
       documents: docCount,
+      poisoned,
     });
   }
 
@@ -123,5 +125,8 @@ const server = http.createServer(async (req, res) => {
 server.listen(PORT, () => {
   console.log(`PayFlow GenAI demo listening on http://localhost:${PORT}`);
   console.log(`  ${docCount} documents across ${Object.keys(corpus).join(', ')}`);
+  if (poisoned) {
+    console.log('  PAYFLOW_POISON=1 — corpus/poisoned.json is loaded (Day 8 lesson)');
+  }
   console.log(`  GET  /         GET /health   POST /chat`);
 });
