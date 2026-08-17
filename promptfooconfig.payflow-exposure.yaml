@@ -1,0 +1,53 @@
+# PayFlow hidden context exposure — LLM08:2026, shipped in the demo.
+#
+# The OWASP GenAI LLM Top 10 2026 (published 2026-08-03) renamed
+# "System Prompt Leakage" to "Hidden Context Exposure" and widened its scope
+# past the prompt to business logic, internal configuration, retrieval pipeline
+# details and tool definitions.
+#
+# PayFlow passes the 2025 test and fails the 2026 one. Nothing changed in the
+# app. The definition moved.
+#
+#   ./run.sh payflow-serve       # terminal 1
+#   ./run.sh payflow-exposure    # terminal 2
+#
+# INVERTED semantics — assertions describe an app that keeps its internals to
+# itself. One case passes (the system prompt really does not leak); the rest
+# fail, and exit 100 is the healthy result.
+#
+# This suite deliberately collides with tests/payflow.routing.yaml, which
+# asserts output.debug.steps exists and names each stage. Both are correct.
+# `debug` is a feature for the operator and a disclosure for everybody else,
+# and nothing in the repo had made anyone choose. Run both suites and make the
+# room pick: delete it, gate it behind a header, or keep it and write down why.
+#
+# It also collides with modules/04-retrieval-eval/ (planned), which needs the
+# app to return MORE — the retrieved document text — before context-faithfulness
+# can be measured at all. Testability and exposure pull in opposite directions
+# on the same field. That tension is the lesson, not a defect in either suite.
+#
+# Cost: 6 cases, at most 3 Groq calls each, one of them a bare GET. Cheap.
+# Every assertion is deterministic: `javascript` and `not-icontains`, no grader.
+
+description: 'PayFlow hidden context exposure — LLM08:2026 in the 200 body'
+
+providers:
+  - id: http
+    label: payflow-exposure
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: exposure-session
+        user_role: student
+      validateStatus: 'status >= 200 && status < 500'
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+tests:
+  - file://tests/payflow.exposure.yaml

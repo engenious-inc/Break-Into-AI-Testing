@@ -10,7 +10,7 @@ something else:
 | PayFlow (below) | `http` | Local multi-agent app — assert on **route + citations** |
 | FinanceBot (below) | `http` | HarborWealth multi-agent app on `:8001` — same contract |
 | [`mcp-deepwiki/`](./mcp-deepwiki/) | `mcp` (`url:`) | Remote DeepWiki — **tool output shapes** |
-| [`mcp-local/`](./mcp-local/) | `mcp` (`command:`) | Local stdio server — happy path + **path-traversal guard** |
+| [`mcp-local/`](./mcp-local/) | `mcp` (`command:`) | Local stdio server — happy path + **path-traversal guard**; Day 8 adds over-scoped tools |
 | [`mcp-promptfoo/`](./mcp-promptfoo/) | Promptfoo **is** the MCP server | IDE agents get `validate` / `run` / `list` eval tools |
 
 When the provider is a model, the only thing you can assert on is the text it produced.
@@ -352,6 +352,9 @@ exactly what `output.route` and `output.citations` assertions exist to catch.
    when to use deterministic vs `llm-rubric` vs error-path asserts against tool output.
 4. **Local MCP** — [`mcp-local/`](./mcp-local/). Promptfoo spawns a tiny stdio server
    (`npm install` once). Happy-path tools plus a path-traversal refusal you assert on.
+   `./run.sh mcp-local`. Day 8 reuses this server: `./run.sh mcp-abuse` (JSON, inverted),
+   `./run.sh mcp-agent` (Groq picks the tool), `./run.sh mcp-injection` (tool-result
+   injection).
 5. **Promptfoo’s MCP** — [`mcp-promptfoo/`](./mcp-promptfoo/). Promptfoo exposes eval tools
    to Cursor/Claude (`validate_promptfoo_config`, `run_evaluation`, …). Not a provider
    lesson — a control-plane lesson. Shared config: root `.cursor/mcp.json` (`npx -y

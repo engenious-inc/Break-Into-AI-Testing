@@ -14,8 +14,12 @@ Every config before tonight pointed at a **model**. Tonight one points at a runn
 ./run.sh payflow            # 25 cases: routing, citations, guard, agency
 ./run.sh payflow-api        # HTTP contract + two planted defects (those two fail on purpose)
 ./run.sh financebot-serve   # optional second app on :8001
+./run.sh financebot         # 17 cases: routing, citations, guard, agency
 ./run.sh financebot-api     # HTTP contract + three planted defects (those three fail on purpose)
+./run.sh financebot-multiturn  # the same injection shape, against the second app
 ./run.sh payflow-multiturn  # injection after four turns of legitimate context
+./run.sh payflow-rbac       # access control: 1 control passes, 5 findings fail
+./run.sh mcp-local          # local MCP: echo / add / read / path-traversal (no Groq key)
 ./run.sh view               # read the results
 ```
 
@@ -32,6 +36,28 @@ Without it `output` is a string and you are grepping prose. With it you can asse
 `output.route.selected_specialists` — *which specialist answered*, not just what it said.
 Most real AI defects are routing and retrieval defects, and they are invisible in the text.
 
+## The field nobody reads
+
+Every PayFlow config in this repo sends `user_role` in the request body.
+`tests/payflow.api.yaml` sends it twice. Neither `payflow/server.js` nor
+`payflow/pipeline.js` ever reads it. PayFlow has an authorization parameter and no
+authorization.
+
+`./run.sh payflow-rbac` is six cases against that. Case 1 is a control and passes: `staff`
+asks for the release blockers and gets them. Case 2 sends the **identical question** with
+`user_role: anonymous` and gets the identical answer, the identical route, and the
+identical citations. Put the two rows next to each other in `./run.sh view` — the only
+difference in the request is one string, and there is no difference at all in the
+response.
+
+This suite is **inverted** and it is the only PayFlow suite that is. Five of six failing
+is the healthy result. Do not relax the assertions; the fix belongs in `pipeline.js`, and
+writing it is the interesting part.
+
+It also makes the argument for `transformResponse: json` better than any other case in the
+day: the answer text is perfectly good prose. The finding is only visible in
+`output.route` — or rather, in what `output.route` does not contain.
+
 ## Read this
 
 - [`modules/03-app-testing/`](../modules/03-app-testing/) — the module overview and the
@@ -46,11 +72,12 @@ Most real AI defects are routing and retrieval defects, and they are invisible i
 
 | Lesson | Provider |
 |---|---|
-| [`mcp-local/`](../modules/03-app-testing/mcp-local/) | a local stdio server Promptfoo spawns — needs a one-time `npm install --prefix modules/03-app-testing/mcp-local` |
+| [`mcp-local/`](../modules/03-app-testing/mcp-local/) | a local stdio server Promptfoo spawns — `./run.sh mcp-local` after a one-time `npm install --prefix modules/03-app-testing/mcp-local` |
 | [`mcp-deepwiki/`](../modules/03-app-testing/mcp-deepwiki/) | a remote MCP server over the network |
 | [`mcp-promptfoo/`](../modules/03-app-testing/mcp-promptfoo/) | Promptfoo *as* the MCP server, giving your IDE agent eval tools |
 
 If you only do one, do `mcp-local` — every assertion in it is deterministic, no API key.
+The same server grows extra tools for Day 8; do not delete them to make a suite go green.
 
 ## Homework
 

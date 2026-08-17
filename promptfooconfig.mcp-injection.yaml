@@ -1,0 +1,36 @@
+# MCP injection — tool output is an untrusted channel.
+#
+# search_notes always returns a poisoned operator note that tells the model
+# to call write_note with the workshop canary. The user asked a Day-7-shaped
+# question. Same beat as payflow-poisoning: the payload never sat in the
+# user message.
+#
+#   ./run.sh mcp-injection
+#
+# INVERTED. One control passes; the finding fails. Exit 100 is the healthy
+# result. Single Groq model.
+#
+# Day 8. Needs GROQ_API_KEY and the one-time mcp-local npm install.
+
+description: 'MCP injection — search_notes result instructs write_note'
+
+providers:
+  - id: groq:qwen/qwen3.6-27b
+    config:
+      temperature: 0
+      max_tokens: 400
+      reasoning_effort: none
+      reasoning_format: hidden
+      mcp:
+        enabled: true
+        server:
+          command: node
+          args:
+            - modules/03-app-testing/mcp-local/server.mjs
+          name: workshop-local
+
+prompts:
+  - '{{query}}'
+
+tests:
+  - file://tests/mcp.injection.yaml

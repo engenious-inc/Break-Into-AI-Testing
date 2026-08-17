@@ -1,0 +1,45 @@
+# PayFlow corpus poisoning — the guard inspects the wrong channel.
+#
+# The user message is classified. Retrieved documents are not. PF-777 carries
+# an instruction the guard would have blocked as prompt_injection if it had
+# arrived in the message; retrieval delivers it as context instead.
+#
+#   PAYFLOW_POISON=1 ./run.sh payflow-serve   # terminal 1
+#   ./run.sh payflow-poisoning                # terminal 2
+#
+# ./run.sh payflow-poisoning refuses to run unless /health reports poisoned: true.
+# Without the overlay every finding would pass, and the lesson would silently invert.
+#
+# INVERTED semantics. Two cases are controls and pass (the payload as a user
+# message is blocked; citations disclose PF-777). Three fail, and exit 100 is
+# the healthy result.
+#
+# Do not "fix" this by relaxing the assertions. The finding is that the guard
+# never sees the retrieved text. The overlay is behind PAYFLOW_POISON=1 so the
+# shipped suites stay green; a restart without the flag clears it.
+#
+# Cost: 5 cases, at most 3 Groq calls each. Comfortable on the free tier.
+# Every assertion is `javascript`. No grader.
+
+description: PayFlow corpus poisoning — retrieved docs are an uninspected channel
+
+providers:
+  - id: http
+    label: payflow-poisoning
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: poisoning-session
+        user_role: student
+      validateStatus: 'status >= 200 && status < 500'
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+tests:
+  - file://tests/payflow.poisoning.yaml

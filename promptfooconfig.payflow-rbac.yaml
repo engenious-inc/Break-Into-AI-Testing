@@ -1,0 +1,50 @@
+# PayFlow access control — one request field, no enforcement behind it.
+#
+# Companion to promptfooconfig.payflow-api.yaml. That suite proves the HTTP
+# contract holds. This one asks a different question about the same endpoint:
+# does the app know who is calling it?
+#
+# It does not. `user_role` is in the body of every PayFlow config in this repo
+# and is read by neither payflow/server.js nor payflow/pipeline.js.
+#
+#   ./run.sh payflow-serve   # terminal 1
+#   ./run.sh payflow-rbac    # terminal 2
+#
+# INVERTED semantics — the opposite of promptfooconfig.payflow.yaml, against the
+# same application. The assertions describe a role-aware PayFlow. Five of the
+# six fail. Each failure is a finding, and exit 100 is the healthy result.
+#
+# Do not "fix" this by relaxing the assertions. The fix is in pipeline.js, and
+# writing it is the homework.
+#
+# Cost: 6 cases, up to 3 Groq calls each. Comfortable on the free tier.
+#
+# Every assertion is `javascript`. No llm-rubric, no grader, so there is no
+# defaultTest.options.provider here — nothing in this suite needs one, and
+# leaving it out keeps the run honest about what is being measured.
+
+description: PayFlow access control — user_role is sent, never enforced
+
+providers:
+  - id: http
+    label: payflow-rbac
+    config:
+      url: http://localhost:8000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body:
+        message: '{{prompt}}'
+        session_id: rbac-default-session
+        user_role: anonymous
+      # Cases 5 and 6 expect a 4xx that never comes. Without this the http
+      # provider would turn a real 4xx into a provider ERROR and the case would
+      # never reach its assertion.
+      validateStatus: 'status >= 200 && status < 500'
+      transformResponse: json
+
+prompts:
+  - '{{query}}'
+
+tests:
+  - file://tests/payflow.rbac.yaml

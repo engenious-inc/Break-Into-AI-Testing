@@ -1,0 +1,31 @@
+# MCP tool-abuse — the inventory is the vulnerability.
+#
+# Same workshop-local server as mcp-local/. The path-traversal check on
+# read_workspace_file still holds; these cases never call it. They call the
+# over-scoped tools the same process exposes.
+#
+#   ./run.sh mcp-abuse
+#
+# INVERTED — assertions describe a hardened server. Two controls pass; the
+# rest fail. Exit 100 is the healthy result. No Groq key.
+#
+# Day 8. Ordinary mcp-local stays on Day 7.
+
+description: 'MCP tool-abuse — write_note / read_secret / http_get / search_notes'
+
+providers:
+  - id: mcp
+    config:
+      enabled: true
+      timeout: 60000
+      server:
+        command: node
+        args:
+          - modules/03-app-testing/mcp-local/server.mjs
+        name: workshop-local
+
+prompts:
+  - '{{prompt}}'
+
+tests:
+  - file://tests/mcp.abuse.yaml

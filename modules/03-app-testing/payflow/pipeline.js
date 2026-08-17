@@ -47,12 +47,26 @@ function loadKey() {
 }
 
 // ---------------------------------------------------------------- corpus
+// PAYFLOW_POISON=1 overlays corpus/poisoned.json into the matching specialist
+// pools. Default path is byte-identical to the four shipped fixtures — the Day 8
+// poisoning lesson turns this on deliberately, and a restart clears it.
 function loadCorpus() {
   const dir = path.join(__dirname, 'corpus');
   const corpus = {};
   for (const source of SPECIALISTS) {
     const file = path.join(dir, `${source}.json`);
     corpus[source] = JSON.parse(fs.readFileSync(file, 'utf8')).map((doc) => ({ ...doc, source }));
+  }
+  if (process.env.PAYFLOW_POISON === '1') {
+    const poisonPath = path.join(dir, 'poisoned.json');
+    const extras = JSON.parse(fs.readFileSync(poisonPath, 'utf8'));
+    for (const doc of extras) {
+      const source = doc.source;
+      if (!SPECIALISTS.includes(source)) {
+        throw new Error(`poisoned.json doc ${doc.id} has unknown source "${source}"`);
+      }
+      corpus[source].push({ ...doc, source });
+    }
   }
   return corpus;
 }

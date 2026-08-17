@@ -130,6 +130,9 @@ SKIPPED=(
   "promptfooconfig.payflow.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
   "promptfooconfig.payflow-api.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
   "promptfooconfig.payflow-multiturn.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
+  "promptfooconfig.payflow-rbac.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
+  "promptfooconfig.payflow-exposure.yaml:needs the PayFlow app running on :8000 — start it with ./run.sh payflow-serve"
+  "promptfooconfig.payflow-poisoning.yaml:needs PAYFLOW_POISON=1 ./run.sh payflow-serve — the overlay is off by default so the shipped suites stay green"
   "promptfooconfig.payflow-redteam.yaml:needs the PayFlow app running, and is a 'redteam run' config rather than an 'eval -c' one"
   "promptfooconfig.financebot.yaml:needs the FinanceBot app running on :8001 — start it with ./run.sh financebot-serve"
   "promptfooconfig.financebot-api.yaml:needs the FinanceBot app running on :8001 — start it with ./run.sh financebot-serve"
@@ -137,6 +140,9 @@ SKIPPED=(
   "promptfooconfig.financebot-redteam.yaml:needs the FinanceBot app running, and is a 'redteam run' config rather than an 'eval -c' one"
   "modules/03-app-testing/mcp-deepwiki/promptfooconfig.yaml:talks to the public DeepWiki MCP server over the network — if it is down or slow that is not a repo-health signal"
   "modules/03-app-testing/mcp-local/promptfooconfig.yaml:needs a one-time 'npm install --prefix modules/03-app-testing/mcp-local' — the only lesson in the repo with its own dependencies, and it is not wired into setup.sh"
+  "promptfooconfig.mcp-abuse.yaml:needs a one-time 'npm install --prefix modules/03-app-testing/mcp-local' — same server as mcp-local"
+  "promptfooconfig.mcp-agent.yaml:needs GROQ_API_KEY plus a one-time 'npm install --prefix modules/03-app-testing/mcp-local'"
+  "promptfooconfig.mcp-injection.yaml:needs GROQ_API_KEY plus a one-time 'npm install --prefix modules/03-app-testing/mcp-local'"
 )
 
 # Intentionally-broken debugger fix-me stages — expected to NOT run clean.
