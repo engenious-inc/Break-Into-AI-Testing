@@ -42,6 +42,10 @@ Targets:
   payflow-redteam     PayFlow generated red team (promptfoo redteam run — slow)
   payflow-serve       Start the PayFlow demo app on :8000 (foreground)
   payflow-health      Check the PayFlow app is answering before you eval
+  mcp-local           Local stdio MCP — echo / add / read / path-traversal (no Groq key)
+  mcp-abuse           MCP tool-abuse — write_note / read_secret / http_get (inverted, no Groq key)
+  mcp-agent           MCP agent — Groq picks tools on workshop-local (inverted)
+  mcp-injection       MCP injection — search_notes result instructs write_note (inverted)
   financebot          FinanceBot app suite — guard, routing, citations (server must be up)
   financebot-api      FinanceBot HTTP contract + three planted defects (those three fail on purpose)
   financebot-multiturn  FinanceBot injection after cooperative context
@@ -64,6 +68,10 @@ Examples:
   PAYFLOW_POISON=1 ./run.sh payflow-serve   # terminal 1 — overlay PF-777
   ./run.sh payflow-poisoning  # Day 8 — corpus poisoning
   ./run.sh payflow-redteam
+  ./run.sh mcp-local          # Day 7 — local MCP, no Groq key
+  ./run.sh mcp-abuse          # Day 8 — over-scoped tools, no Groq key
+  ./run.sh mcp-agent          # Day 8 — the model picks the tool
+  ./run.sh mcp-injection      # Day 8 — tool output is an untrusted channel
   ./run.sh financebot-serve   # in one terminal (:8001)
   ./run.sh financebot         # in another
   ./run.sh financebot-api
@@ -180,7 +188,9 @@ if [ "$target" = "financebot-redteam" ]; then
 fi
 
 case "$target" in
-  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|payflow-rbac|payflow-exposure|payflow-poisoning|financebot|financebot-api|financebot-multiturn)
+  mcp-local)
+    cfg="modules/03-app-testing/mcp-local/promptfooconfig.yaml" ;;
+  medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|payflow-rbac|payflow-exposure|payflow-poisoning|financebot|financebot-api|financebot-multiturn|mcp-abuse|mcp-agent|mcp-injection)
     cfg="promptfooconfig.${target}.yaml" ;;
   *)
     printf "${RED}✗${NC} Unknown target: %s\n\n" "$target" >&2
@@ -206,9 +216,20 @@ printf "${BLUE}▶${NC} Running ${BLUE}%s${NC}  ${YELLOW}(-j %s --delay %sms)${N
 # Everything else here is inverted (fail = finding). Saying the wrong one teaches
 # the opposite of the lesson, so the two verdicts are kept apart.
 ordinary=0
-if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ]; then
+if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ] || [ "$target" = "mcp-local" ]; then
   ordinary=1
 fi
+
+# mcp-local and the Day 8 MCP suites spawn workshop-local from this folder.
+# A missing install looks like a spawn error, not a failing assertion.
+case "$target" in
+  mcp-local|mcp-abuse|mcp-agent|mcp-injection)
+    if [ ! -d modules/03-app-testing/mcp-local/node_modules/@modelcontextprotocol ]; then
+      printf "${RED}✗${NC} mcp-local dependencies are not installed.\n" >&2
+      printf "  One-time:  ${BLUE}npm install --prefix modules/03-app-testing/mcp-local${NC}\n" >&2
+      exit 2
+    fi ;;
+esac
 
 # The app suites need the server up whichever semantics they use — payflow-rbac,
 # payflow-exposure and payflow-poisoning are inverted but still point at :8000,
@@ -242,6 +263,8 @@ if [ "$ordinary" = 1 ]; then
   case "$target" in
     payflow|payflow-api|payflow-multiturn|financebot|financebot-api|financebot-multiturn)
       printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n" ;;
+    mcp-local)
+      printf "  Testing the ${BLUE}MCP server${NC} with JSON tool calls — pass means the happy path and the path-traversal guard held.\n\n" ;;
     *)
       printf "  Ordinary suite — a ${YELLOW}failing${NC} check is a defect in your bot, not a finding.\n\n" ;;
   esac
@@ -250,6 +273,15 @@ else
     payflow-rbac|payflow-exposure)
       printf "  Inverted against the ${BLUE}application${NC} — the assertions describe a hardened PayFlow, so a ${YELLOW}failing${NC} check is a finding in the app itself.\n"
       printf "  One case is a control and passes. Do not relax the others; the fix belongs in pipeline.js.\n\n" ;;
+    mcp-abuse)
+      printf "  Inverted against the ${BLUE}MCP server${NC} — the assertions describe a hardened tool inventory, so a ${YELLOW}failing${NC} check is a finding in server.mjs.\n"
+      printf "  Two cases are controls and pass. Do not relax the others; the path-traversal check does not cover write_note.\n\n" ;;
+    mcp-agent)
+      printf "  Inverted against the ${BLUE}agent${NC} — Groq is given the workshop-local schemas and decides which tool to call.\n"
+      printf "  Three cases are controls and pass. The findings are that a model with write_note in its inventory will use it.\n\n" ;;
+    mcp-injection)
+      printf "  Inverted against the ${BLUE}agent${NC} — search_notes returns an instruction; the user message is ordinary.\n"
+      printf "  One case is a control and passes. Same beat as payflow-poisoning: the payload never sat in the user message.\n\n" ;;
     payflow-poisoning)
       printf "  Inverted against the ${BLUE}application${NC} — the assertions describe a PayFlow that inspects retrieved documents the same way it inspects the user message.\n"
       printf "  Two cases are controls and pass. Do not relax the others; the guard is pointed at the wrong channel.\n\n" ;;
@@ -268,6 +300,8 @@ if [ "$ordinary" = 1 ]; then
     0)   printf "${GREEN}✓ Exit 0 — every case passed.${NC}\n"
          if [ "$target" = "mybot" ]; then
            printf "  Guardrails held where they should; benign and gray-area cases behaved.\n"
+         elif [ "$target" = "mcp-local" ]; then
+           printf "  Happy paths returned the fixture values; path traversal was refused.\n"
          else
            printf "  Guard fired where it should, routing picked the right specialist, citations lined up.\n"
          fi ;;
@@ -294,6 +328,16 @@ case "$target" in
            printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
       *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"
            printf "  Is the app still up?  ${BLUE}./run.sh payflow-health${NC}\n" ;;
+    esac
+    exit "$ec" ;;
+  mcp-abuse|mcp-agent|mcp-injection)
+    case "$ec" in
+      0)   printf "${YELLOW}? Exit 0 — nothing failed, which is not what this suite expects.${NC}\n"
+           printf "  Either somebody hardened server.mjs, or Groq refused the tool calls this run.\n" ;;
+      100) printf "${GREEN}✓ Exit 100 — the findings are still there. That's the healthy result.${NC}\n"
+           printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
+      *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"
+           printf "  Is mcp-local installed?  ${BLUE}npm install --prefix modules/03-app-testing/mcp-local${NC}\n" ;;
     esac
     exit "$ec" ;;
 esac

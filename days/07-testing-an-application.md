@@ -19,6 +19,7 @@ Every config before tonight pointed at a **model**. Tonight one points at a runn
 ./run.sh financebot-multiturn  # the same injection shape, against the second app
 ./run.sh payflow-multiturn  # injection after four turns of legitimate context
 ./run.sh payflow-rbac       # access control: 1 control passes, 5 findings fail
+./run.sh mcp-local          # local MCP: echo / add / read / path-traversal (no Groq key)
 ./run.sh view               # read the results
 ```
 
@@ -71,11 +72,12 @@ day: the answer text is perfectly good prose. The finding is only visible in
 
 | Lesson | Provider |
 |---|---|
-| [`mcp-local/`](../modules/03-app-testing/mcp-local/) | a local stdio server Promptfoo spawns — needs a one-time `npm install --prefix modules/03-app-testing/mcp-local` |
+| [`mcp-local/`](../modules/03-app-testing/mcp-local/) | a local stdio server Promptfoo spawns — `./run.sh mcp-local` after a one-time `npm install --prefix modules/03-app-testing/mcp-local` |
 | [`mcp-deepwiki/`](../modules/03-app-testing/mcp-deepwiki/) | a remote MCP server over the network |
 | [`mcp-promptfoo/`](../modules/03-app-testing/mcp-promptfoo/) | Promptfoo *as* the MCP server, giving your IDE agent eval tools |
 
 If you only do one, do `mcp-local` — every assertion in it is deterministic, no API key.
+The same server grows extra tools for Day 8; do not delete them to make a suite go green.
 
 ## Homework
 

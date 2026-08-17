@@ -1,5 +1,6 @@
 .env
 node_modules/
+modules/03-app-testing/mcp-local/notes/
 output/
 .promptfoo/
 *.log

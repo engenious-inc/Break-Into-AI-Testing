@@ -18,14 +18,18 @@ Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.
 > use Promptfoo's `http` provider against local multi-agent apps (assert on route +
 > citations — server must be up: `./run.sh payflow-serve` then `./run.sh payflow`, or
 > `./run.sh financebot-serve` then `./run.sh financebot`).
-> MCP track: `mcp-deepwiki/` (remote SUT), `mcp-local/` (stdio SUT — install once), and
-> `mcp-promptfoo/` (Promptfoo *is* the MCP server for the IDE — see root `.cursor/mcp.json`).
+> MCP track: `mcp-deepwiki/` (remote SUT), `mcp-local/` (stdio SUT — install once,
+> `./run.sh mcp-local`), and `mcp-promptfoo/` (Promptfoo *is* the MCP server for the IDE —
+> see root `.cursor/mcp.json`). Day 8 reuses workshop-local: `./run.sh mcp-abuse` (JSON,
+> inverted), `./run.sh mcp-agent` (Groq picks the tool), `./run.sh mcp-injection`
+> (tool-result injection).
 > The first two test tools; the third drives evals from chat.
 >
 > It is also the only module with **both** semantics: `payflow` / `payflow-multiturn` and
-> `financebot` / `financebot-multiturn` are ordinary pass=good suites, while
+> `financebot` / `financebot-multiturn` and `mcp-local` are ordinary pass=good suites, while
 > `payflow-redteam` / `financebot-redteam` generate their own attacks and invert them,
-> like Module 1. Lab-slot checklist:
+> like Module 1, and `mcp-abuse` / `mcp-agent` / `mcp-injection` invert against the
+> workshop-local tool inventory. Lab-slot checklist:
 > [`LAB-GUIDE-NOTES.md`](03-app-testing/LAB-GUIDE-NOTES.md).
 
 > **Module 1's runnable artifacts still live at the repo root** — `prompts/`, `tests/`,

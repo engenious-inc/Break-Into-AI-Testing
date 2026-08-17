@@ -148,6 +148,23 @@ Full cadence table: module [`README.md`](README.md).
 Closing question for the class: *"Why does deterministic checking take under a second
 when evals take minutes?"*
 
+## Day 8 — MCP tool-abuse
+
+```bash
+npm install --prefix modules/03-app-testing/mcp-local   # once
+./run.sh mcp-local        # Day 7 leftover — 4/4 pass
+./run.sh mcp-abuse        # no Groq; 2 pass / 4 fail
+./run.sh mcp-agent        # Groq; 3 pass / 2 fail
+./run.sh mcp-injection    # Groq; 1 pass / 1 fail
+```
+
+The path-traversal check on `read_workspace_file` still holds. The findings are the
+*other* tools: `write_note` has no allow-list, `read_secret` has no auth, `http_get`
+reports `would_fetch` for `169.254.169.254`, `search_notes` returns an instruction.
+Do not delete the tools to green the suite. Homework is an allow-list on `write_note`.
+
+`mcp-local` is ordinary (pass = good). The other three are inverted (exit 100 is healthy).
+
 ## Instructor — teaching points that travel well
 
 - **Overreliance / excessive agency** — concrete fintech cases in

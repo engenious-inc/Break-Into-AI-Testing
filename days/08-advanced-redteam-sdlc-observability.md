@@ -21,6 +21,11 @@ npx promptfoo@latest redteam eval -c redteam.yaml -j 1 --delay 1000
 PAYFLOW_POISON=1 ./run.sh payflow-serve   # restart terminal 1 with the overlay
 ./run.sh payflow-poisoning                # 2 controls pass, 3 findings fail
 
+# the same MCP server Day 7 tested with JSON — now the inventory is the finding
+./run.sh mcp-abuse                        # no Groq key; 2 controls pass, 4 findings fail
+./run.sh mcp-agent                        # Groq picks the tool; 3 controls pass, 2 findings fail
+./run.sh mcp-injection                    # search_notes result instructs write_note
+
 # the same generator against the second app (needs ./run.sh financebot-serve on :8001)
 ./run.sh financebot-redteam
 
@@ -107,13 +112,43 @@ that would have worked is already in the 200 body.
 Without the overlay every finding would pass, and the lesson would silently invert.
 Restart without the flag and the overlay is gone — do not edit `jira.json`.
 
+## The inventory is the vulnerability
+
+Day 7's `./run.sh mcp-local` proved the path-traversal check on `read_workspace_file`
+holds. Day 8 calls the *other* tools on the same server.
+
+```bash
+./run.sh mcp-abuse        # JSON tool calls, no Groq key
+./run.sh mcp-agent        # English prompts; Groq picks the tool
+./run.sh mcp-injection    # search_notes returns the payload
+```
+
+`write_note` has no allow-list. `read_secret` has no auth. `http_get` does not fetch,
+but it will tell you it *would* have requested `http://169.254.169.254/`. `search_notes`
+returns an instruction-shaped operator note. The path-traversal check never sees any of
+them, because it is attached to one tool.
+
+`mcp-abuse` is inverted and needs no API key: 2 controls pass, 4 findings fail. That is
+the lesson that always runs. `mcp-agent` is the missing beat from Day 7 — the prompt is
+English, the model is given the schemas, and a model with `write_note` in its inventory
+will use it. `mcp-injection` is PayFlow poisoning with a different channel: the user asked for the
+release status; `search_notes` returned an instruction to `write_note` the secret.
+Qwen often does not follow that instruction (same as PayFlow's first poisoning
+payload). The finding still lands — the canary is already in the tool result the
+model was given. `mcp-abuse` case 6 is the server-only proof that the payload is
+emitted with no model in the loop.
+
+Homework: add an allow-list to `write_note`, re-run `./run.sh mcp-abuse`, and watch the
+write finding go green. Do not relax the assertion.
+
 ## Inverted scoreboard, again
 
 `payflow-redteam` is a red-team target: a **failing** check means the attack landed. That
 is the finding. `payflow-exposure` and `payflow-poisoning` are inverted too, for a
 different reason — their assertions describe a hardened app, so a failure is a finding in
-PayFlow rather than a landed attack. `payflow` and the observability lesson are ordinary —
-pass means good.
+PayFlow rather than a landed attack. `mcp-abuse`, `mcp-agent` and `mcp-injection` are the
+same idea against workshop-local. `payflow` and the observability lesson are ordinary —
+pass means good. `mcp-local` is ordinary too.
 
 **`payflow-exposure` deliberately contradicts `payflow`.** `tests/payflow.routing.yaml`
 asserts `output.debug.steps` exists and names every stage; `tests/payflow.exposure.yaml`
@@ -137,6 +172,13 @@ Worth saying out loud: some defects are invisible to a per-case assertion framew
   retrieved documents are an uninspected channel. Overlay is behind `PAYFLOW_POISON=1`.
 - [`redteam.yaml`](../redteam.yaml) — the generated attacks themselves. Read them. Plugin
   names like `hijacking` mean nothing until you see the prompt one produced.
+- [`promptfooconfig.mcp-abuse.yaml`](../promptfooconfig.mcp-abuse.yaml) — JSON tool
+  calls against the over-scoped tools. No Groq key. The path-traversal check is still
+  green; it is attached to the wrong tool.
+- [`promptfooconfig.mcp-agent.yaml`](../promptfooconfig.mcp-agent.yaml) — Groq with
+  `mcp.enabled` on the same server. English prompts.
+- [`promptfooconfig.mcp-injection.yaml`](../promptfooconfig.mcp-injection.yaml) —
+  `search_notes` returns the payload; the user message is ordinary.
 - [`LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md) — redteam pacing,
   replay vs regenerate, known traps
 - [`observability/`](../modules/02-advanced-eval/observability/) — genuine wire-compatible

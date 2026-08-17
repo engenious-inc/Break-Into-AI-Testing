@@ -39,13 +39,17 @@ renumbered once between cohorts, which is why the lessons are not stored in day 
 
 | Semantics | Exit 100 means | Targets |
 |---|---|---|
-| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning` |
-| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse` |
+| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
+| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse`, `mcp-local` |
 
 `payflow-rbac`, `payflow-exposure` and `payflow-poisoning` are the inverted suites that
 point at the **application** rather than at a model. Their assertions describe a hardened
 PayFlow, so a failure is a finding in the app itself. Each ships at least one control case
 that passes — if the control fails too, the harness is broken, not the app.
+
+`mcp-abuse`, `mcp-agent` and `mcp-injection` are the inverted suites that point at the
+**workshop-local MCP server** (and, for the last two, at Groq holding its tool schemas).
+`mcp-local` is ordinary: pass means the path-traversal guard held.
 
 `./run.sh` prints the right verdict for each. Quality suites invert even though they are
 not jailbreaks — a fail still means the model behaved badly.

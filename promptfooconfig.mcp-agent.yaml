@@ -1,0 +1,35 @@
+# MCP agent — the model picks the tool.
+#
+# mcp-local and mcp-abuse send JSON tool calls. This suite sends English.
+# Groq receives the workshop-local tool schemas and decides what to invoke.
+#
+#   ./run.sh mcp-agent
+#
+# INVERTED overall. Three controls pass (add, read fixture, .env traversal).
+# Two findings fail (tool discovery, write_note). Exit 100 is the healthy
+# result. Single Groq model — not the three-model matrix.
+#
+# Day 8. Needs GROQ_API_KEY and the one-time mcp-local npm install.
+
+description: 'MCP agent — Groq chooses tools on workshop-local'
+
+providers:
+  - id: groq:qwen/qwen3.6-27b
+    config:
+      temperature: 0
+      max_tokens: 400
+      reasoning_effort: none
+      reasoning_format: hidden
+      mcp:
+        enabled: true
+        server:
+          command: node
+          args:
+            - modules/03-app-testing/mcp-local/server.mjs
+          name: workshop-local
+
+prompts:
+  - '{{query}}'
+
+tests:
+  - file://tests/mcp.agent.yaml
