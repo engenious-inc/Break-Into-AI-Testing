@@ -29,8 +29,13 @@ PAYFLOW_POISON=1 ./run.sh payflow-serve   # restart terminal 1 with the overlay
 # the same generator against the second app (needs ./run.sh financebot-serve on :8001)
 ./run.sh financebot-redteam
 
-# observability: a real OTLP span per LLM call, one per subject
+# observability: a real OTLP span per LLM call, one per subject (TutorBot eval)
 npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
+
+# same keys, the running app — look for payflow.chat (parent) vs llm.chat.completion (TutorBot)
+curl -s http://localhost:8000/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"What is PayFlow?","session_id":"day8-otel","user_role":"student"}'
 ```
 
 **Want to see them land somewhere?** [Agenta](https://agenta.ai) cloud is free and speaks
@@ -40,8 +45,12 @@ OTLP. Sign up, then one line in `.env`:
 AGENTA_API_KEY=...
 ```
 
-Three traces appear, one per subject. Open one and look for `tutor.subject` — that
-attribute is the difference between a span you can read and a span you can *query*.
+Three TutorBot traces appear, one per subject. Then the curl above (or one question in
+the chat UI on :8000) adds a `payflow.chat` parent with `llm.chat.completion` children —
+that is the deployed app, not the eval provider. Open a TutorBot span and look for
+`tutor.subject`; open a PayFlow span and look for `session_id` /
+`route.orchestrator_decision`. Those attributes are the difference between a span you
+can read and a span you can *query*.
 
 Without a key the lesson still runs and tells you it skipped the POST. The span is real
 either way; only the network call is optional.
@@ -62,7 +71,7 @@ details, and keys embedded in tool definitions.
 
 `./run.sh payflow-exposure` is that rename, run against PayFlow. Case 1 is the control and
 it **passes**: the system prompt genuinely does not leak, because the guard's raw verdict
-is never echoed to the caller — `pipeline.js:185-191` explains why that was deliberate. So
+is never echoed to the caller — `pipeline.js:218-224` explains why that was deliberate. So
 by the 2025 definition PayFlow is clean.
 
 The other five cases fail. `debug.steps` returns `Guard check: allowed`,
@@ -159,9 +168,11 @@ keep it and write down why.
 
 Then notice that deleting it does not close the finding. A blocked request makes one Groq
 call and an allowed one makes three, so the wall clock reports the guard verdict whether
-or not `latency_ms` is in the body. There is no assertion for that, because Promptfoo
-grades one case at a time and this finding is a *relationship between two responses*.
-Worth saying out loud: some defects are invisible to a per-case assertion framework.
+or not `latency_ms` is in the body. Act 3 puts that same duration on the `payflow.chat`
+span as `debug.latency_ms` — the JSON leak and the telemetry sink are the same number.
+There is no assertion for that, because Promptfoo grades one case at a time and this
+finding is a *relationship between two responses*. Worth saying out loud: some defects
+are invisible to a per-case assertion framework.
 
 ## Read this
 
@@ -195,5 +206,6 @@ question carrying a false premise. A model that says "I can't help with that" ha
 and the false premise walked out intact.
 
 **Telemetry is a place data leaks.** The observability lesson ships the prompt's SHA-256,
-never the prompt. You lose debuggability and gain a defensible export. That is a trade
-somebody has to decide deliberately.
+never the prompt — and PayFlow's `payflow.chat` export uses the same switch. You lose
+debuggability and gain a defensible export. That is a trade somebody has to decide
+deliberately.

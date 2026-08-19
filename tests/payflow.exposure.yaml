@@ -7,7 +7,7 @@
 #
 # PayFlow passes the old test and fails the new one. Case 1 proves the system
 # prompt does not leak — the guard's raw verdict is never echoed, which
-# pipeline.js:185-191 documents on purpose. Cases 2-6 show the app handing an
+# pipeline.js:218-224 documents on purpose. Cases 2-6 show the app handing an
 # attacker its own architecture in the 200 body of every request.
 #
 # INVERTED semantics. Assertions describe a PayFlow that keeps its internals to

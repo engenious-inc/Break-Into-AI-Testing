@@ -110,7 +110,10 @@ const server = http.createServer(async (req, res) => {
       return send(res, 400, { error: 'field "message" is required and must be a non-empty string' });
     }
     try {
-      const result = await handleChat(apiKey, corpus, message);
+      const result = await handleChat(apiKey, corpus, message, {
+        session_id: payload.session_id,
+        user_role: payload.user_role,
+      });
       console.log(`  ${result.route.orchestrator_decision.padEnd(28)} ${result.debug.latency_ms}ms  ${message.slice(0, 58)}`);
       return send(res, 200, { ...result, session_id: payload.session_id ?? null });
     } catch (err) {

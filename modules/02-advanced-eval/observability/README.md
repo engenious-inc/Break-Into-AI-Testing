@@ -189,12 +189,34 @@ LOG_RAW_PROMPTS=true
 For a live demo you probably want it on — hashes make a dull dashboard. For anything
 touching real user traffic, the default is the default for a reason.
 
-## Why MediBot/FinanceBot don't have any of this
+## The same bytes, from the running app
 
-Module 1's bots call Groq directly via Promptfoo's built-in `groq:` provider
-— there's no code of ours in that path to instrument. This lesson swaps in a
-*custom* provider specifically so there's somewhere to put that
-instrumentation. In a real deployment, your own API layer is that somewhere.
+The eval above instruments a custom Promptfoo provider wrapping TutorBot — that
+is the "what is a span / OTLP is bytes" lesson. Act 3 of Day 8 is the deployed
+app.
+
+PayFlow's `POST /chat` emits a parent `payflow.chat` span plus one
+`llm.chat.completion` child per Groq call (guard, orchestrator, answer), through
+the same `otlp.mjs`. Module 1's bots still cannot: they go through Promptfoo's
+built-in `groq:` provider, and there is no code of ours on that path. FinanceBot
+is the twin; it is not instrumented yet.
+
+With `./run.sh payflow-serve` running and `AGENTA_API_KEY` set:
+
+```bash
+curl -s http://localhost:8000/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"What is PayFlow?","session_id":"day8-otel","user_role":"student"}'
+```
+
+The 200 body is unchanged. The server log grows `[agenta] OTLP 200` and a
+`payflow.chat` line. In Agenta, filter on span name `payflow.chat` — that is the
+app — versus TutorBot's root `llm.chat.completion`.
+
+`debug.latency_ms` in the JSON (the [`payflow-exposure`](../../../tests/payflow.exposure.yaml)
+finding) is the same number as `debug.latency_ms` on the parent span. Same leak,
+two sinks. `LOG_RAW_PROMPTS` unset still hashes `input.value` / `output.value`;
+the user message does not leave the process in the clear.
 
 > Extension lesson — not part of the original `how-to-test-ai` day-03-promptfoo-advanced
 > curriculum. Taught on **Day 8** (Advanced Red Teaming, SDLC Testing + Arato.ai &

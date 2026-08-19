@@ -10,6 +10,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { withRequestTrace, currentTrace } = require('./telemetry');
 
 const GROQ_API_BASE = process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1';
 const FAST_MODEL = 'qwen/qwen3.6-27b';      // guard + routing: short, structured
@@ -72,7 +73,7 @@ function loadCorpus() {
 }
 
 // ---------------------------------------------------------------- Groq
-async function groq(apiKey, model, messages, maxTokens, jsonMode) {
+async function groq(apiKey, model, messages, maxTokens, jsonMode, stage) {
   const payload = {
     model,
     messages,
@@ -88,6 +89,7 @@ async function groq(apiKey, model, messages, maxTokens, jsonMode) {
   if (jsonMode) payload.response_format = { type: 'json_object' };
   let lastError;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const startMs = Date.now();
     let res;
     try {
       res = await fetch(`${GROQ_API_BASE}/chat/completions`, {
@@ -100,7 +102,23 @@ async function groq(apiKey, model, messages, maxTokens, jsonMode) {
       console.warn(`  warn: ${lastError.message}`);
       continue;
     }
-    if (res.ok) return (await res.json()).choices[0].message.content;
+    if (res.ok) {
+      const data = await res.json();
+      const content = data.choices[0].message.content;
+      const trace = currentTrace();
+      if (trace) {
+        trace.recordLlm({
+          stage,
+          model,
+          messages,
+          content,
+          usage: data.usage,
+          startMs,
+          endMs: Date.now(),
+        });
+      }
+      return content;
+    }
     const body = await res.text();
     lastError = new Error(`Groq ${res.status} (${model}, attempt ${attempt + 1}): ${body.slice(0, 400)}`);
     // json_validate_failed is a generation failure, not a bad request — the next sample
@@ -157,8 +175,9 @@ function parseJsonObject(text, what) {
 // it, warn, and raise the last error if it never conforms.
 async function structured(apiKey, model, messages, maxTokens, what, validate) {
   let lastError;
+  const stage = what === 'route' ? 'orchestrator' : what;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    const raw = await groq(apiKey, model, messages, maxTokens, true);
+    const raw = await groq(apiKey, model, messages, maxTokens, true, stage);
     try {
       return validate(parseJsonObject(raw, what));
     } catch (err) {
@@ -379,11 +398,15 @@ async function answer(apiKey, message, docs) {
   return groq(apiKey, ANSWER_MODEL, [
     { role: 'system', content: ANSWER_PROMPT },
     { role: 'user', content: `DOCUMENTS:\n${context}\n\nQUESTION: ${message}` },
-  ], 700, false);
+  ], 700, false, 'answer');
 }
 
 // ---------------------------------------------------------------- orchestration
-async function handleChat(apiKey, corpus, message) {
+async function handleChat(apiKey, corpus, message, meta) {
+  return withRequestTrace(meta, () => runChat(apiKey, corpus, message));
+}
+
+async function runChat(apiKey, corpus, message) {
   const startedAt = Date.now();
   const steps = [];
 
