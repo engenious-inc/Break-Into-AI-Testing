@@ -166,8 +166,10 @@ Do not delete the tools to green the suite. Homework is an allow-list on `write_
 `mcp-local` is ordinary (pass = good). The other three are inverted (exit 100 is healthy).
 
 **CI on every PR** (`.github/workflows/ci.yml`) runs `mcp-local` and `mcp-abuse` the same
-way — inverted exit 100 maps to a green check. Optional instructor demo: Actions →
-**Promptfoo smoke**. Tag `v*` → GitHub Release. Walkthrough: Day 8 “Testing in the SDLC.”
+way — inverted exit 100 maps to a green check. Instructor live demo: Actions →
+**Promptfoo eval & red team** (`light` = ordinary eval + MediBot inverted; `payflow` =
+serve app + replay `redteam.yaml`). Tag `v*` → GitHub Release. Walkthrough: Day 8
+“Testing in the SDLC.”
 
 ## Instructor — teaching points that travel well
 

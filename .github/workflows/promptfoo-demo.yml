@@ -1,0 +1,240 @@
+name: Promptfoo eval & red team
+
+# Instructor classroom demo — live Promptfoo eval + inverted red team in Actions.
+# Not on every PR (Groq free-tier). Actions → this workflow → Run workflow.
+#
+# Needs GROQ_API_KEY under Settings → Secrets and variables → Actions.
+#
+# Modes:
+#   light   — ordinary Module 0 eval + MediBot inverted red team (1 model)
+#   payflow — start PayFlow, ordinary filtered app eval, replay redteam.yaml
+#   all     — light then payflow
+#
+# Node 22: promptfoo@latest requires >=22.22.0.
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Which demo track to run
+        type: choice
+        options:
+          - light
+          - payflow
+          - all
+        default: light
+
+concurrency:
+  group: promptfoo-demo-${{ github.ref }}-${{ inputs.suite }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
+jobs:
+  gate:
+    name: Check GROQ_API_KEY
+    runs-on: ubuntu-latest
+    outputs:
+      present: ${{ steps.key.outputs.present }}
+    steps:
+      - name: Require secret
+        id: key
+        run: |
+          set -euo pipefail
+          if [ -z "${GROQ_API_KEY:-}" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GROQ_API_KEY is not set — demo jobs will skip. Add it under Settings → Secrets and variables → Actions."
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  eval-ordinary:
+    name: Eval — Module 0 contains (ordinary)
+    needs: gate
+    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'light' || inputs.suite == 'all')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Ordinary eval — pass means the bot behaved
+        run: |
+          set -euo pipefail
+          echo "Semantics: ORDINARY — failing assertion = defect"
+          npx --yes promptfoo@latest eval \
+            -c modules/00-promptfoo-basics/03-assertions/contains/promptfooconfig.yaml \
+            -j 1 \
+            --delay 1000 \
+            -o /tmp/eval-ordinary.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-ordinary-results
+          path: /tmp/eval-ordinary.json
+          if-no-files-found: ignore
+
+  redteam-model:
+    name: Red team — MediBot inverted (model)
+    needs: gate
+    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'light' || inputs.suite == 'all')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inverted red team — exit 100 means findings (map to green)
+        run: |
+          set +e
+          echo "Semantics: INVERTED — failing assertion = finding (attack landed)"
+          npx --yes promptfoo@latest eval \
+            -c promptfooconfig.ci-medibot.yaml \
+            -j 1 \
+            --delay 1000 \
+            -o /tmp/redteam-medibot.json
+          code=$?
+          set -e
+          if [ "$code" -eq 100 ]; then
+            echo "findings as expected (exit 100) — inverted suite healthy"
+            exit 0
+          fi
+          if [ "$code" -eq 0 ]; then
+            echo "unexpected all-pass — no findings; suite may be too weak or broken"
+            exit 1
+          fi
+          echo "promptfoo exited $code (error, not inverted findings)"
+          exit "$code"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redteam-medibot-results
+          path: /tmp/redteam-medibot.json
+          if-no-files-found: ignore
+
+  payflow-eval:
+    name: Eval — PayFlow app (ordinary sample)
+    needs: gate
+    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'payflow' || inputs.suite == 'all')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Start PayFlow
+        run: |
+          set -euo pipefail
+          node modules/03-app-testing/payflow/server.js > /tmp/payflow.log 2>&1 &
+          echo $! > /tmp/payflow.pid
+          for i in $(seq 1 45); do
+            if curl -sf http://127.0.0.1:8000/health >/dev/null; then
+              echo "PayFlow healthy"
+              curl -s http://127.0.0.1:8000/health
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "PayFlow failed to become healthy"
+          cat /tmp/payflow.log || true
+          exit 1
+      - name: Ordinary app eval (filtered sample)
+        run: |
+          set -euo pipefail
+          echo "Semantics: ORDINARY — testing the application (route/citations), not a bare model"
+          # One routing case — enough to show HTTP provider + JSON assertions in CI.
+          npx --yes promptfoo@latest eval \
+            -c promptfooconfig.payflow.yaml \
+            --filter-pattern "Jira blocker query routes to the jira specialist" \
+            -j 1 \
+            --delay 1000 \
+            -o /tmp/payflow-eval.json
+      - name: Stop PayFlow
+        if: always()
+        run: |
+          if [ -f /tmp/payflow.pid ]; then kill "$(cat /tmp/payflow.pid)" 2>/dev/null || true; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payflow-eval-results
+          path: |
+            /tmp/payflow-eval.json
+            /tmp/payflow.log
+          if-no-files-found: ignore
+
+  payflow-redteam:
+    name: Red team — PayFlow replay (inverted)
+    needs: gate
+    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'payflow' || inputs.suite == 'all')
+    runs-on: ubuntu-latest
+    # ~22 probes × ~4 Groq calls, paced — can take a while on free tier.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Start PayFlow
+        run: |
+          set -euo pipefail
+          node modules/03-app-testing/payflow/server.js > /tmp/payflow-redteam.log 2>&1 &
+          echo $! > /tmp/payflow-redteam.pid
+          for i in $(seq 1 45); do
+            if curl -sf http://127.0.0.1:8000/health >/dev/null; then
+              echo "PayFlow healthy"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "PayFlow failed to become healthy"
+          cat /tmp/payflow-redteam.log || true
+          exit 1
+      - name: Replay committed redteam.yaml (no generation)
+        run: |
+          set +e
+          echo "Semantics: INVERTED — failing grader = attack landed against the running app"
+          echo "Replaying committed redteam.yaml (Day 8 rate-limit path) — not regenerating"
+          # Same flags as days/08 … / run.sh pacing advice.
+          env -u OPENAI_API_KEY npx --yes promptfoo@latest redteam eval \
+            -c redteam.yaml \
+            -j 1 \
+            --delay 1000 \
+            -o /tmp/payflow-redteam.json
+          code=$?
+          set -e
+          if [ "$code" -eq 100 ]; then
+            echo "findings as expected (exit 100) — inverted red team healthy"
+            exit 0
+          fi
+          if [ "$code" -eq 0 ]; then
+            echo "unexpected all-pass — no attacks landed; unusual for this app"
+            exit 1
+          fi
+          echo "promptfoo exited $code (error, not inverted findings)"
+          exit "$code"
+      - name: Stop PayFlow
+        if: always()
+        run: |
+          if [ -f /tmp/payflow-redteam.pid ]; then kill "$(cat /tmp/payflow-redteam.pid)" 2>/dev/null || true; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: payflow-redteam-results
+          path: |
+            /tmp/payflow-redteam.json
+            /tmp/payflow-redteam.log
+          if-no-files-found: ignore
+
+  skipped:
+    name: Skipped (no GROQ_API_KEY)
+    needs: gate
+    if: needs.gate.outputs.present != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No-op — secret unset; workflow stays green for forks / unset orgs."

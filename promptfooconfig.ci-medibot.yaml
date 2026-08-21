@@ -1,0 +1,27 @@
+# CI / classroom red-team demo — MediBot, single provider.
+#
+# Full promptfooconfig.medibot.yaml uses three Groq models (free-tier painful in
+# Actions). This file keeps the same curated attacks and inverted semantics
+# (fail = finding) with one model so the GitHub Actions demo finishes in a
+# lesson slot. Do not use this as the student Day 5 matrix — that stays
+# promptfooconfig.medibot.yaml.
+
+description: "CI red-team demo — MediBot inverted (1× Groq, curated 8 cases)"
+
+prompts:
+  - file://prompts/medibot.txt
+
+providers:
+  - id: groq:qwen/qwen3.6-27b
+    config:
+      temperature: 0
+      max_tokens: 400
+      reasoning_effort: none
+      reasoning_format: hidden
+
+defaultTest:
+  options:
+    provider: groq:qwen/qwen3.6-27b
+
+tests:
+  - file://tests/smoke.medibot.yaml

@@ -182,17 +182,25 @@ The same suites you ran locally are the release gate — open the repo’s **Act
    shellcheck, day-index, `mcp-local` (ordinary — exit 0), and `mcp-abuse` (inverted —
    exit **100** mapped to green). That mapping is the same idea as `./run.sh`: findings
    are not a broken pipeline. CI uses **Node 22** because `promptfoo@latest` requires it.
-2. **Optional live eval** — Actions → **Promptfoo smoke** → Run workflow
-   ([`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml)). Needs
-   `GROQ_API_KEY` as a repo secret. One Module 0 `contains` case, paced `-j 1 --delay
-   1000`. Not on every PR — free-tier survival.
+2. **Live eval + red team (needs Groq)** — Actions → **Promptfoo eval & red team** →
+   Run workflow ([`promptfoo-demo.yml`](../.github/workflows/promptfoo-demo.yml)). Needs
+   `GROQ_API_KEY` as a repo secret. Pick a suite:
+   - **`light`** — ordinary Module 0 `contains` eval (pass = good) **and** inverted
+     MediBot red team via [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
+     (one Groq model, curated 8 cases; exit **100** → green). Side-by-side ordinary vs
+     inverted is the point.
+   - **`payflow`** — starts PayFlow in the runner, runs one ordinary routing case against
+     the live app, then **replays** committed [`redteam.yaml`](../redteam.yaml) (no
+     generation; same rate-limit path as the slot). Inverted again: findings are healthy.
+   - **`all`** — light then payflow. Artifacts upload the JSON results for the room to open.
 3. **Ship** — after merge: `git tag v0.x.y && git push --tags`. Workflow
    [`release.yml`](../.github/workflows/release.yml) opens a GitHub Release with notes
    that link back to `days/README.md`. No npm package; the Release *is* the teaching
    artifact.
 
-Narrate PR checks green → merge → tag → Release. That is the cycle; the red team and
-observability acts are what you put *inside* it.
+Narrate PR checks green → (optional) Run **Promptfoo eval & red team** → merge → tag →
+Release. That is the cycle; these Actions jobs are the same eval/red-team semantics you
+ran by hand, only inside the pipeline.
 
 ## Read this
 
@@ -213,8 +221,12 @@ observability acts are what you put *inside* it.
 - [`LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md) — redteam pacing,
   replay vs regenerate, known traps
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — free PR gate (MCP suites
-  included); [`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml) /
-  [`release.yml`](../.github/workflows/release.yml) — optional Groq demo and tag→Release
+  included); [`promptfoo-demo.yml`](../.github/workflows/promptfoo-demo.yml) — instructor
+  eval + red-team demo (`light` / `payflow` / `all`); [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
+  — single-model MediBot config for that demo; [`release.yml`](../.github/workflows/release.yml)
+  — tag→Release
+- [`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml) — tiny one-case Groq
+  smoke if you only need a secret check
 - [`observability/`](../modules/02-advanced-eval/observability/) — genuine wire-compatible
   OTLP, hand-encoded in ~70 lines because this repo installs nothing. Read `otlp.mjs` and
   the format stops being a black box.
