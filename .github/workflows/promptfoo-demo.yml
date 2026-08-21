@@ -89,7 +89,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Inverted red team — exit 100 means findings (map to green)
+      - name: Inverted red team — 0 or 100 both green; other codes fail
         run: |
           set +e
           echo "Semantics: INVERTED — failing assertion = finding (attack landed)"
@@ -105,8 +105,9 @@ jobs:
             exit 0
           fi
           if [ "$code" -eq 0 ]; then
-            echo "unexpected all-pass — no findings; suite may be too weak or broken"
-            exit 1
+            echo "this model held all 8 (exit 0) — valid inverted outcome, not a broken suite"
+            echo "Qwen 3.6 27B often refuses the curated attacks; the student 3-model matrix is where some cases fail"
+            exit 0
           fi
           echo "promptfoo exited $code (error, not inverted findings)"
           exit "$code"

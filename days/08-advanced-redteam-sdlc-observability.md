@@ -187,8 +187,10 @@ The same suites you ran locally are the release gate — open the repo’s **Act
    `GROQ_API_KEY` as a repo secret. Pick a suite:
    - **`light`** — ordinary Module 0 `contains` eval (pass = good) **and** inverted
      MediBot red team via [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
-     (one Groq model, curated 8 cases; exit **100** → green). Side-by-side ordinary vs
-     inverted is the point.
+     (one Groq model, curated 8 cases). Exit **100** (findings) and exit **0** (this
+     model held) both map to green — Qwen often refuses the curated set; the student
+     3-model matrix is where some cases fail. Side-by-side ordinary vs inverted is
+     the point. Only a real Promptfoo error (not 0/100) fails the job.
    - **`payflow`** — starts PayFlow in the runner, runs one ordinary routing case against
      the live app, then **replays** committed [`redteam.yaml`](../redteam.yaml) (no
      generation; same rate-limit path as the slot). Inverted again: findings are healthy.
