@@ -3,8 +3,17 @@ name: Promptfoo smoke
 # Instructor demo — live Promptfoo in Actions. Not on every PR (Groq free-tier).
 # Actions → Promptfoo smoke → Run workflow. Needs GROQ_API_KEY under
 # Settings → Secrets and variables → Actions.
+#
+# Node 22: promptfoo@latest requires >=22.22.0.
 on:
   workflow_dispatch:
+
+concurrency:
+  group: promptfoo-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   smoke:
@@ -14,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Check GROQ_API_KEY secret
         id: key
         env:
@@ -23,8 +32,7 @@ jobs:
           set -euo pipefail
           if [ -z "${GROQ_API_KEY:-}" ]; then
             echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "GROQ_API_KEY is not set — skipping live smoke."
-            echo "Add the secret under Settings → Secrets and variables → Actions."
+            echo "::warning::GROQ_API_KEY is not set — skipping live smoke. Add it under Settings → Secrets and variables → Actions."
           else
             echo "present=true" >> "$GITHUB_OUTPUT"
           fi
@@ -41,4 +49,4 @@ jobs:
             --delay 1000
       - name: Skipped (no secret)
         if: steps.key.outputs.present != 'true'
-        run: echo "No-op — secret unset; job stays green for forks."
+        run: echo "No-op — secret unset; job stays green for forks / unset orgs."

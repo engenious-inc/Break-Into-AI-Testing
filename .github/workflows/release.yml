@@ -10,6 +10,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   release:
     name: Create GitHub Release
@@ -24,7 +28,15 @@ jobs:
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
-          prev="$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "Release ${tag} already exists — nothing to do."
+            exit 0
+          fi
+
+          # Previous tag by version order among v* tags (not commit ancestry alone).
+          prev="$(git tag -l 'v*' --sort=-v:refname | awk -v t="$tag" '$0 != t { print; exit }')"
+
           {
             echo "## ${tag}"
             echo
@@ -49,6 +61,8 @@ jobs:
             echo "PR / \`main\` CI (free): shellcheck, day-index, \`mcp-local\`, inverted \`mcp-abuse\`."
             echo "Optional live eval: Actions → **Promptfoo smoke** (needs \`GROQ_API_KEY\`)."
           } > /tmp/release-notes.md
+
           gh release create "$tag" \
             --title "$tag" \
+            --verify-tag \
             --notes-file /tmp/release-notes.md

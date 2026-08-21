@@ -3,10 +3,20 @@ name: CI
 # Free PR / main gate — no GROQ_API_KEY.
 # Static hygiene + deterministic MCP suites. mcp-abuse is inverted: exit 100
 # (findings) is the healthy result and maps to a green check.
+#
+# Node 22: promptfoo@latest currently requires >=22.22.0 (course local floor
+# remains Node ≥ 20 in CLAUDE.md; CI tracks what @latest enforces).
 on:
   pull_request:
   push:
     branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   shellcheck:
@@ -47,52 +57,47 @@ jobs:
       - name: Every promptfooconfig claimed by exactly one day page
         run: ./scripts/check-day-index.sh
 
-  mcp-local:
-    name: mcp-local (ordinary)
+  mcp:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: mcp-local (ordinary)
+            config: modules/03-app-testing/mcp-local/promptfooconfig.yaml
+            inverted: 'false'
+          - name: mcp-abuse (inverted)
+            config: promptfooconfig.mcp-abuse.yaml
+            inverted: 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
           cache-dependency-path: modules/03-app-testing/mcp-local/package-lock.json
       - name: Install workshop-local MCP deps
         run: npm install --prefix modules/03-app-testing/mcp-local
-      - name: Ordinary MCP suite — pass means the path-traversal guard held
-        run: |
-          set -euo pipefail
-          npx --yes promptfoo@latest eval \
-            -c modules/03-app-testing/mcp-local/promptfooconfig.yaml \
-            -j 1
-
-  mcp-abuse:
-    name: mcp-abuse (inverted)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: npm
-          cache-dependency-path: modules/03-app-testing/mcp-local/package-lock.json
-      - name: Install workshop-local MCP deps
-        run: npm install --prefix modules/03-app-testing/mcp-local
-      - name: Inverted MCP suite — exit 100 means findings (map to green)
+      - name: Run Promptfoo MCP suite
+        env:
+          INVERTED: ${{ matrix.inverted }}
+          CONFIG: ${{ matrix.config }}
         run: |
           set +e
-          npx --yes promptfoo@latest eval \
-            -c promptfooconfig.mcp-abuse.yaml \
-            -j 1
+          npx --yes promptfoo@latest eval -c "$CONFIG" -j 1
           code=$?
           set -e
-          if [ "$code" -eq 100 ]; then
-            echo "findings as expected (exit 100) — inverted suite healthy"
-            exit 0
+          if [ "$INVERTED" = 'true' ]; then
+            if [ "$code" -eq 100 ]; then
+              echo "findings as expected (exit 100) — inverted suite healthy"
+              exit 0
+            fi
+            if [ "$code" -eq 0 ]; then
+              echo "unexpected all-pass — suite may be broken (controls without findings)"
+              exit 1
+            fi
+            echo "promptfoo exited $code (error, not inverted findings)"
+            exit "$code"
           fi
-          if [ "$code" -eq 0 ]; then
-            echo "unexpected all-pass — suite may be broken (controls without findings)"
-            exit 1
-          fi
-          echo "promptfoo exited $code (error, not inverted findings)"
           exit "$code"

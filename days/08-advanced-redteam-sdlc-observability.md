@@ -181,7 +181,7 @@ The same suites you ran locally are the release gate — open the repo’s **Act
 1. **PR / `main` CI (free, no Groq key)** — workflow [`ci.yml`](../.github/workflows/ci.yml):
    shellcheck, day-index, `mcp-local` (ordinary — exit 0), and `mcp-abuse` (inverted —
    exit **100** mapped to green). That mapping is the same idea as `./run.sh`: findings
-   are not a broken pipeline.
+   are not a broken pipeline. CI uses **Node 22** because `promptfoo@latest` requires it.
 2. **Optional live eval** — Actions → **Promptfoo smoke** → Run workflow
    ([`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml)). Needs
    `GROQ_API_KEY` as a repo secret. One Module 0 `contains` case, paced `-j 1 --delay
