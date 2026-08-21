@@ -184,17 +184,14 @@ The same suites you ran locally are the release gate — open the repo’s **Act
    are not a broken pipeline. CI uses **Node 22** because `promptfoo@latest` requires it.
 2. **Live eval + red team (needs Groq)** — Actions → **Promptfoo eval & red team** →
    Run workflow ([`promptfoo-demo.yml`](../.github/workflows/promptfoo-demo.yml)). Needs
-   `GROQ_API_KEY` as a repo secret. Pick a suite:
-   - **`light`** — ordinary Module 0 `contains` eval (pass = good) **and** inverted
-     MediBot red team via [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
-     (one Groq model, curated 8 cases). Exit **100** (findings) and exit **0** (this
-     model held) both map to green — Qwen often refuses the curated set; the student
-     3-model matrix is where some cases fail. Side-by-side ordinary vs inverted is
-     the point. Only a real Promptfoo error (not 0/100) fails the job.
-   - **`payflow`** — starts PayFlow in the runner, runs one ordinary routing case against
-     the live app, then **replays** committed [`redteam.yaml`](../redteam.yaml) (no
-     generation; same rate-limit path as the slot). Inverted again: findings are healthy.
-   - **`all`** — light then payflow. Artifacts upload the JSON results for the room to open.
+   `GROQ_API_KEY` as a repo secret. Four jobs after the key check — no suite picker,
+   nothing skipped:
+   - ordinary Module 0 `contains` eval (pass = good)
+   - inverted MediBot via [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
+     (exit **100** findings or exit **0** this model held → both green)
+   - ordinary PayFlow routing sample against the app started in the runner
+   - inverted replay of committed [`redteam.yaml`](../redteam.yaml) (no generation)
+   Artifacts upload the JSON results. PayFlow replay is the slow job (~22 probes).
 3. **Ship** — after merge: `git tag v0.x.y && git push --tags`. Workflow
    [`release.yml`](../.github/workflows/release.yml) opens a GitHub Release with notes
    that link back to `days/README.md`. No npm package; the Release *is* the teaching
@@ -224,7 +221,8 @@ ran by hand, only inside the pipeline.
   replay vs regenerate, known traps
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — free PR gate (MCP suites
   included); [`promptfoo-demo.yml`](../.github/workflows/promptfoo-demo.yml) — instructor
-  eval + red-team demo (`light` / `payflow` / `all`); [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
+  eval + red-team demo (Module 0, MediBot, PayFlow eval, PayFlow replay);
+  [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
   — single-model MediBot config for that demo; [`release.yml`](../.github/workflows/release.yml)
   — tag→Release
 - [`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml) — tiny one-case Groq

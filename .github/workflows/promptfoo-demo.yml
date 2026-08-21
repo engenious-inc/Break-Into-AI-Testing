@@ -4,27 +4,18 @@ name: Promptfoo eval & red team
 # Not on every PR (Groq free-tier). Actions → this workflow → Run workflow.
 #
 # Needs GROQ_API_KEY under Settings → Secrets and variables → Actions.
+# Missing key fails the gate (this workflow is dispatch-only, so forks stay quiet).
 #
-# Modes:
-#   light   — ordinary Module 0 eval + MediBot inverted red team (1 model)
-#   payflow — start PayFlow, ordinary filtered app eval, replay redteam.yaml
-#   all     — light then payflow
+# Four jobs after the gate, always:
+#   ordinary Module 0 eval + inverted MediBot
+#   ordinary PayFlow routing sample + replay redteam.yaml
 #
 # Node 22: promptfoo@latest requires >=22.22.0.
 on:
   workflow_dispatch:
-    inputs:
-      suite:
-        description: Which demo track to run
-        type: choice
-        options:
-          - light
-          - payflow
-          - all
-        default: light
 
 concurrency:
-  group: promptfoo-demo-${{ github.ref }}-${{ inputs.suite }}
+  group: promptfoo-demo-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -37,24 +28,19 @@ jobs:
   gate:
     name: Check GROQ_API_KEY
     runs-on: ubuntu-latest
-    outputs:
-      present: ${{ steps.key.outputs.present }}
     steps:
       - name: Require secret
-        id: key
         run: |
           set -euo pipefail
           if [ -z "${GROQ_API_KEY:-}" ]; then
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::GROQ_API_KEY is not set — demo jobs will skip. Add it under Settings → Secrets and variables → Actions."
-          else
-            echo "present=true" >> "$GITHUB_OUTPUT"
+            echo "::error::GROQ_API_KEY is not set. Add it under Settings → Secrets and variables → Actions."
+            exit 1
           fi
+          echo "GROQ_API_KEY is set"
 
   eval-ordinary:
     name: Eval — Module 0 contains (ordinary)
     needs: gate
-    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'light' || inputs.suite == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -81,7 +67,6 @@ jobs:
   redteam-model:
     name: Red team — MediBot inverted (model)
     needs: gate
-    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'light' || inputs.suite == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -121,7 +106,6 @@ jobs:
   payflow-eval:
     name: Eval — PayFlow app (ordinary sample)
     needs: gate
-    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'payflow' || inputs.suite == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -172,7 +156,6 @@ jobs:
   payflow-redteam:
     name: Red team — PayFlow replay (inverted)
     needs: gate
-    if: needs.gate.outputs.present == 'true' && (inputs.suite == 'payflow' || inputs.suite == 'all')
     runs-on: ubuntu-latest
     # ~22 probes × ~4 Groq calls, paced — can take a while on free tier.
     timeout-minutes: 60
@@ -231,11 +214,3 @@ jobs:
             /tmp/payflow-redteam.json
             /tmp/payflow-redteam.log
           if-no-files-found: ignore
-
-  skipped:
-    name: Skipped (no GROQ_API_KEY)
-    needs: gate
-    if: needs.gate.outputs.present != 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "No-op — secret unset; workflow stays green for forks / unset orgs."
