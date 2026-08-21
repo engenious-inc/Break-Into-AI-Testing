@@ -10,7 +10,6 @@ name: Promptfoo eval & red team
 #   ordinary Module 0 eval + inverted MediBot + one PayFlow routing case.
 # PayFlow redteam.yaml replay stays local (too slow for a live Actions walkthrough).
 # Each eval writes Promptfoo JSON + HTML artifacts (open the .html — not Allure).
-# Each eval writes Promptfoo JSON + HTML artifacts (open the .html — not Allure).
 #
 # Node 22: promptfoo@latest requires >=22.22.0.
 on:
