@@ -168,7 +168,8 @@ Do not delete the tools to green the suite. Homework is an allow-list on `write_
 **CI on every PR** (`.github/workflows/ci.yml`) runs `mcp-local` and `mcp-abuse` the same
 way — inverted exit 100 maps to a green check. Instructor live demo: Actions →
 **Promptfoo eval & red team** (Module 0 + MediBot + one PayFlow routing case; `redteam.yaml`
-replay stays local). Open the HTML artifact — that is the Promptfoo report, not Allure.
+replay stays local). Open the GitHub Pages URL from **Publish report site** — Promptfoo
+HTML, not Allure. `npx promptfoo view` is local-only.
 Tag `v*` → GitHub Release. Walkthrough: Day 8 “Testing in the SDLC.”
 
 ## Instructor — teaching points that travel well
