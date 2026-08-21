@@ -2,7 +2,7 @@ name: Promptfoo smoke
 
 # Tiny one-case Groq check (Module 0 contains). Prefer the fuller classroom demo:
 # Actions → "Promptfoo eval & red team" (promptfoo-demo.yml) for ordinary eval +
-# inverted red team (+ optional PayFlow).
+# inverted MediBot + one PayFlow routing case.
 #
 # Needs GROQ_API_KEY under Settings → Secrets and variables → Actions.
 # Node 22: promptfoo@latest requires >=22.22.0.

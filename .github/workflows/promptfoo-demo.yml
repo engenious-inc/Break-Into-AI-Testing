@@ -6,9 +6,9 @@ name: Promptfoo eval & red team
 # Needs GROQ_API_KEY under Settings → Secrets and variables → Actions.
 # Missing key fails the gate (this workflow is dispatch-only, so forks stay quiet).
 #
-# Four jobs after the gate, always:
-#   ordinary Module 0 eval + inverted MediBot
-#   ordinary PayFlow routing sample + replay redteam.yaml
+# Three jobs after the gate:
+#   ordinary Module 0 eval + inverted MediBot + one PayFlow routing case.
+# PayFlow redteam.yaml replay stays local (too slow for a live Actions walkthrough).
 #
 # Node 22: promptfoo@latest requires >=22.22.0.
 on:
@@ -151,66 +151,4 @@ jobs:
           path: |
             /tmp/payflow-eval.json
             /tmp/payflow.log
-          if-no-files-found: ignore
-
-  payflow-redteam:
-    name: Red team — PayFlow replay (inverted)
-    needs: gate
-    runs-on: ubuntu-latest
-    # ~22 probes × ~4 Groq calls, paced — can take a while on free tier.
-    timeout-minutes: 60
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: '22'
-      - name: Start PayFlow
-        run: |
-          set -euo pipefail
-          node modules/03-app-testing/payflow/server.js > /tmp/payflow-redteam.log 2>&1 &
-          echo $! > /tmp/payflow-redteam.pid
-          for i in $(seq 1 45); do
-            if curl -sf http://127.0.0.1:8000/health >/dev/null; then
-              echo "PayFlow healthy"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "PayFlow failed to become healthy"
-          cat /tmp/payflow-redteam.log || true
-          exit 1
-      - name: Replay committed redteam.yaml (no generation)
-        run: |
-          set +e
-          echo "Semantics: INVERTED — failing grader = attack landed against the running app"
-          echo "Replaying committed redteam.yaml (Day 8 rate-limit path) — not regenerating"
-          # Same flags as days/08 … / run.sh pacing advice.
-          env -u OPENAI_API_KEY npx --yes promptfoo@latest redteam eval \
-            -c redteam.yaml \
-            -j 1 \
-            --delay 1000 \
-            -o /tmp/payflow-redteam.json
-          code=$?
-          set -e
-          if [ "$code" -eq 100 ]; then
-            echo "findings as expected (exit 100) — inverted red team healthy"
-            exit 0
-          fi
-          if [ "$code" -eq 0 ]; then
-            echo "unexpected all-pass — no attacks landed; unusual for this app"
-            exit 1
-          fi
-          echo "promptfoo exited $code (error, not inverted findings)"
-          exit "$code"
-      - name: Stop PayFlow
-        if: always()
-        run: |
-          if [ -f /tmp/payflow-redteam.pid ]; then kill "$(cat /tmp/payflow-redteam.pid)" 2>/dev/null || true; fi
-      - uses: actions/upload-artifact@v5
-        if: always()
-        with:
-          name: payflow-redteam-results
-          path: |
-            /tmp/payflow-redteam.json
-            /tmp/payflow-redteam.log
           if-no-files-found: ignore

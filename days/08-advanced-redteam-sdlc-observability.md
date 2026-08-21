@@ -184,14 +184,13 @@ The same suites you ran locally are the release gate — open the repo’s **Act
    are not a broken pipeline. CI uses **Node 22** because `promptfoo@latest` requires it.
 2. **Live eval + red team (needs Groq)** — Actions → **Promptfoo eval & red team** →
    Run workflow ([`promptfoo-demo.yml`](../.github/workflows/promptfoo-demo.yml)). Needs
-   `GROQ_API_KEY` as a repo secret. Four jobs after the key check — no suite picker,
-   nothing skipped:
+   `GROQ_API_KEY` as a repo secret. Three jobs after the key check:
    - ordinary Module 0 `contains` eval (pass = good)
    - inverted MediBot via [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
      (exit **100** findings or exit **0** this model held → both green)
    - ordinary PayFlow routing sample against the app started in the runner
-   - inverted replay of committed [`redteam.yaml`](../redteam.yaml) (no generation)
-   Artifacts upload the JSON results. PayFlow replay is the slow job (~22 probes).
+   Replay of committed [`redteam.yaml`](../redteam.yaml) stays local — too slow for a live
+   Actions walkthrough. Artifacts upload the JSON results.
 3. **Ship** — after merge: `git tag v0.x.y && git push --tags`. Workflow
    [`release.yml`](../.github/workflows/release.yml) opens a GitHub Release with notes
    that link back to `days/README.md`. No npm package; the Release *is* the teaching
@@ -221,7 +220,7 @@ ran by hand, only inside the pipeline.
   replay vs regenerate, known traps
 - [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — free PR gate (MCP suites
   included); [`promptfoo-demo.yml`](../.github/workflows/promptfoo-demo.yml) — instructor
-  eval + red-team demo (Module 0, MediBot, PayFlow eval, PayFlow replay);
+  eval + red-team demo (Module 0, MediBot, one PayFlow routing case);
   [`promptfooconfig.ci-medibot.yaml`](../promptfooconfig.ci-medibot.yaml)
   — single-model MediBot config for that demo; [`release.yml`](../.github/workflows/release.yml)
   — tag→Release
