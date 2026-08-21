@@ -24,7 +24,7 @@ copy_html "$artifacts/payflow-eval-results/payflow-eval.html" payflow.html
 link_or_missing() {
   local file="$1" label="$2"
   if [ -f "$site/$file" ]; then
-    printf '<div class="card"><a href="%s">%s</a></div>\n' "$file" "$label"
+    printf '<div class="card"><a href="%s" target="_blank" rel="noopener noreferrer">%s</a></div>\n' "$file" "$label"
   else
     printf '<div class="card muted">%s — not produced on this run</div>\n' "$label"
   fi
