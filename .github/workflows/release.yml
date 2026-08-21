@@ -1,0 +1,54 @@
+name: Release
+
+# Tag → GitHub Release. Classroom "ship" moment for Day 8 SDLC — no npm/Docker
+# publish. Notes link the session index so students land somewhere useful.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          prev="$(git describe --tags --abbrev=0 "${tag}^" 2>/dev/null || true)"
+          {
+            echo "## ${tag}"
+            echo
+            echo "Workshop release for [Break Into AI Testing](https://github.com/${GITHUB_REPOSITORY})."
+            echo
+            echo "Session index: \`days/README.md\` — Day 8 covers advanced red teaming, SDLC, and observability."
+            echo
+            if [ -n "$prev" ]; then
+              echo "### Commits since ${prev}"
+              echo
+              git log --pretty=format:'- %s (%h)' "${prev}..${tag}"
+              echo
+            else
+              echo "### Commits"
+              echo
+              git log --pretty=format:'- %s (%h)' "${tag}" | head -n 40
+              echo
+            fi
+            echo
+            echo "### CI on this tag"
+            echo
+            echo "PR / \`main\` CI (free): shellcheck, day-index, \`mcp-local\`, inverted \`mcp-abuse\`."
+            echo "Optional live eval: Actions → **Promptfoo smoke** (needs \`GROQ_API_KEY\`)."
+          } > /tmp/release-notes.md
+          gh release create "$tag" \
+            --title "$tag" \
+            --notes-file /tmp/release-notes.md

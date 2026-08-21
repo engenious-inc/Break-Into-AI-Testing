@@ -174,6 +174,26 @@ There is no assertion for that, because Promptfoo grades one case at a time and 
 finding is a *relationship between two responses*. Worth saying out loud: some defects
 are invisible to a per-case assertion framework.
 
+## Testing in the SDLC (~5 minutes)
+
+The same suites you ran locally are the release gate — open the repo’s **Actions** tab.
+
+1. **PR / `main` CI (free, no Groq key)** — workflow [`ci.yml`](../.github/workflows/ci.yml):
+   shellcheck, day-index, `mcp-local` (ordinary — exit 0), and `mcp-abuse` (inverted —
+   exit **100** mapped to green). That mapping is the same idea as `./run.sh`: findings
+   are not a broken pipeline.
+2. **Optional live eval** — Actions → **Promptfoo smoke** → Run workflow
+   ([`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml)). Needs
+   `GROQ_API_KEY` as a repo secret. One Module 0 `contains` case, paced `-j 1 --delay
+   1000`. Not on every PR — free-tier survival.
+3. **Ship** — after merge: `git tag v0.x.y && git push --tags`. Workflow
+   [`release.yml`](../.github/workflows/release.yml) opens a GitHub Release with notes
+   that link back to `days/README.md`. No npm package; the Release *is* the teaching
+   artifact.
+
+Narrate PR checks green → merge → tag → Release. That is the cycle; the red team and
+observability acts are what you put *inside* it.
+
 ## Read this
 
 - [`promptfooconfig.payflow-redteam.yaml`](../promptfooconfig.payflow-redteam.yaml) — the
@@ -192,6 +212,9 @@ are invisible to a per-case assertion framework.
   `search_notes` returns the payload; the user message is ordinary.
 - [`LAB-GUIDE-NOTES.md`](../modules/03-app-testing/LAB-GUIDE-NOTES.md) — redteam pacing,
   replay vs regenerate, known traps
+- [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — free PR gate (MCP suites
+  included); [`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml) /
+  [`release.yml`](../.github/workflows/release.yml) — optional Groq demo and tag→Release
 - [`observability/`](../modules/02-advanced-eval/observability/) — genuine wire-compatible
   OTLP, hand-encoded in ~70 lines because this repo installs nothing. Read `otlp.mjs` and
   the format stops being a black box.

@@ -78,6 +78,10 @@ tool), `./run.sh mcp-injection` (tool output is the channel). Do not "fix" those
 by deleting the tools; the inventory is the lesson. Homework is an allow-list on
 `write_note`.
 
+**CI:** every PR runs `mcp-local` (ordinary) and `mcp-abuse` (inverted — exit 100 is
+green) via [`.github/workflows/ci.yml`](../../../.github/workflows/ci.yml). Same suites
+as `./run.sh`; no Groq key on that path.
+
 ## When install was skipped
 
 ```

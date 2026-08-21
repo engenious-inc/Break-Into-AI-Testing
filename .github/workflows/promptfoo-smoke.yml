@@ -1,0 +1,44 @@
+name: Promptfoo smoke
+
+# Instructor demo — live Promptfoo in Actions. Not on every PR (Groq free-tier).
+# Actions → Promptfoo smoke → Run workflow. Needs GROQ_API_KEY under
+# Settings → Secrets and variables → Actions.
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: Module 0 contains (1 case)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check GROQ_API_KEY secret
+        id: key
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${GROQ_API_KEY:-}" ]; then
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "GROQ_API_KEY is not set — skipping live smoke."
+            echo "Add the secret under Settings → Secrets and variables → Actions."
+          else
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Ordinary Promptfoo eval (paced for free tier)
+        if: steps.key.outputs.present == 'true'
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          set -euo pipefail
+          # One deterministic assertion lesson — single provider, one case.
+          npx --yes promptfoo@latest eval \
+            -c modules/00-promptfoo-basics/03-assertions/contains/promptfooconfig.yaml \
+            -j 1 \
+            --delay 1000
+      - name: Skipped (no secret)
+        if: steps.key.outputs.present != 'true'
+        run: echo "No-op — secret unset; job stays green for forks."
