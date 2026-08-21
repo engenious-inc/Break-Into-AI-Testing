@@ -58,8 +58,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Ordinary eval — pass means the bot behaved
@@ -71,7 +71,7 @@ jobs:
             -j 1 \
             --delay 1000 \
             -o /tmp/eval-ordinary.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: eval-ordinary-results
@@ -85,8 +85,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Inverted red team — 0 or 100 both green; other codes fail
@@ -111,7 +111,7 @@ jobs:
           fi
           echo "promptfoo exited $code (error, not inverted findings)"
           exit "$code"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: redteam-medibot-results
@@ -125,8 +125,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Start PayFlow
@@ -160,7 +160,7 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/payflow.pid ]; then kill "$(cat /tmp/payflow.pid)" 2>/dev/null || true; fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: payflow-eval-results
@@ -177,8 +177,8 @@ jobs:
     # ~22 probes × ~4 Groq calls, paced — can take a while on free tier.
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       - name: Start PayFlow
@@ -223,7 +223,7 @@ jobs:
         if: always()
         run: |
           if [ -f /tmp/payflow-redteam.pid ]; then kill "$(cat /tmp/payflow-redteam.pid)" 2>/dev/null || true; fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: payflow-redteam-results

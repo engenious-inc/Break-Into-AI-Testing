@@ -23,7 +23,7 @@ jobs:
     name: shellcheck + bash -n
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Static-check shell scripts
         run: |
           set -euo pipefail
@@ -53,7 +53,7 @@ jobs:
     name: day index coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Every promptfooconfig claimed by exactly one day page
         run: ./scripts/check-day-index.sh
 
@@ -71,8 +71,8 @@ jobs:
             config: promptfooconfig.mcp-abuse.yaml
             inverted: 'true'
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
