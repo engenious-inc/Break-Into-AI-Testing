@@ -22,9 +22,10 @@ copy_html "$artifacts/redteam-medibot-results/redteam-medibot.html" medibot.html
 copy_html "$artifacts/payflow-eval-results/payflow-eval.html" payflow.html
 
 link_or_missing() {
-  local file="$1" label="$2"
+  local file="$1" tab="$2" label="$3"
   if [ -f "$site/$file" ]; then
-    printf '<div class="card"><a href="%s" target="_blank" rel="noopener noreferrer">%s</a></div>\n' "$file" "$label"
+    printf '<a class="card report-link" href="%s" data-tab="%s" target="%s" rel="noopener noreferrer">%s</a>\n' \
+      "$file" "$tab" "$tab" "$label"
   else
     printf '<div class="card muted">%s — not produced on this run</div>\n' "$label"
   fi
@@ -42,20 +43,45 @@ cat > "$site/index.html" <<'HDR'
     h1 { font-size: 1.4rem; }
     a { color: #0969da; }
     .muted { color: #57606a; font-size: 0.95rem; }
-    .card { border: 1px solid #d0d7de; border-radius: 8px; padding: 0.9rem 1.1rem; margin: 0.7rem 0; }
+    .card { display: block; border: 1px solid #d0d7de; border-radius: 8px; padding: 0.9rem 1.1rem; margin: 0.7rem 0; text-decoration: none; color: inherit; }
+    a.card:hover { border-color: #0969da; }
+    #frame-wrap { margin-top: 1.2rem; }
+    iframe { width: 100%; min-height: 70vh; border: 1px solid #d0d7de; border-radius: 8px; }
   </style>
 </head>
 <body>
   <h1>Promptfoo eval &amp; red team</h1>
-  <p class="muted">Latest classroom demo from GitHub Actions. These are Promptfoo HTML reports — the same UI as <code>npx promptfoo view</code>, which only sees evals that ran on your laptop. Not Allure.</p>
+  <p class="muted">Latest classroom demo from GitHub Actions. Click a report — it opens in its own tab and this index stays. In a one-tab preview, it loads below instead. These are Promptfoo HTML reports, not Allure. <code>npx promptfoo view</code> is local-only.</p>
 HDR
 
 {
-  link_or_missing ordinary.html "Ordinary eval — Module 0 contains (fail = defect)"
-  link_or_missing medibot.html "Inverted red team — MediBot (fail = finding)"
-  link_or_missing payflow.html "Ordinary eval — PayFlow routing sample (fail = defect)"
+  link_or_missing ordinary.html pf-ordinary "Ordinary eval — Module 0 contains (fail = defect)"
+  link_or_missing medibot.html pf-medibot "Inverted red team — MediBot (fail = finding)"
+  link_or_missing payflow.html pf-payflow "Ordinary eval — PayFlow routing sample (fail = defect)"
   cat <<'FTR'
+  <div id="frame-wrap" hidden>
+    <p class="muted">Preview (this browser blocked a second tab):</p>
+    <iframe id="frame" title="Promptfoo report"></iframe>
+  </div>
   <p class="muted">Each demo run overwrites this site. JSON artifacts remain on the workflow run as a fallback.</p>
+  <script>
+    document.querySelectorAll('.report-link').forEach((a) => {
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        const name = a.getAttribute('data-tab') || 'pf-report';
+        const opened = window.open(a.href, name);
+        if (opened) {
+          opened.opener = null;
+          opened.focus();
+          return;
+        }
+        const wrap = document.getElementById('frame-wrap');
+        const frame = document.getElementById('frame');
+        wrap.hidden = false;
+        frame.src = a.href;
+      });
+    });
+  </script>
 </body>
 </html>
 FTR
