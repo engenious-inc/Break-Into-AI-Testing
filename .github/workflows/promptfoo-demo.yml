@@ -9,6 +9,8 @@ name: Promptfoo eval & red team
 # Three jobs after the gate:
 #   ordinary Module 0 eval + inverted MediBot + one PayFlow routing case.
 # PayFlow redteam.yaml replay stays local (too slow for a live Actions walkthrough).
+# Each eval writes Promptfoo JSON + HTML artifacts (open the .html — not Allure).
+# Each eval writes Promptfoo JSON + HTML artifacts (open the .html — not Allure).
 #
 # Node 22: promptfoo@latest requires >=22.22.0.
 on:
@@ -56,12 +58,25 @@ jobs:
             -c modules/00-promptfoo-basics/03-assertions/contains/promptfooconfig.yaml \
             -j 1 \
             --delay 1000 \
-            -o /tmp/eval-ordinary.json
+            --no-share \
+            -o /tmp/eval-ordinary.json /tmp/eval-ordinary.html
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Ordinary eval"
+            echo
+            echo "Failing assertion = **defect**."
+            echo
+            echo "Download the **eval-ordinary-results** artifact and open \`eval-ordinary.html\` — same report as \`npx promptfoo view\` locally. Not Allure: Promptfoo already knows providers, assertions, and prompts."
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: eval-ordinary-results
-          path: /tmp/eval-ordinary.json
+          path: |
+            /tmp/eval-ordinary.json
+            /tmp/eval-ordinary.html
           if-no-files-found: ignore
 
   redteam-model:
@@ -82,7 +97,8 @@ jobs:
             -c promptfooconfig.ci-medibot.yaml \
             -j 1 \
             --delay 1000 \
-            -o /tmp/redteam-medibot.json
+            --no-share \
+            -o /tmp/redteam-medibot.json /tmp/redteam-medibot.html
           code=$?
           set -e
           if [ "$code" -eq 100 ]; then
@@ -96,11 +112,23 @@ jobs:
           fi
           echo "promptfoo exited $code (error, not inverted findings)"
           exit "$code"
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Inverted red team (MediBot)"
+            echo
+            echo "Failing assertion = **finding**. Exit 0 (this model held) and 100 (attacks landed) both green."
+            echo
+            echo "Download the **redteam-medibot-results** artifact and open \`redteam-medibot.html\` — same report as \`npx promptfoo view\` locally."
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: redteam-medibot-results
-          path: /tmp/redteam-medibot.json
+          path: |
+            /tmp/redteam-medibot.json
+            /tmp/redteam-medibot.html
           if-no-files-found: ignore
 
   payflow-eval:
@@ -139,16 +167,28 @@ jobs:
             --filter-pattern "Jira blocker query routes to the jira specialist" \
             -j 1 \
             --delay 1000 \
-            -o /tmp/payflow-eval.json
+            --no-share \
+            -o /tmp/payflow-eval.json /tmp/payflow-eval.html
       - name: Stop PayFlow
         if: always()
         run: |
           if [ -f /tmp/payflow.pid ]; then kill "$(cat /tmp/payflow.pid)" 2>/dev/null || true; fi
+      - name: Job summary
+        if: always()
+        run: |
+          {
+            echo "## Ordinary PayFlow eval"
+            echo
+            echo "Testing the **application** (route / citations), not a bare model. Failing assertion = defect."
+            echo
+            echo "Download the **payflow-eval-results** artifact and open \`payflow-eval.html\`."
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v5
         if: always()
         with:
           name: payflow-eval-results
           path: |
             /tmp/payflow-eval.json
+            /tmp/payflow-eval.html
             /tmp/payflow.log
           if-no-files-found: ignore

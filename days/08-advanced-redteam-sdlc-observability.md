@@ -190,7 +190,9 @@ The same suites you ran locally are the release gate — open the repo’s **Act
      (exit **100** findings or exit **0** this model held → both green)
    - ordinary PayFlow routing sample against the app started in the runner
    Replay of committed [`redteam.yaml`](../redteam.yaml) stays local — too slow for a live
-   Actions walkthrough. Artifacts upload the JSON results.
+   Actions walkthrough. Each job uploads Promptfoo **JSON + HTML** artifacts; open the
+   `.html` in a browser (same report as `npx promptfoo view`). The job Summary tab
+   states ordinary vs inverted so a red cell is never mistaken for a broken pipeline.
 3. **Ship** — after merge: `git tag v0.x.y && git push --tags`. Workflow
    [`release.yml`](../.github/workflows/release.yml) opens a GitHub Release with notes
    that link back to `days/README.md`. No npm package; the Release *is* the teaching
