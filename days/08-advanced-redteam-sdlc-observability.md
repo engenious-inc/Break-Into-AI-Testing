@@ -32,25 +32,41 @@ PAYFLOW_POISON=1 ./run.sh payflow-serve   # restart terminal 1 with the overlay
 # observability: a real OTLP span per LLM call, one per subject (TutorBot eval)
 npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
 
-# same keys, the running app — look for payflow.chat (parent) vs llm.chat.completion (TutorBot)
-curl -s http://localhost:8000/chat \
-  -H 'Content-Type: application/json' \
-  -d '{"message":"What is PayFlow?","session_id":"day8-otel","user_role":"student"}'
+# same keys, the running app — Day 8 suites are the traffic (not a one-off curl)
+./run.sh payflow-exposure      # Sessions → exposure-session (student)
+# PAYFLOW_POISON=1 ./run.sh payflow-serve && ./run.sh payflow-poisoning  # → poisoning-session
+# optional one-liner: curl -s http://localhost:8000/chat -H 'Content-Type: application/json' \
+#   -d '{"message":"What is PayFlow?","session_id":"day8-otel","user_role":"student"}'
 ```
 
 **Want to see them land somewhere?** [Agenta](https://agenta.ai) cloud is free and speaks
-OTLP. Sign up, then one line in `.env`:
+OTLP. Sign up (US or EU), create a **project** API key, then in `.env`:
 
 ```env
 AGENTA_API_KEY=...
+# AGENTA_HOST=https://eu.cloud.agenta.ai   # only if your project URL is eu.cloud
 ```
 
-Three TutorBot traces appear, one per subject. Then the curl above (or one question in
-the chat UI on :8000) adds a `payflow.chat` parent with `llm.chat.completion` children —
-that is the deployed app, not the eval provider. Open a TutorBot span and look for
-`tutor.subject`; open a PayFlow span and look for `session_id` /
-`route.orchestrator_decision`. Those attributes are the difference between a span you
-can read and a span you can *query*.
+The exporter defaults to `https://us.cloud.agenta.ai`. US and EU are separate — a key
+from one region 401s on the other. Match `AGENTA_HOST` to the host in your project URL.
+
+Three TutorBot traces appear, one per subject — and they share one `ag.session.id`,
+so **Sessions** shows a single conversation with three turns. There is no
+create-session API; Agenta groups at query time on that exact attribute.
+
+The deployed-app beat is the Day 8 suites you already ran. With `./run.sh payflow-serve`
+up and `AGENTA_API_KEY` in `.env`, `./run.sh payflow-exposure` posts five
+`payflow.chat` parents (one per `/chat` case) into **Sessions → `exposure-session`**
+with `ag.user.id=student`. Restart with `PAYFLOW_POISON=1` and `./run.sh payflow-poisoning`
+fills `poisoning-session`. `./run.sh payflow-redteam` uses `redteam-session` if you
+have the time. Each case is one trace; the suite's `session_id` is copied onto
+`ag.session.id` — bare `session_id` is still on the span (grep it) but does not
+populate Sessions.
+
+Open a TutorBot span and look for `tutor.subject`; open a PayFlow span and look
+for `ag.session.id` / `route.orchestrator_decision`. That is the difference between
+a span you can read and a span you can *query*. A one-off curl with
+`session_id=day8-otel` works the same way if you want a sixth turn in that drawer.
 
 Without a key the lesson still runs and tells you it skipped the POST. The span is real
 either way; only the network call is optional.

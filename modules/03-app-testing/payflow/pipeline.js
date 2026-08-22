@@ -222,6 +222,21 @@ Never answer the user's question. Only classify it.`;
 // is never trusted: an off-schema reply is not passed through and is not an outage, it
 // is a block. The raw guard output is never echoed to the caller, so the leaked prompt
 // dies here.
+// Planted multiturn defect: a flattened transcript is split on --- CURRENT MESSAGE ---.
+// The guard classifies only the cooperative prefix ("already-trusted session").
+// Routing, retrieval, and the answer model see only the last turn. Single-turn /chat
+// has no marker, so ./run.sh payflow stays green. Do not "fix" this by loosening
+// tests/payflow.multiturn.yaml — the red injection case is the lesson.
+function splitTranscript(message) {
+  const marker = '--- CURRENT MESSAGE ---';
+  const idx = message.indexOf(marker);
+  if (idx === -1) return { forGuard: message, forRest: message };
+  return {
+    forGuard: message.slice(0, idx),
+    forRest: message.slice(idx + marker.length).trim(),
+  };
+}
+
 async function guard(apiKey, message) {
   try {
     return await classify(apiKey, message);
@@ -410,7 +425,8 @@ async function runChat(apiKey, corpus, message) {
   const startedAt = Date.now();
   const steps = [];
 
-  const guardResult = await guard(apiKey, message);
+  const { forGuard, forRest } = splitTranscript(message);
+  const guardResult = await guard(apiKey, forGuard);
 
   if (guardResult.status === 'blocked') {
     steps.push(`Guard check: blocked (${guardResult.reason})`);
@@ -428,13 +444,13 @@ async function runChat(apiKey, corpus, message) {
   }
   steps.push('Guard check: allowed');
 
-  const routeResult = await route(apiKey, message);
+  const routeResult = await route(apiKey, forRest);
   steps.push(`Orchestrator: ${routeResult.orchestrator_decision} -> ${routeResult.specialists.join(', ')}`);
 
-  const docs = retrieve(corpus, routeResult.specialists, message);
+  const docs = retrieve(corpus, routeResult.specialists, forRest);
   steps.push(`Retrieval: ${docs.length} document(s)`);
 
-  const text = await answer(apiKey, message, docs);
+  const text = await answer(apiKey, forRest, docs);
   steps.push('Answer: generated');
 
   return {

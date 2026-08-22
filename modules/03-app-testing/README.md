@@ -120,7 +120,7 @@ the one that said it.
 ```bash
 ./run.sh payflow-serve      # terminal 1 — the app
 ./run.sh payflow            # terminal 2 — 25 cases, guard/routing/citations/agency
-./run.sh payflow-multiturn  # injection after 4 turns of legitimate context
+./run.sh payflow-multiturn  # injection after 4 turns of legitimate context (1 case fails on purpose)
 ./run.sh payflow-redteam    # generated attacks (slow — see below)
 ```
 

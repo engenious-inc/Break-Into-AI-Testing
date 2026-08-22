@@ -50,6 +50,31 @@ function attribute(key, value) {
 export const newTraceId = () => randomBytes(16);
 export const newSpanId = () => randomBytes(8);
 
+// Agenta Sessions are derived at query time: traces that share ag.session.id
+// become one session. There is no create-session endpoint. The indexed column
+// is this exact key — session.id, gen_ai.conversation.id, ag.meta.session_id,
+// and a top-level session_id field are stored (or dropped) and never surface
+// in the Sessions view. Same pattern for users: ag.user.id works, user.id does not.
+export function agentaIndexAttributes(ids) {
+  const attrs = {};
+  if (ids.sessionId) attrs['ag.session.id'] = ids.sessionId;
+  if (ids.userId) attrs['ag.user.id'] = ids.userId;
+  if (ids.applicationId) attrs['ag.references.application.id'] = ids.applicationId;
+  if (ids.variantId) attrs['ag.references.variant.id'] = ids.variantId;
+  if (ids.revisionId) attrs['ag.references.revision.id'] = ids.revisionId;
+  return attrs;
+}
+
+export function agentaIndexFromEnv(ids) {
+  return agentaIndexAttributes({
+    sessionId: ids.sessionId,
+    userId: ids.userId,
+    applicationId: process.env.AGENTA_APPLICATION_ID,
+    variantId: process.env.AGENTA_VARIANT_ID,
+    revisionId: process.env.AGENTA_REVISION_ID,
+  });
+}
+
 // Span { trace_id=1 span_id=2 parent_span_id=4 name=5 kind=6 start=7 end=8
 //        attributes=9 status=15 flags=16 }
 // A root span omits parent_span_id and sets flags=256 (bit 8, "context has

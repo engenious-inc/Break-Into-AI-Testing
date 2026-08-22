@@ -12,6 +12,7 @@ const fs = require('fs');
 const http = require('http');
 const path = require('path');
 const { loadKey, loadCorpus, handleChat } = require('./pipeline');
+const { logOtlpListenStatus } = require('./telemetry');
 
 const PORT = Number(process.env.PAYFLOW_PORT || 8000);
 const MAX_BODY_BYTES = 64 * 1024;
@@ -132,4 +133,5 @@ server.listen(PORT, () => {
     console.log('  PAYFLOW_POISON=1 — corpus/poisoned.json is loaded (Day 8 lesson)');
   }
   console.log(`  GET  /         GET /health   POST /chat`);
+  logOtlpListenStatus();
 });

@@ -53,13 +53,15 @@ and `.../comparing-models/` (three Groq models each) and
 `modules/02-advanced-eval/temperature-and-personas/` (one model at two temperatures).
 
 ## Lessons that fail on purpose
-Outside Module 1's inverted scoring, three lessons ship red by design:
+Outside Module 1's inverted scoring, four lessons ship red by design:
 `02-providers/comparing-models/` fails 2 of 6 because `groq:openai/gpt-oss-20b` emits its
 chain of thought (`"Thinking: ..."`) in the visible answer. `payflow-api` and
 `financebot-api` fail their planted Day 7 cases (text asserts pass; route / citation /
-agency asserts fail). Do not "fix" them by loosening the assertion — the failure is
-the lesson. If you add another deliberately-failing lesson, say so in the module
-README so a red run is never mistaken for a broken repo.
+agency asserts fail). `payflow-multiturn` fails the turn-5 injection case because the
+guard classifies only the transcript above `--- CURRENT MESSAGE ---`. Do not "fix"
+them by loosening the assertion — the failure is the lesson. If you add another
+deliberately-failing lesson, say so in the module README so a red run is never
+mistaken for a broken repo.
 
 ## Groq gotchas — keep off the default path
 - No cost field → `type: cost` **errors**. Only inside a commented paid-provider block.

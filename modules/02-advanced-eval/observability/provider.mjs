@@ -9,7 +9,13 @@
 // account at all.
 
 import { createHash } from 'node:crypto';
-import { encodeTrace, newTraceId, newSpanId } from './otlp.mjs';
+import { encodeTrace, newTraceId, newSpanId, agentaIndexFromEnv } from './otlp.mjs';
+
+// One eval process = one Agenta session. The three TutorBot cases share this
+// id, so Sessions shows one conversation with three turns, not three orphans.
+const EVAL_SESSION_ID = process.env.AGENTA_SESSION_ID
+  || `tutorbot-${process.pid}-${Date.now().toString(16)}`;
+const EVAL_USER_ID = process.env.AGENTA_USER_ID || 'tutorbot-student';
 
 // Arato dispatches on the instrumentation scope name and rejects unknown ones
 // with `Unknown span type: <scope>`. Only openinference.instrumentation.* works.
@@ -33,6 +39,10 @@ function redactForTelemetry(text) {
 //
 // Arato:  <OTEL_EXPORTER_OTLP_ENDPOINT>/v1/traces      Authorization: Bearer <key>
 // Agenta: <AGENTA_HOST>/api/otlp/v1/traces             Authorization: ApiKey <key>
+//
+// Agenta US and EU cloud are separate accounts. Keys are project-scoped and
+// do not cross regions — a key from us.cloud.agenta.ai 401s on eu.cloud and
+// the other way around. Default is US, matching current Agenta cloud signup.
 const BACKENDS = [
   {
     name: 'arato',
@@ -46,11 +56,19 @@ const BACKENDS = [
     name: 'agenta',
     keyVar: 'AGENTA_API_KEY',
     hostVar: 'AGENTA_HOST',
-    defaultHost: 'https://eu.cloud.agenta.ai',
+    defaultHost: 'https://us.cloud.agenta.ai',
     path: '/api/otlp/v1/traces',
     auth: (k) => `ApiKey ${k}`,
   },
 ];
+
+function regionHint(backend, host, status) {
+  if (backend.name !== 'agenta' || status !== 401) return '';
+  const other = host.includes('us.cloud')
+    ? 'https://eu.cloud.agenta.ai'
+    : 'https://us.cloud.agenta.ai';
+  return ` — US and EU cloud are separate; if your project URL is ${other}, set AGENTA_HOST`;
+}
 
 async function sendTo(backend, body, traceId) {
   const host = (process.env[backend.hostVar] || backend.defaultHost).replace(/\/+$/, '');
@@ -65,7 +83,7 @@ async function sendTo(backend, body, traceId) {
       body,
     });
     const detail = res.ok ? '' : ` — ${(await res.text()).replace(/\s+/g, ' ').slice(0, 200)}`;
-    console.log(`[${backend.name}] OTLP ${res.status} trace_id=${traceId}${detail}`);
+    console.log(`[${backend.name}] OTLP ${res.status} host=${host} trace_id=${traceId}${detail}${regionHint(backend, host, res.status)}`);
   } catch (err) {
     // Loud, not silent — but a telemetry outage must not fail the eval it is
     // only observing.
@@ -161,6 +179,8 @@ export default class ObservedGroqProvider {
       duration_ms: endMs - startMs,
       tokens: data.usage,
       'prompt.sha256': promptHash,
+      'ag.session.id': EVAL_SESSION_ID,
+      'ag.user.id': EVAL_USER_ID,
     }, null, 2));
 
     // OpenInference semantic conventions — the attribute names Arato reads.
@@ -194,6 +214,7 @@ export default class ObservedGroqProvider {
         // stays hashed unless LOG_RAW_PROMPTS=true.
         'tutor.subject': context?.vars?.subject ?? 'unknown',
         'tutor.level': context?.vars?.level ?? 'unknown',
+        ...agentaIndexFromEnv({ sessionId: EVAL_SESSION_ID, userId: EVAL_USER_ID }),
       },
     });
 

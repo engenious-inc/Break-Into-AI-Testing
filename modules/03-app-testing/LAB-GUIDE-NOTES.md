@@ -92,9 +92,11 @@ requests. The whole transcript arrives in one `message` field, so the guard sees
 cooperative turns and the attack together. Check whether a knob is wired before
 theorising about it.
 
-The guard holds in that setup — all three cases pass. Softening with friendly context
-does not get the injection through. That is the transferable point: apply the guard to
-the **whole conversation**, not only the latest message.
+The injection case **fails on purpose**. The guard classifies only the text above
+`--- CURRENT MESSAGE ---` (the cooperative history) and never sees turn 5. The two
+controls still pass. Do not loosen `tests/payflow.multiturn.yaml` — the fix is to
+hand `classify()` the whole `message`. That is the transferable point: apply the
+guard to the **whole conversation**, not only the already-trusted turns.
 
 ## Day 8 — Generated red team
 

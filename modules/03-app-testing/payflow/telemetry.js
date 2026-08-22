@@ -8,8 +8,36 @@
 // Skips whichever backends are unconfigured. A telemetry outage must not fail
 // the /chat request it is only observing.
 
+const fs = require('fs');
+const path = require('path');
 const { createHash } = require('node:crypto');
 const { AsyncLocalStorage } = require('node:async_hooks');
+
+const REPO_ENV_PATH = path.join(__dirname, '..', '..', '..', '.env');
+const OTLP_ENV_KEYS = [
+  'AGENTA_API_KEY',
+  'AGENTA_HOST',
+  'ARATO_API_KEY',
+  'OTEL_EXPORTER_OTLP_ENDPOINT',
+  'OTEL_SERVICE_NAME',
+  'LOG_RAW_PROMPTS',
+];
+
+function loadOtlpEnvFromDotenv() {
+  if (!fs.existsSync(REPO_ENV_PATH)) return;
+  for (const line of fs.readFileSync(REPO_ENV_PATH, 'utf8').split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq < 0) continue;
+    const key = trimmed.slice(0, eq).trim();
+    if (!OTLP_ENV_KEYS.includes(key) || process.env[key]) continue;
+    const value = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, '');
+    if (value) process.env[key] = value;
+  }
+}
+
+loadOtlpEnvFromDotenv();
 
 const SCOPE_NAME = 'openinference.instrumentation.openai';
 const otlpReady = import('../../02-advanced-eval/observability/otlp.mjs');
@@ -31,6 +59,9 @@ function redactForTelemetry(text) {
 //
 // Arato:  <OTEL_EXPORTER_OTLP_ENDPOINT>/v1/traces      Authorization: Bearer <key>
 // Agenta: <AGENTA_HOST>/api/otlp/v1/traces             Authorization: ApiKey <key>
+//
+// Agenta US and EU cloud are separate accounts. Keys are project-scoped and
+// do not cross regions. Default is US, matching current Agenta cloud signup.
 const BACKENDS = [
   {
     name: 'arato',
@@ -44,13 +75,31 @@ const BACKENDS = [
     name: 'agenta',
     keyVar: 'AGENTA_API_KEY',
     hostVar: 'AGENTA_HOST',
-    defaultHost: 'https://eu.cloud.agenta.ai',
+    defaultHost: 'https://us.cloud.agenta.ai',
     path: '/api/otlp/v1/traces',
     auth: (k) => `ApiKey ${k}`,
   },
 ];
 
 let skippedLogged = false;
+
+function activeBackends() {
+  return BACKENDS.filter((b) => process.env[b.keyVar]
+    && (process.env[b.hostVar] || b.defaultHost));
+}
+
+function logOtlpListenStatus() {
+  const active = activeBackends();
+  if (active.length === 0) {
+    console.log('[otlp] skipped — set ARATO_API_KEY (+OTEL_EXPORTER_OTLP_ENDPOINT) '
+      + 'or AGENTA_API_KEY to export for real');
+    return;
+  }
+  for (const backend of active) {
+    const host = (process.env[backend.hostVar] || backend.defaultHost).replace(/\/+$/, '');
+    console.log(`[otlp] ${backend.name} host=${host}`);
+  }
+}
 
 function compactAttributes(attrs) {
   const out = {};
@@ -61,7 +110,7 @@ function compactAttributes(attrs) {
   return out;
 }
 
-function llmAttributes(entry) {
+function llmAttributes(entry, index) {
   const question = [...entry.messages].reverse().find((m) => m.role === 'user')?.content ?? '';
   const usage = entry.usage || {};
   return compactAttributes({
@@ -82,6 +131,7 @@ function llmAttributes(entry) {
     'output.value': redactForTelemetry(entry.content),
     'prompt.sha256': sha256(question),
     'payflow.stage': entry.stage,
+    ...index,
   });
 }
 
@@ -98,7 +148,10 @@ async function sendTo(backend, body, traceId) {
       body,
     });
     const detail = res.ok ? '' : ` — ${(await res.text()).replace(/\s+/g, ' ').slice(0, 200)}`;
-    console.log(`[${backend.name}] OTLP ${res.status} trace_id=${traceId}${detail}`);
+    const hint = (!res.ok && res.status === 401 && backend.name === 'agenta')
+      ? ` — US and EU cloud are separate; if your project URL is ${host.includes('us.cloud') ? 'https://eu.cloud.agenta.ai' : 'https://us.cloud.agenta.ai'}, set AGENTA_HOST`
+      : '';
+    console.log(`[${backend.name}] OTLP ${res.status} host=${host} trace_id=${traceId}${detail}${hint}`);
   } catch (err) {
     console.error(`[${backend.name}] OTLP export to ${url} failed: ${err.message}`);
   }
@@ -109,8 +162,7 @@ async function exportSpans(params) {
   const body = encodeTrace(params);
   const traceId = params.traceId.toString('hex');
 
-  const active = BACKENDS.filter((b) => process.env[b.keyVar]
-    && (process.env[b.hostVar] || b.defaultHost));
+  const active = activeBackends();
 
   if (active.length === 0) {
     if (!skippedLogged) {
@@ -152,8 +204,14 @@ async function withRequestTrace(meta, fn) {
 
   async function finish(outcome) {
     try {
+      const { agentaIndexFromEnv } = await otlpReady;
       const endMs = Date.now();
       const latency = outcome?.debug?.latency_ms ?? (endMs - startMs);
+      const sessionId = typeof meta.session_id === 'string' ? meta.session_id : undefined;
+      const userId = typeof meta.user_role === 'string' ? meta.user_role : undefined;
+      // Bare session_id stays on the span so students can grep it. Agenta's
+      // Sessions view only indexes ag.session.id — the same trap as user.id.
+      const index = agentaIndexFromEnv({ sessionId, userId });
       const spans = [
         {
           spanId: parentSpanId,
@@ -163,11 +221,12 @@ async function withRequestTrace(meta, fn) {
           endMs,
           attributes: compactAttributes({
             'openinference.span.kind': 'CHAIN',
-            session_id: typeof meta.session_id === 'string' ? meta.session_id : undefined,
-            user_role: typeof meta.user_role === 'string' ? meta.user_role : undefined,
+            session_id: sessionId,
+            user_role: userId,
             'route.guard_status': outcome?.route?.guard_status,
             'route.orchestrator_decision': outcome?.route?.orchestrator_decision,
             'debug.latency_ms': latency,
+            ...index,
           }),
         },
         ...children.map((child) => ({
@@ -177,7 +236,7 @@ async function withRequestTrace(meta, fn) {
           kind: 3,
           startMs: child.startMs,
           endMs: child.endMs,
-          attributes: llmAttributes(child),
+          attributes: llmAttributes(child, index),
         })),
       ];
 
@@ -186,7 +245,8 @@ async function withRequestTrace(meta, fn) {
         trace_id: traceId.toString('hex'),
         span_id: parentSpanId.toString('hex'),
         duration_ms: latency,
-        session_id: typeof meta.session_id === 'string' ? meta.session_id : null,
+        session_id: sessionId ?? null,
+        'ag.session.id': sessionId ?? null,
         stages: children.map((c) => c.stage),
       }));
 
@@ -202,4 +262,10 @@ async function withRequestTrace(meta, fn) {
   }
 }
 
-module.exports = { withRequestTrace, currentTrace, redactForTelemetry, sha256 };
+module.exports = {
+  withRequestTrace,
+  currentTrace,
+  redactForTelemetry,
+  sha256,
+  logOtlpListenStatus,
+};

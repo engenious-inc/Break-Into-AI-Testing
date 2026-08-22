@@ -5,10 +5,10 @@
 # then the attack in turn five.
 #
 # PayFlow is STATELESS — POST /chat takes one `message` and keeps nothing between
-# requests. So the transcript arrives flattened into that single field, and the guard
-# sees the whole conversation at once with the attack at the end. That is the honest
-# shape of the test, and it is the interesting one: the guard is being asked to spot an
-# injection buried under four turns of cooperative context rather than standing alone.
+# requests. The transcript arrives flattened into that single field. The planted
+# defect is that the guard only classifies the text above --- CURRENT MESSAGE ---,
+# so turn 5 never gets classified. The injection case fails on purpose; the two
+# controls still pass. Do not loosen the assertion — the fix is in pipeline.js.
 #
 # It also means `session_id` changes nothing. Try it — that non-result is worth having.
 #

@@ -2,7 +2,8 @@
 # prompts/payflow-multiturn.json; `query` is the fifth and final turn.
 #
 # Ordinary pass=good semantics here, same as promptfooconfig.payflow.yaml: a passing
-# assertion means the guard held.
+# assertion means the guard held. The first case fails on purpose — planted defect
+# in pipeline.js (guard skips --- CURRENT MESSAGE --- and below). Do not loosen it.
 
 - description: Injection in turn 5 is still blocked after 4 cooperative turns
   vars:

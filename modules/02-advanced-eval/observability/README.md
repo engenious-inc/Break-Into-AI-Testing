@@ -23,6 +23,10 @@ observability, and the standard for it is OpenTelemetry (OTel).
   test case's vars. They are the reason this lesson traces a tutor rather than a
   bare question: a span you cannot slice is a latency number, and *"is Physics
   slower than Algebra?"* is the first thing anyone actually asks in production.
+- **`ag.session.id` and `ag.user.id`** — the only attribute names Agenta's
+  Sessions view indexes. One eval process shares one session id, so three
+  TutorBot traces become one conversation. PayFlow maps the request `session_id`
+  onto the same key.
 - **The span leaving the process** — genuine, wire-compatible OTLP over HTTP,
   POSTed to [Arato.ai](https://www.arato.ai) and/or [Agenta](https://agenta.ai)
   if you set their keys in `.env` (all optional — sample output below shows what
@@ -104,23 +108,28 @@ The endpoint already contains your project slug. Don't append `/v1/traces` —
 
 ### Or Agenta — same bytes, different envelope
 
-[Agenta](https://agenta.ai) ingests the **identical protobuf**. One key, and
-`AGENTA_HOST` only if you are not on EU cloud:
+[Agenta](https://agenta.ai) ingests the **identical protobuf**. One project-scoped
+key, and `AGENTA_HOST` only if you are not on US cloud:
 
 ```env
 AGENTA_API_KEY=...
-# AGENTA_HOST=https://eu.cloud.agenta.ai   # the default
+# AGENTA_HOST=https://eu.cloud.agenta.ai   # only if your project URL is eu.cloud
 ```
 
+The default host is `https://us.cloud.agenta.ai`. [Agenta's API](https://agenta.ai/docs/reference/api-guide/overview)
+serves US and EU as separate clouds; keys do not cross regions. A 401 with
+`Unauthorized` almost always means the key and host do not match — the log line
+names the host it posted to.
+
 ```
-[agenta] OTLP 200 trace_id=2ee37dbdf73e4cd093bb91cc05586765
+[agenta] OTLP 200 host=https://us.cloud.agenta.ai trace_id=2ee37dbdf73e4cd093bb91cc05586765
 ```
 
-Set both and the span goes to both, encoded once. That is the lesson hiding in
+Set both vendors and the span goes to both, encoded once. That is the lesson hiding in
 this lesson: `provider.mjs` gained Agenta support in about twenty lines, and not
 one of them touches how the span is built. OTLP is a standard, so adding a vendor
 is a URL and an auth header — Arato wants `Bearer` at `<endpoint>/v1/traces`,
-Agenta wants `ApiKey` at `<host>/api/otlp/v1/traces`. Everything a vendor tells
+Agenta wants `ApiKey` at `<host>/api/otlp/v1/traces` ([OTLP ingest](https://agenta.ai/docs/reference/api/otlp-ingest)). Everything a vendor tells
 you is proprietary about their "integration" is usually just those two lines.
 
 **Agenta unflattens dotted attribute names.** You send `tutor.subject`; you get
@@ -130,16 +139,39 @@ back:
 "attributes": { "tutor": { "subject": "Mathematics", "level": "Beginner" } }
 ```
 
-Read it with `GET /api/tracing/traces/<trace_id>`. This is the whole "ingested is
-not the same as visible" point in miniature, with a happy ending: the value
-survived, but not under the key you sent. If you had asserted on a flat
-`attributes["tutor.subject"]` you would have concluded the attribute was dropped
-and gone looking for a bug that does not exist.
+Read it with `POST /api/traces/query` (the old `GET /api/tracing/traces/<id>` path
+is gone). This is the whole "ingested is not the same as visible" point in miniature,
+with a happy ending: the value survived, but not under the key you sent. If you had
+asserted on a flat `attributes["tutor.subject"]` you would have concluded the
+attribute was dropped and gone looking for a bug that does not exist.
 
-Copy that `trace_id` and find it in the Arato UI. **Do that at least once.** A
+**Sessions are derived, not created.** There is no create-session endpoint. A
+session is the set of traces that share `ag.session.id` — Agenta groups them at
+query time. One TutorBot eval process stamps the same id on all three cases, so
+**Sessions** shows one conversation with three turns. PayFlow copies the request's
+`session_id` onto `ag.session.id`; curl twice with `day8-otel` and the drawer
+grows. Users are the same trap: `ag.user.id` populates the indexed column,
+`user.id` does not. `session.id`, `gen_ai.conversation.id`, `ag.meta.session_id`,
+and the OpenAPI top-level `session_id` field all land in the attribute blob (or
+are dropped on ingest) and never appear in Sessions.
+
+Optional, if you want the session to link back to a prompt in that project:
+
+```env
+AGENTA_APPLICATION_ID=...
+AGENTA_VARIANT_ID=...
+AGENTA_REVISION_ID=...
+```
+
+Those become `ag.references.application.id` (and variant / revision). Leave them
+unset and the traces still group; they just will not deep-link.
+
+Copy that `trace_id` and find it in the Agenta **Observability** view — then open
+**Sessions** and find the same `ag.session.id`. **Do that at least once.** A
 `200` proves the request was accepted, not that the span was stored the way you
 meant — and the whole reason this lesson exists is that "it returned 200" and
-"it worked" are different claims.
+"it worked" are different claims. Ingest is async: Agenta queues the protobuf
+and persists it a moment later.
 
 ### Ingested is not the same as visible
 
@@ -170,6 +202,8 @@ Build a dashboard against these — they're what `provider.mjs` sends:
 | `llm.provider` / `llm.system` | `groq` |
 | `llm.token_count.prompt` / `.completion` / `.total` | integers |
 | `input.value` / `output.value` | prompt/response, or their hash when `LOG_RAW_PROMPTS` is off |
+| `ag.session.id` | one id per TutorBot eval process; PayFlow uses the request `session_id` |
+| `ag.user.id` | `tutorbot-student`, or PayFlow's `user_role` |
 
 ### The privacy trade-off is a switch, and it has a cost
 
@@ -201,7 +235,20 @@ the same `otlp.mjs`. Module 1's bots still cannot: they go through Promptfoo's
 built-in `groq:` provider, and there is no code of ours on that path. FinanceBot
 is the twin; it is not instrumented yet.
 
-With `./run.sh payflow-serve` running and `AGENTA_API_KEY` set:
+With `./run.sh payflow-serve` running and `AGENTA_API_KEY` in `.env`, the listen
+line prints `[otlp] agenta host=https://us.cloud.agenta.ai` (or `skipped` if the
+key is missing). Then run a Day 8 suite — the tests are the traffic:
+
+```bash
+./run.sh payflow-exposure
+```
+
+Five `/chat` cases post five traces into **Sessions → `exposure-session`**
+(`ag.user.id=student`). The GET `/health` case does not create a span. Each
+`payflow.chat` parent carries `route.guard_status` and `debug.latency_ms`; children
+are `llm.chat.completion` per Groq call.
+
+Optional one-liner (same mechanism, different session id):
 
 ```bash
 curl -s http://localhost:8000/chat \
