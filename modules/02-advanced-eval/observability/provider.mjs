@@ -9,7 +9,7 @@
 // account at all.
 
 import { createHash } from 'node:crypto';
-import { encodeTrace, newTraceId, newSpanId, agentaIndexFromEnv } from './otlp.mjs';
+import { encodeTrace, newTraceId, newSpanId, agentaIndexFromEnv, evaluationAttributes } from './otlp.mjs';
 
 // One eval process = one Agenta session. The three TutorBot cases share this
 // id, so Sessions shows one conversation with three turns, not three orphans.
@@ -183,6 +183,26 @@ export default class ObservedGroqProvider {
       'ag.user.id': EVAL_USER_ID,
     }, null, 2));
 
+    const durationMs = endMs - startMs;
+    const outputTrimmed = output.trim();
+
+    // OpenInference evaluations — Arato Observe surfaces these in the Evals column.
+    const evaluations = [
+      {
+        name: 'response-nonempty',
+        label: outputTrimmed.length > 0 ? 'pass' : 'fail',
+        score: outputTrimmed.length > 0 ? 1 : 0,
+        annotator_kind: 'CODE',
+      },
+      {
+        name: 'latency-under-10s',
+        label: durationMs < 10000 ? 'pass' : 'fail',
+        score: durationMs < 10000 ? 1 : 0,
+        annotator_kind: 'CODE',
+        explanation: `${durationMs}ms`,
+      },
+    ];
+
     // OpenInference semantic conventions — the attribute names Arato reads.
     await exportSpan({
       traceId,
@@ -215,6 +235,7 @@ export default class ObservedGroqProvider {
         'tutor.subject': context?.vars?.subject ?? 'unknown',
         'tutor.level': context?.vars?.level ?? 'unknown',
         ...agentaIndexFromEnv({ sessionId: EVAL_SESSION_ID, userId: EVAL_USER_ID }),
+        ...evaluationAttributes(evaluations),
       },
     });
 

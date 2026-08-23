@@ -265,6 +265,252 @@ finding) is the same number as `debug.latency_ms` on the parent span. Same leak,
 two sinks. `LOG_RAW_PROMPTS` unset still hashes `input.value` / `output.value`;
 the user message does not leave the process in the clear.
 
+## Arato Observe: dashboards and topology (10 min)
+
+[Arato Observe](https://arato.ai/observe/) is the other OTLP sink this lesson
+targets. The **same protobuf bytes** go to Arato and Agenta when both are
+configured — one encode in `otlp.mjs`, two POSTs in `provider.mjs` /
+`telemetry.js`.
+
+### Setup (one-time)
+
+1. Sign up at [arato.ai](https://arato.ai/) and open **Observe**.
+2. Create a project (or open your workshop project).
+3. Click **Monitor With Arato** (or the OTLP setup card) and copy:
+   - **OTLP endpoint** → `OTEL_EXPORTER_OTLP_ENDPOINT`
+   - **API key** → `ARATO_API_KEY`
+4. Add both to `.env` (do **not** append `/v1/traces` — the exporter adds it):
+
+```env
+OTEL_EXPORTER_OTLP_ENDPOINT=https://api.arato.ai/opentelemetry/<your-project>
+ARATO_API_KEY=ar-...
+OTEL_SERVICE_NAME=break-into-ai-testing
+```
+
+Keep `AGENTA_API_KEY` set if you want **dual export** to both vendors.
+
+### Generate traces
+
+**TutorBot** (three spans, one `ag.session.id`, `tutor.subject` / `tutor.level`):
+
+```bash
+npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
+```
+
+Look for **two** success lines per case when both backends are configured:
+
+```
+[arato] OTLP 200 host=https://api.arato.ai/opentelemetry/<project> trace_id=...
+[agenta] OTLP 200 host=https://us.cloud.agenta.ai trace_id=...
+```
+
+Copy a `trace_id` from the JSON block above the OTLP lines.
+
+**PayFlow** (parent `payflow.chat` + LLM children):
+
+```bash
+./run.sh payflow-serve          # terminal 1 — startup should log [otlp] arato host=...
+./run.sh payflow-exposure       # terminal 2
+```
+
+### What to show in Arato (vs Agenta)
+
+| | **Arato Observe** | **Agenta Observability** |
+|---|---|---|
+| Traces land | After you configure OTLP | After you configure OTLP |
+| Default UI | **You build dashboards** | Sessions / Traces work out of the box |
+| PayFlow waterfall | Topology / session replay | `payflow.chat` parent + children |
+| Slice by subject | Dashboard on `tutor.subject` | Filter on `tutor.subject` |
+| Eval loop | Not in this lesson | Evaluation runs + test sets |
+
+That contrast is the teaching point: **ingested is not the same as visible**
+(see above). Agenta gives you a session explorer for free; Arato expects you to
+**create a dashboard** (or use topology / session replay) before the numbers
+appear.
+
+### Build a dashboard (do this live)
+
+In Arato **Observe**, create a dashboard panel using the attributes this repo
+sends:
+
+| Field | Value |
+|---|---|
+| `service.name` | `break-into-ai-testing` |
+| instrumentation scope | `openinference.instrumentation.openai` |
+| span name | `llm.chat.completion` (TutorBot) or `payflow.chat` (PayFlow) |
+| `llm.model_name` | `qwen/qwen3.6-27b` |
+| `llm.token_count.total` | token count per span |
+| `tutor.subject` | Mathematics / Biology / … (TutorBot only) |
+| `tutor.level` | Beginner / Intermediate / Advanced |
+| `route.guard_status` | allowed / blocked (PayFlow only) |
+| `debug.latency_ms` | end-to-end ms (PayFlow only) |
+
+Suggested first panels:
+
+1. **Latency** — p50 / p95 of span duration, grouped by `tutor.subject` or span name.
+2. **Tokens** — sum of `llm.token_count.total` over time.
+3. **PayFlow** — count by `route.guard_status` (allowed vs blocked).
+
+Paste a `trace_id` into Arato search to confirm the span you just exported.
+
+### Arato gotchas (same as the code comments)
+
+- **Protobuf only** — JSON OTLP returns `500 invalid wire type`.
+- **Scope name** — must be `openinference.instrumentation.openai` (or another
+  `openinference.instrumentation.*` name Arato accepts). Anything else →
+  `400 Unknown span type`.
+- **Privacy** — default telemetry is `sha256:… (len=N)`; set `LOG_RAW_PROMPTS=true`
+  only for live demos.
+
+### Suggested class order (Arato + Agenta)
+
+1. Run TutorBot eval → show **dual** `[arato]` and `[agenta]` lines in the terminal.
+2. **Agenta** — Sessions: three turns, one conversation (`tutor.subject` visible).
+3. **Arato** — open Observe; if empty, **build one dashboard panel** (latency or
+   tokens). Name the three-step pipeline: emit → ingest → query.
+4. **PayFlow** — `./run.sh payflow-exposure`; compare Agenta waterfall to Arato
+   topology / session replay for `payflow.chat`.
+
+### Arato evals (two surfaces)
+
+OTLP traces and Arato evals are related but not automatic. This repo now attaches
+**OpenInference evaluation attributes** on exported spans (`evaluations.0.evaluation.*`
+via `evaluationAttributes()` in `otlp.mjs`):
+
+| Span | Eval names | What they check |
+|---|---|---|
+| TutorBot `llm.chat.completion` | `response-nonempty`, `latency-under-10s` | Non-empty answer; duration &lt; 10s |
+| PayFlow `payflow.chat` | `no-debug-leak`, `guard-decision`, `latency-under-10s` | Exposure finding (`debug` in body); guard outcome; latency SLO |
+
+Generate fresh eval-bearing traces:
+
+```bash
+npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
+```
+
+```bash
+./run.sh payflow-serve   # restart after telemetry.js changes
+curl -s http://localhost:8000/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"What is PayFlow?","session_id":"arato-evals-demo","user_role":"student"}'
+```
+
+**Where evals appear in Arato:**
+
+| Surface | What you see | Setup |
+|---|---|---|
+| **Observe → threads** | **Evals** column (`+N` pass/fail badges) on OTLP traffic | **One-time:** attach **dashboard validations** to this flow (below). OTLP `evaluations.*` span attributes (above) are useful metadata but **do not** populate this column by themselves. Refresh after ~30s after new traffic. |
+| **Experiment → Try demo notebook** | Run Results grid with **Evaluations** column | **Experiment → Try demo notebook** → step **7/7 Run Results** (pre-baked demo data). |
+| **Evals Hub** | Reusable String Check / Yes-No templates | **Evals → Create Template** — reusable library; attach copies to Observe dashboards or Studio notebooks. |
+
+**One-time Observe setup (Release Testing dashboard):**
+
+1. Open **Observe → Release Testing** (`neat-gold-numbat-1988`).
+2. Attach these **dashboard validations** (header Evals / validations panel, or
+   the same TextValidator shape used for `day8-mentions-payflow`). OTLP
+   `evaluations.*` attributes do **not** fill the threads Evals column.
+3. Save. Generate a fresh PayFlow `/chat` (and optionally a TutorBot eval).
+   New threads show badges within ~30s. Threads from *before* the attach stay empty.
+
+| Name | Type | Field | Operator | Value | What class should see |
+|---|---|---|---|---|---|
+| `day8-mentions-payflow` | TextValidator | Output | contains | `PayFlow` | Pass on PayFlow's final answer; **fail** on TutorBot and on PayFlow's guard / orchestrator spans (no "PayFlow" in those JSON outputs) |
+| `day8-no-debug-leak` | TextValidator | Output | notContains | `debug` | **Fail** on the PayFlow parent when `debug` leaked into the exported output (the exposure finding); pass on TutorBot |
+| `day8-response-nonempty` | TextValidator | Output | regex | `.+` | Pass on any span with output — the green check next to the red ones |
+
+There is **no** simple duration / latency TextValidator in Observe. Latency stays
+on the span (`debug.latency_ms`, `latency-under-10s` OpenInference attr) and in
+Agenta's waterfall. **Failed Evals** is the tab next to **Threads**. **Column
+Selection** can show Model / Tokens; there is no Latency column. The topology
+canvas stays empty until you **click a thread ID**.
+
+For class: show **Observe** eval badges on fresh TutorBot / PayFlow OTLP threads *and*
+the **Experiment** demo run results so students see evals in both the production-trace
+and pre-ship experiment loops. PayFlow batch regression stays in Promptfoo;
+Agenta evaluation runs stay on hosted prompts.
+
+## Agenta: observability and evaluations (two loops)
+
+Agenta is one project with two views on the same traffic. Teach them as separate
+loops that meet in the middle.
+
+| Loop | Sidebar | Question it answers |
+|---|---|---|
+| **Observability** | Observability → Sessions / Traces | What did the app do on this request? |
+| **Evaluation** | Evaluation → Evaluation runs | Does this prompt variant pass the test set? |
+
+PayFlow covers the first loop end-to-end. The second loop uses the
+**support-ticket-triage** application already in the BreakIntoAI workspace (two
+completed runs named *Demo: baseline vs budget-flash*). PayFlow itself is not an
+Agenta prompt — its batch regression stays in Promptfoo (`./run.sh
+payflow-exposure`). The bridge below shows how a production trace becomes a
+regression row anyway.
+
+### Loop A — Observability demo (10 min)
+
+1. **Generate traffic** (from repo root, with `AGENTA_API_KEY` in `.env`):
+   ```bash
+   ./run.sh payflow-serve          # terminal 1
+   ./run.sh payflow-exposure       # → Sessions → exposure-session
+   ```
+2. **Observability → Sessions** — open `exposure-session` or `# demo-exposure-map`.
+   Five `/chat` cases appear as five traces; the `/health` case does not (no span).
+3. **Waterfall** — expand one trace: parent `payflow.chat`, children
+   `llm.chat.completion` (guard, orchestrator, answer). Name the slow stage.
+4. **Filters** — **Traces** tab → filter root span name `payflow.chat`; blocked
+   requests show `route.guard_status=blocked` and one child span.
+5. **Two sinks** — compare `debug.latency_ms` in the HTTP JSON with the same
+   attribute on the parent span (`# demo-two-sinks`).
+
+Optional beats if you have time: `# rbac-staff` vs `# rbac-anonymous` (same answer,
+different `ag.user.id`); `# poisoning-session` with `PAYFLOW_POISON=1`.
+
+### Bridge — trace → test set
+
+This is how observability feeds evaluation: promote a real failure into a
+regression case.
+
+1. In the session drawer, open a trace (e.g. the blocked weather question in
+   `demo-exposure-map`).
+2. Click **Add to testset**.
+3. **Create New** → name it `day8-payflow-exposure` (or select that test set if
+   it already exists) → **Commit**.
+4. In the field mapper, wire span attributes to columns:
+   - **inputs** ← `ag.data.inputs` (PayFlow sends `{"message":"..."}` — must be a
+     JSON object on the root span or Sessions stays empty)
+   - **outputs** ← `output.value`
+5. **Evaluation → Test sets** — confirm the row shows the user message and model
+   answer. Repeat for other exposure traces if you want a five-row set.
+
+If **Create** gives you empty skeleton rows, you skipped the value mapping on the
+right-hand comboboxes — map `ag.data.inputs` and `output.value` before committing.
+
+### Loop B — Evaluation demo (5 min)
+
+1. **Evaluation → Evaluation runs**.
+2. Open an existing run — *Demo: baseline vs budget-flash* — and walk the grid:
+   test set `support-tickets-demo`, application `support-ticket-triage`, evaluators
+   *Contains JSON* and *Triage Field Match*.
+3. Or start a fresh run: **New Evaluation → Auto evaluation** → pick
+   **Application** (`support-ticket-triage`) → **Test set** → **Evaluators** →
+   **Start Evaluation**.
+
+Read the result as you read Promptfoo: green = met the assertion, red = finding.
+Agenta adds variant comparison (baseline vs budget-flash) in one table.
+
+### How this maps to Promptfoo
+
+| Promptfoo | Agenta |
+|---|---|
+| `tests/payflow.exposure.yaml` | Test set rows (manual import or trace → test set) |
+| `promptfooconfig.payflow-exposure.yaml` | Evaluation run configuration |
+| `./run.sh payflow-exposure` (inverted exit 100) | Auto evaluation on a hosted prompt variant |
+| OTLP from `payflow.chat` | Observability → Sessions |
+
+Promptfoo stays the source of truth for PayFlow attacks. Agenta shows the same
+SDLC shape — observe, capture, evaluate — on traces and on prompts hosted in the
+cloud UI.
+
 > Extension lesson — not part of the original `how-to-test-ai` day-03-promptfoo-advanced
 > curriculum. Taught on **Day 8** (Advanced Red Teaming, SDLC Testing + Arato.ai &
 > Agenta.ai).

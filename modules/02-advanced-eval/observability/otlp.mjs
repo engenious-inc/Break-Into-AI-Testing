@@ -75,6 +75,23 @@ export function agentaIndexFromEnv(ids) {
   });
 }
 
+// OpenInference evaluation feedback on a span — flattened as
+// evaluations.N.evaluation.* (see openinference/spec/annotations.md).
+// Span metadata for OpenInference consumers; Observe's threads Evals column
+// runs dashboard validations (see observability README), not these alone.
+export function evaluationAttributes(evaluations) {
+  const attrs = {};
+  evaluations.forEach((ev, index) => {
+    const prefix = `evaluations.${index}.evaluation`;
+    attrs[`${prefix}.name`] = ev.name;
+    if (ev.label != null) attrs[`${prefix}.label`] = ev.label;
+    if (ev.score != null) attrs[`${prefix}.score`] = ev.score;
+    if (ev.annotator_kind != null) attrs[`${prefix}.annotator_kind`] = ev.annotator_kind;
+    if (ev.explanation != null) attrs[`${prefix}.explanation`] = ev.explanation;
+  });
+  return attrs;
+}
+
 // Span { trace_id=1 span_id=2 parent_span_id=4 name=5 kind=6 start=7 end=8
 //        attributes=9 status=15 flags=16 }
 // A root span omits parent_span_id and sets flags=256 (bit 8, "context has

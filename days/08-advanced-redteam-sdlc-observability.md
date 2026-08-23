@@ -71,6 +71,56 @@ a span you can read and a span you can *query*. A one-off curl with
 Without a key the lesson still runs and tells you it skipped the POST. The span is real
 either way; only the network call is optional.
 
+### Agenta: observability + evaluations
+
+Same project, two loops — teach both in the Agenta UI after `./run.sh
+payflow-exposure` lands traces.
+
+**Loop A (observability):** Observability → Sessions → `exposure-session` or
+`# demo-exposure-map`. Expand `payflow.chat` and its `llm.chat.completion`
+children; filter Traces on root span name and `route.guard_status`.
+
+**Bridge (trace → test set):** On a trace, **Add to testset** → create
+`day8-payflow-exposure` → map `ag.data.inputs` → inputs and `output.value` →
+outputs → **Commit**. That row is a Promptfoo case captured from production
+traffic.
+
+**Loop B (evaluation):** Evaluation → Evaluation runs → open *Demo: baseline vs
+budget-flash* (or **New Evaluation → Auto evaluation** on `support-ticket-triage` +
+`support-tickets-demo`). PayFlow batch regression stays in Promptfoo; Agenta evals
+need a prompt variant hosted in the project.
+
+Full click-path and session ids:
+[`observability/README.md`](../modules/02-advanced-eval/observability/README.md#agenta-observability-and-evaluations-two-loops).
+
+### Arato Observe
+
+Arato is the **dashboard / topology** beat — same OTLP bytes as Agenta, different
+UI. Your `.env` needs **both** `OTEL_EXPORTER_OTLP_ENDPOINT` and `ARATO_API_KEY`
+from **Observe → Monitor With Arato** (see `.env.example`). With Agenta also set,
+each span POSTs twice and the terminal shows `[arato] OTLP 200` and `[agenta] OTLP
+200`.
+
+```bash
+# TutorBot — three traces, tutor.subject / tutor.level on each span
+npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
+```
+
+In Arato, **build at least one dashboard panel** (latency or tokens by
+`tutor.subject`) — empty Observe after a `200` is the lesson: ingest ≠ visible.
+The **Release Testing** dashboard needs **dashboard validations** attached or the
+threads **Evals** column stays empty — OTLP `evaluations.*` attributes are
+metadata only. The class set is `day8-mentions-payflow` (Output contains
+`PayFlow`), `day8-no-debug-leak` (Output notContains `debug`), and
+`day8-response-nonempty` (Output regex `.+`). Click a thread ID to fill the
+topology canvas. See the **Arato evals** section in the observability README.
+For a **visible eval grid** in Studio, use **Experiment → Try demo notebook**
+(step 7/7 Run Results). Then run `./run.sh payflow-exposure` and compare PayFlow's
+`payflow.chat` waterfall in Agenta to Arato session replay / topology.
+
+Full Arato click-path:
+[`observability/README.md`](../modules/02-advanced-eval/observability/README.md#arato-observe-dashboards-and-topology-10-min).
+
 **The red team is slow and rate-limited.** ~24 probes, four Groq calls each.
 `./run.sh payflow-redteam` paces at `-j 1 --delay 1000` so a free-tier key survives the
 slot. If your key is exhausted, use the replay command — the attacks are committed in

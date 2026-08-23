@@ -204,13 +204,43 @@ async function withRequestTrace(meta, fn) {
 
   async function finish(outcome) {
     try {
-      const { agentaIndexFromEnv } = await otlpReady;
+      const { agentaIndexFromEnv, evaluationAttributes } = await otlpReady;
       const endMs = Date.now();
       const latency = outcome?.debug?.latency_ms ?? (endMs - startMs);
       const sessionId = typeof meta.session_id === 'string' ? meta.session_id : undefined;
       const userId = typeof meta.user_role === 'string' ? meta.user_role : undefined;
+      const question = typeof meta.message === 'string' ? meta.message : undefined;
+      const answer = typeof outcome?.answer === 'string' ? outcome.answer : undefined;
+      const guardStatus = outcome?.route?.guard_status;
+      const hasDebugLeak = Boolean(outcome?.debug);
+      const evaluations = [
+        {
+          name: 'no-debug-leak',
+          label: hasDebugLeak ? 'fail' : 'pass',
+          score: hasDebugLeak ? 0 : 1,
+          annotator_kind: 'CODE',
+          explanation: hasDebugLeak ? 'HTTP body included debug object' : 'No debug object in response',
+        },
+        {
+          name: 'guard-decision',
+          label: guardStatus === 'blocked' ? 'blocked' : 'allowed',
+          score: guardStatus === 'blocked' ? 0 : 1,
+          annotator_kind: 'CODE',
+        },
+        {
+          name: 'latency-under-10s',
+          label: latency < 10000 ? 'pass' : 'fail',
+          score: latency < 10000 ? 1 : 0,
+          annotator_kind: 'CODE',
+          explanation: `${latency}ms`,
+        },
+      ];
       // Bare session_id stays on the span so students can grep it. Agenta's
       // Sessions view only indexes ag.session.id — the same trap as user.id.
+      // First input / last output on that view come from the ROOT span's
+      // ag.data, which OpenInference fills from input.value / output.value.
+      // Child LLM spans already have those; without them here the session
+      // id is stored and the Sessions table still has nothing to render.
       const index = agentaIndexFromEnv({ sessionId, userId });
       const spans = [
         {
@@ -226,7 +256,21 @@ async function withRequestTrace(meta, fn) {
             'route.guard_status': outcome?.route?.guard_status,
             'route.orchestrator_decision': outcome?.route?.orchestrator_decision,
             'debug.latency_ms': latency,
+            // ag.data.inputs must be a JSON object — a bare string is stored
+            // under ag.unsupported and the Sessions "First input" column stays empty.
+            'ag.data.inputs': question
+              ? JSON.stringify({ message: redactForTelemetry(question) })
+              : undefined,
+            // Include debug in the exported output when it leaked so Arato's
+            // day8-no-debug-leak dashboard check (Output notContains "debug")
+            // fails on the same finding as the span eval / HTTP body.
+            'output.value': (answer || hasDebugLeak)
+              ? redactForTelemetry(hasDebugLeak
+                ? JSON.stringify({ answer: answer || '', debug: outcome.debug })
+                : answer)
+              : undefined,
             ...index,
+            ...evaluationAttributes(evaluations),
           }),
         },
         ...children.map((child) => ({

@@ -418,7 +418,7 @@ async function answer(apiKey, message, docs) {
 
 // ---------------------------------------------------------------- orchestration
 async function handleChat(apiKey, corpus, message, meta) {
-  return withRequestTrace(meta, () => runChat(apiKey, corpus, message));
+  return withRequestTrace({ ...meta, message }, () => runChat(apiKey, corpus, message));
 }
 
 async function runChat(apiKey, corpus, message) {
