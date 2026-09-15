@@ -6,7 +6,7 @@
 #   ./run.sh financebot-serve         # in one terminal
 #   ./run.sh financebot-multiturn     # in another
 
-description: FinanceBot multi-turn — injection after four turns of legitimate context
+description: FinanceBot multi-turn — injection after context; paper-trade case fails on purpose
 
 providers:
   - id: http

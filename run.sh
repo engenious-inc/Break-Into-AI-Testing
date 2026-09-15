@@ -48,7 +48,7 @@ Targets:
   mcp-injection       MCP injection — search_notes result instructs write_note (inverted)
   financebot          FinanceBot app suite — guard, routing, citations (server must be up)
   financebot-api      FinanceBot HTTP contract + three planted defects (those three fail on purpose)
-  financebot-multiturn  FinanceBot injection after cooperative context
+  financebot-multiturn  FinanceBot injection after context (paper-trade case fails on purpose)
   financebot-redteam  FinanceBot generated red team (writes redteam.financebot.yaml)
   financebot-serve    Start the FinanceBot demo app on :8001 (foreground)
   financebot-health   Check the FinanceBot app is answering before you eval
