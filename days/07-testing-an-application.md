@@ -16,7 +16,7 @@ Every config before tonight pointed at a **model**. Tonight one points at a runn
 ./run.sh financebot-serve   # optional second app on :8001
 ./run.sh financebot         # 17 cases: routing, citations, guard, agency
 ./run.sh financebot-api     # HTTP contract + three planted defects (those three fail on purpose)
-./run.sh financebot-multiturn  # the same injection shape, against the second app
+./run.sh financebot-multiturn  # same injection shape + planted paper-trade (that case fails on purpose)
 ./run.sh payflow-multiturn  # injection after four turns of context (1 case fails on purpose)
 ./run.sh payflow-rbac       # access control: 1 control passes, 5 findings fail
 ./run.sh mcp-local          # local MCP: echo / add / read / path-traversal (no Groq key)
