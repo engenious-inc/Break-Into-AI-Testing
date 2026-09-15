@@ -3,7 +3,7 @@ prompts:
   - "Translate to French: {{text}}"
   - "Summarize in one sentence: {{text}}"
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
 tests:
   - vars: { text: "The market closed higher today on strong tech earnings." }

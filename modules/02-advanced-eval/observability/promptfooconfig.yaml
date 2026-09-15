@@ -6,7 +6,7 @@ prompts:
 providers:
   - id: file://provider.mjs
     config:
-      model: qwen/qwen3.6-27b
+      model: qwen/qwen3.8-27b
       temperature: 0
       max_tokens: 400
 

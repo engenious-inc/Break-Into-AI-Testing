@@ -9,7 +9,7 @@ prompts:
 # extra Groq models (or the paid OpenAI/Anthropic providers) below — but watch the
 # rate limit, and add `-j 2` if you start hitting throttling.
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config:
       temperature: 0
       max_tokens: 400
@@ -28,7 +28,7 @@ providers:
       max_tokens: 400
 
   # Add back for the full lineup (slower on free tier):
-  # - id: groq:meta-llama/llama-4-scout-17b-16e-instruct
+  # - id: groq:groq/compound
   # - id: groq:openai/gpt-oss-120b  # now in the default matrix above
   # - id: groq:openai/gpt-oss-safeguard-20b
   # OPTIONAL — cross-vendor comparison (paid keys):
@@ -37,7 +37,7 @@ providers:
 
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 
 # Curated 8-case subset — kept deliberately small so a live demo stays under Groq's free tier.
 tests:

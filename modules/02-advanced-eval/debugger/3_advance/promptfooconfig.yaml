@@ -2,7 +2,7 @@ description: "Debugger 3 — fix me"
 prompts:
   - file://prompt/hello.txt
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 60, reasoning_effort: none, reasoning_format: hidden}
 tests:
   - assert:

@@ -6,7 +6,7 @@ prompts:
 # Standalone add-on — kept out of promptfooconfig.medibot.yaml's default run so the
 # free-tier-safe curated suite's size/timing is unchanged. Same 3 models as default.
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config:
       temperature: 0
       max_tokens: 400
@@ -26,7 +26,7 @@ providers:
 
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 
 tests:
   - file://tests/medibot-multiturn.yaml

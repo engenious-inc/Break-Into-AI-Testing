@@ -351,8 +351,8 @@ blind spots." Which is lesson 1.5.
 `04-grading-the-grader/` shows one grader failure. This generalises it into the four named
 biases, and it starts by pointing at this repo:
 
-**`defaultTest.options.provider: groq:qwen/qwen3.6-27b` is the grader in nearly every
-config, and `groq:qwen/qwen3.6-27b` is also the first provider in the matrix.** Qwen grades
+**`defaultTest.options.provider: groq:qwen/qwen3.8-27b` is the grader in nearly every
+config, and `groq:qwen/qwen3.8-27b` is also the first provider in the matrix.** Qwen grades
 Qwen. That is textbook self-preference, measured at 10–25 points of score inflation, and
 it is running in the shipped course today.
 

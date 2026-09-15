@@ -2,7 +2,7 @@ description: "Advanced 4 — CSV-driven test data (__expected / __metadata colum
 prompts:
   - file://prompts/prompt.txt
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden}
 # Switch which CSV loads by editing this line:
 tests: file://tests/with_assertions.csv

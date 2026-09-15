@@ -44,7 +44,7 @@ prompts:
 # limit but is a billing error from a provider you never meant to call.
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 
 tests:
   - file://tests/payflow.routing.yaml

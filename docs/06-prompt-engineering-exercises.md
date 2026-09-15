@@ -113,9 +113,9 @@ temperature 0.7:
 
 | Model | Latency | Total tokens | Reasoning | Clean answer? |
 |---|---|---|---|---|
-| `qwen/qwen3.6-27b` | 289 ms | 115 | 0 | yes |
+| `qwen/qwen3.8-27b` | 289 ms | 115 | 0 | yes |
 | `openai/gpt-oss-20b` | 315 ms | 216 | 69 | **no — leaks** |
-| `qwen/qwen3.6-27b` | 466 ms | 123 | 0 | yes |
+| `qwen/qwen3.8-27b` | 466 ms | 123 | 0 | yes |
 
 ### Exercise 5 — Put a budget in the config
 

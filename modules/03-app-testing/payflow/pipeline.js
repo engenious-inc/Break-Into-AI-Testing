@@ -13,8 +13,8 @@ const path = require('path');
 const { withRequestTrace, currentTrace } = require('./telemetry');
 
 const GROQ_API_BASE = process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1';
-const FAST_MODEL = 'qwen/qwen3.6-27b';      // guard + routing: short, structured
-const ANSWER_MODEL = 'qwen/qwen3.6-27b'; // answering: needs to read documents
+const FAST_MODEL = 'qwen/qwen3.8-27b';      // guard + routing: short, structured
+const ANSWER_MODEL = 'qwen/qwen3.8-27b'; // answering: needs to read documents
 const SPECIALISTS = ['jira', 'confluence', 'figma', 'basic'];
 const INTENTS = ['blocker_query', 'docs_query', 'design_query', 'product_query', 'general'];
 // A fixed vocabulary, not free text. A guard that answers "why" in prose cannot be
@@ -79,7 +79,7 @@ async function groq(apiKey, model, messages, maxTokens, jsonMode, stage) {
     messages,
     temperature: 0,
     max_tokens: maxTokens,
-    // Qwen 3.6 otherwise emits <think> into the visible answer and can empty out
+    // Qwen 3.8 otherwise emits <think> into the visible answer and can empty out
     // json_object responses (guard/route then fail closed or 502).
     reasoning_effort: 'none',
   };

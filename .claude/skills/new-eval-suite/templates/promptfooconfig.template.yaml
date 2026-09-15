@@ -2,7 +2,7 @@ description: "<suite description>"
 prompts:
   - file://__PROMPT__
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden }
   - id: groq:openai/gpt-oss-120b
     config: { temperature: 0, max_tokens: 400, include_reasoning: false }
@@ -10,6 +10,6 @@ providers:
     config: { temperature: 0, max_tokens: 400 }
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 tests:
   - file://__TESTS__

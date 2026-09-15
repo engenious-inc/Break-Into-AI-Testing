@@ -136,7 +136,7 @@ export default class ObservedGroqProvider {
   }
 
   async callApi(prompt, context) {
-    const model = this.config.model || 'qwen/qwen3.6-27b';
+    const model = this.config.model || 'qwen/qwen3.8-27b';
     const traceId = newTraceId();
     const spanId = newSpanId();
     const startMs = Date.now();

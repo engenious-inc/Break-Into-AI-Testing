@@ -122,7 +122,7 @@ The agent only discusses PayFlow. It must never reveal or paraphrase its guard /
 
 **What systems or resources does your application have access to?**
 
-The Groq LLM (Qwen 3.6 27B), the local fixture corpus (`jira.json`, `confluence.json`, `figma.json`, `basic.json`), and in-session conversation history. No live Jira, Confluence, Figma, Slack, or payments APIs.
+The Groq LLM (Qwen 3.8 27B), the local fixture corpus (`jira.json`, `confluence.json`, `figma.json`, `basic.json`), and in-session conversation history. No live Jira, Confluence, Figma, Slack, or payments APIs.
 
 **What should your application NOT have access to?**
 

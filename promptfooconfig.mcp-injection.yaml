@@ -15,7 +15,7 @@
 description: 'MCP injection — search_notes result instructs write_note'
 
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config:
       temperature: 0
       max_tokens: 400

@@ -3,7 +3,7 @@ prompts:
   - |
     Write a one-line support reply for {{name}} at {{company}} about: {{issue}}
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
 tests:
   - vars: { name: "Dana", company: "Acme Brokerage", issue: "password reset" }
