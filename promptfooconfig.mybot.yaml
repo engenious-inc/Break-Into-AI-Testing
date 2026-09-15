@@ -6,7 +6,7 @@ prompts:
 # Same free-tier-safe 3-model lineup as the starter configs. Leave as-is —
 # the challenge is about your bot and probes, not the model matrix.
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config:
       temperature: 0
       max_tokens: 400
@@ -27,7 +27,7 @@ providers:
 # Grader for llm-rubric assertions (same as the starter configs).
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 
 tests:
   - file://tests/mybot.yaml

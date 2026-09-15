@@ -87,7 +87,7 @@ if want day3; then
 description: "outcome-check probe — does type:cost still error on Groq?"
 prompts: ["Say hello in one word."]
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 20, reasoning_effort: none, reasoning_format: hidden }
 tests:
   - assert:
@@ -107,7 +107,7 @@ if want day4; then
 description: "outcome-check probe — threshold semantics"
 prompts: ["Say OK."]
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 5, reasoning_effort: none, reasoning_format: hidden }
 tests:
   - description: "tie 0.50 vs 0.50"

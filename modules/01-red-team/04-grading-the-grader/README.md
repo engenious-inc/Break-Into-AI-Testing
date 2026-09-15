@@ -28,7 +28,7 @@ understanding separately:
 
 ## What you run today (post–August 2026 Groq decommission)
 
-Groq retired both Llamas. Free-tier replacements (Qwen 3.6 27B, GPT-OSS 120B) **refuse**
+Groq retired both Llamas. Free-tier replacements (Qwen 3.8 27B, GPT-OSS 120B) **refuse**
 the French translation attack cleanly — so they cannot reproduce the historical V1
 "reports SAFE while leaking" demo.
 

@@ -2,7 +2,7 @@ description: "Module 1 quality challenges — MediBot (bias / consistency / comp
 prompts:
   - file://prompts/medibot.txt
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
   # Uncomment for full cross-model comparison (watch free-tier rate limits):
   # - id: groq:openai/gpt-oss-120b
@@ -11,7 +11,7 @@ providers:
   #   config: { temperature: 0, max_tokens: 400 }
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 tests:
   - file://tests/bias.medibot.yaml
   - file://tests/consistency.medibot.yaml

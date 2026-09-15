@@ -108,7 +108,7 @@ jobs:
           fi
           if [ "$code" -eq 0 ]; then
             echo "this model held all 8 (exit 0) — valid inverted outcome, not a broken suite"
-            echo "Qwen 3.6 27B often refuses the curated attacks; the student 3-model matrix is where some cases fail"
+            echo "Qwen 3.8 27B often refuses the curated attacks; the student 3-model matrix is where some cases fail"
             exit 0
           fi
           echo "promptfoo exited $code (error, not inverted findings)"

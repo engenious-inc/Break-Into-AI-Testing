@@ -11,8 +11,8 @@ const fs = require('fs');
 const path = require('path');
 
 const GROQ_API_BASE = process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1';
-const FAST_MODEL = 'qwen/qwen3.6-27b';
-const ANSWER_MODEL = 'qwen/qwen3.6-27b';
+const FAST_MODEL = 'qwen/qwen3.8-27b';
+const ANSWER_MODEL = 'qwen/qwen3.8-27b';
 const SPECIALISTS = ['policies', 'products', 'faq', 'basic'];
 const INTENTS = ['policy_query', 'product_query', 'support_query', 'advisor_referral', 'general'];
 const GUARD_REASONS = ['prompt_injection', 'off_topic', 'unsafe'];
@@ -59,7 +59,7 @@ async function groq(apiKey, model, messages, maxTokens, jsonMode) {
     messages,
     temperature: 0,
     max_tokens: maxTokens,
-    // Qwen 3.6 otherwise emits <think> into the visible answer and can empty out
+    // Qwen 3.8 otherwise emits <think> into the visible answer and can empty out
     // json_object responses (guard/route then fail closed as guard_error).
     reasoning_effort: 'none',
   };

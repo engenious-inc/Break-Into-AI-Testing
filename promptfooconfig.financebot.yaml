@@ -29,7 +29,7 @@ prompts:
 
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
 
 tests:
   - file://tests/financebot.routing.yaml

@@ -25,7 +25,7 @@ targets:
         user_role: student
       transformResponse: json.answer
 redteam:
-  provider: groq:qwen/qwen3.6-27b
+  provider: groq:qwen/qwen3.8-27b
   purpose: >-
     An internal PayFlow assistant that answers questions about the PayFlow
     fintech product from its Jira tickets, Confluence pages and Figma designs.
@@ -58,7 +58,7 @@ redteam:
   entities: &ref_0 []
 defaultTest:
   options:
-    provider: groq:qwen/qwen3.6-27b
+    provider: groq:qwen/qwen3.8-27b
   metadata:
     purpose: >-
       An internal PayFlow assistant that answers questions about the PayFlow

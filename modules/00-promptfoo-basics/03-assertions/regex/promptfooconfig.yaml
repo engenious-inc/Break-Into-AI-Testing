@@ -2,7 +2,7 @@ description: "Assertions 2/5 — deterministic regex"
 prompts:
   - "In what year was Python first released? Answer with the year only."
 providers:
-  - id: groq:qwen/qwen3.6-27b
+  - id: groq:qwen/qwen3.8-27b
     config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
 tests:
   - assert:
