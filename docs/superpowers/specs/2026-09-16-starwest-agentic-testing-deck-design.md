@@ -50,7 +50,7 @@ Repository examples will be explained without requiring attendees to know Prompt
 ### Correct
 
 - Distinguish empirical pass rate, `pass@k` (at least one success), and `pass^k` (all k trials succeed).
-- Replace claims that ten repeated runs constitute a `pass@k` baseline.
+- Replace claims that ten repeated runs constitute a `pass@k` baseline. Monday takeaway: harness smoke versus reliability (`pass^k`) versus coverage (`pass@k`).
 - Clarify sample-size assumptions and avoid treating repeated prompts as independent observations.
 - Describe aggregation masking directly unless the slide demonstrates Simpson's paradox.
 - Correct duplicated or mismatched speaker notes.
@@ -63,6 +63,19 @@ Repository examples will be explained without requiring attendees to know Prompt
 - A repository-backed application assertion example for route and citations.
 - Source footnotes on evidence slides and a linked bibliography.
 - Clear labels for internal, illustrative, preprint, and published measurements.
+
+### Borrow from the Arbon book summary (phrasing, not the tour)
+
+`Testing-AI-Arbon-Summary.pptx` restates material STARWEST already uses. Do not copy the 14-slide book tour, Confidence Engineer rebrand, Chapter 21 predictions, or Arbon's slate/orange theme. STARWEST's `pass@k` vs `pass^k` split is stronger than the summary and must remain the primary metric language.
+
+Borrow only:
+
+- Anti-pattern punch lines near the metrics block: retries are selection, not evaluation; a pass rate is a property of the test mix; cluster failures into families before filing.
+- Six-step trajectory as the compact agentic contract: plan → tool and arguments → permissions → recovery → side effects → final answer. Optional spoken line: if a human would follow a checklist, build a parameterized workflow, not an agent.
+- Guardrail questions on the security slide: allowed / blocked / escalated / constrained / logged; calibration bugs are over-block, under-block, and silent block.
+- Judge one-liners: hard blockers never dissolve into the mean; if two humans cannot apply the scale, automating it only makes the confusion official; mine disagreement.
+
+Keep in notes or appendix: Confidence Engineer hats, multiple-testing math, the "50 cases this week" recipe, and the six predictions.
 
 ### Move to Appendix or Consolidate
 
