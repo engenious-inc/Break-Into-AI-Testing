@@ -89,11 +89,12 @@ Potentially sensitive operational details will be generalized unless already pub
 
 External evidence will be qualified:
 
-- τ-bench and MAST will cite their primary papers.
-- The silent-failure study will be labeled a single-system longitudinal preprint.
-- OWASP LLM and Agentic Top 10 references will use official titles and dates.
+- The original τ-bench results will be labeled as a 2024 benchmark result for a specific GPT-4o version and harness, not current frontier performance.
+- MAST will cite the NeurIPS paper and state that its 1,642-trace dataset was predominantly LLM-annotated; human annotation developed and validated the taxonomy.
+- The silent-failure study will be labeled a single-author, single-system, non-peer-reviewed longitudinal preprint.
+- OWASP LLM and Agentic Top 10 references will use official titles and dates; the Agentic resource page date is December 9, 2025.
 - OpenTelemetry GenAI conventions will be described as Development status.
-- The July 2026 τ-bench grading change will be cited to its release notes.
+- The July 2026 τ-bench 1.0.1 grading change will be cited to its release notes and scoped specifically to the `banking_knowledge` domain.
 - `Testing AI` will include its full subtitle, edition, and publication date.
 
 ## Visual Direction
