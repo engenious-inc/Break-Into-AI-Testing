@@ -1,4 +1,4 @@
-description: "Providers 1/2 — config tuning + the model matrix"
+description: "Providers 1/3 — config tuning + the model matrix"
 prompts:
   - "Explain {{topic}} to a beginner in two sentences."
 providers:

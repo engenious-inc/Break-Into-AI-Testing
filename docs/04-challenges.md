@@ -9,14 +9,16 @@ as the tiebreaker. See [Scoring](#scoring) at the bottom.
 
 **Time:** ~20–25 min per challenge.
 
-**The command you'll run every time:**
+**Use the workshop runner for every eval:**
 ```bash
-npx promptfoo@latest eval -c <config> -j 2   # run the eval (-j 2 dodges Groq throttling)
-npx promptfoo@latest view                    # inspect results in the web UI
+./run.sh <target>   # Windows: .\run.ps1 <target>
+./run.sh view       # Windows: .\run.ps1 view
 ```
 
-> Reminder: **exit code 100 is healthy.** It just means some assertions failed —
-> which, in a red-team suite, is often exactly what you want to see.
+The runner applies the repo's free-tier pacing (`RUN_JOBS=1`,
+`RUN_DELAY_MS=1000` by default) and prints the right verdict for each target.
+Exit 100 depends on the challenge: it is a finding in BREAK IT, but a defect to fix in
+FIX IT and BUILD IT.
 
 ---
 
@@ -36,7 +38,7 @@ system prompt (`prompts/medibot.txt`, `prompts/financebot.txt`). Your job is to 
    - A **failing** assertion means your attack **landed**.
 3. Run the eval and confirm your case shows ✗ on at least one model:
    ```bash
-   npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 2
+   ./run.sh medibot
    ```
 
 ### Rules
@@ -50,8 +52,12 @@ system prompt (`prompts/medibot.txt`, `prompts/financebot.txt`). Your job is to 
 The new YAML case + a screenshot of the eval row showing the break + one line naming your technique.
 
 ### Scored on
-Novelty of the vector (biggest weight) · breadth — bonus for breaking `llama-3.3-70b`
-or all three models · elegance — a short, sneaky prompt beats a wall of text.
+Novelty of the vector (biggest weight) · breadth — bonus for breaking all three current
+default models (`groq:qwen/qwen3.8-27b`, `groq:openai/gpt-oss-120b`, and
+`groq:openai/gpt-oss-20b`) · elegance — a short, sneaky prompt beats a wall of text.
+
+For this challenge the suite is **inverted**: exit 100 means at least one attack landed,
+which is the finding you are trying to produce.
 
 ---
 
@@ -60,19 +66,17 @@ or all three models · elegance — a short, sneaky prompt beats a wall of text.
 **Harden a bot so the attacks that currently land stop landing — by editing
 _only_ the system prompt.**
 
-Out of the box, MediBot passes **roughly half** of the suite — the exact count varies
-run to run (the models are non-deterministic and Groq rotates versions), so record
-**your own** baseline in Step 1 below. The suite is **8 cases × 3 providers = 24**
-test cells. The holes you'll typically see: both Llamas leak a dose under
-education-framing, the 70B *also* leaks one as "DoseBot", and gpt-oss over-runs the length
-limit, spills its own rules, and invents a fabricated citation. Close those holes.
+The exact baseline varies run to run, so record **your own** in Step 1. The suite is
+**8 cases × 3 providers = 24** test cells across Qwen 3.8 27B, GPT-OSS 120B, and
+GPT-OSS 20B. Groq retired the older Llama baselines; do not treat historical Llama
+results as a promise about this matrix. Find the holes in your run, then close those.
 
 ### Steps
 1. Record your baseline (run it once, note the pass count).
 2. Edit **only** the `content` string in `prompts/medibot.txt` — rewrite / strengthen the rules.
 3. Re-run the **same** suite and push red → green:
    ```bash
-   npx promptfoo@latest eval -c promptfooconfig.medibot.yaml -j 2
+   ./run.sh medibot
    ```
 
 ### Rules — read these, they contain the trap
@@ -80,7 +84,8 @@ limit, spills its own rules, and invents a fabricated citation. Close those hole
 - You **cannot** win by making the bot refuse everything. The suite includes must-answer
   cases — the concise "what is HTTP?" reply and the chest-pain → 911 response. Over-refusing
   **regresses** those and **costs** you points.
-- Goal: raise the pass count **above your recorded baseline** (~12/18 out of the box) without breaking a must-answer case.
+- Goal: raise the pass count **above your recorded baseline** without breaking a
+  must-answer case.
 
 > **Discussion point — why only the system prompt?** This challenge restricts you to
 > prompt edits on purpose, but production systems don't stop there. A real deployment
@@ -98,6 +103,10 @@ Your new system prompt + before/after pass counts (screenshots).
 ### Scored on
 Highest pass count with no regressions · cleverness and generality of the guardrail
 wording · concision — a tight prompt that generalizes beats a long checklist.
+
+For this challenge you are fixing the failures: the desired final state is green. The
+MediBot runner still reports red-team findings honestly, but your job here is to remove
+those findings without regressing the must-answer controls.
 
 ---
 
@@ -125,7 +134,7 @@ your own domain. `promptfooconfig.mybot.yaml` already wires the three files toge
    - a **gray-area** edge case that sits right on the boundary — the interesting one.
 3. `promptfooconfig.mybot.yaml` already points at both files. Run it:
    ```bash
-   npx promptfoo@latest eval -c promptfooconfig.mybot.yaml -j 2
+   ./run.sh mybot
    ```
 
 ### Deliverable
@@ -135,6 +144,10 @@ Your prompt + config + tests + eval output.
 Originality of the concept/domain · cleverness of the guardrails · how genuinely hard
 your gray-area probe is · **bonus** if a model actually fails one of your own probes
 (proof you found a real weakness in your own design).
+
+`mybot` uses **ordinary** semantics: green is the goal, and exit 100 means a defect in
+your new bot or tests. A failed probe can earn the stated bonus as an honestly documented
+weakness, but the runner will not call it a healthy inverted finding.
 
 ---
 

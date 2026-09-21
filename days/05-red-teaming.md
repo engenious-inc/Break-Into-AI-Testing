@@ -13,8 +13,8 @@ Assertions describe the SAFE answer, so a failure is the finding — not a broke
 
 | Semantics | Meaning of exit 100 | Targets |
 |---|---|---|
-| **Inverted** (fail = finding) | Something bad happened — triage it | `medibot`, `finance`, `medibot-multiturn`, `quality.medibot`, `quality.finance`, `openrouter.*`, `payflow-redteam` |
-| **Ordinary** (fail = defect) | Your bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse` |
+| **Inverted** (fail = finding) | Something bad happened — triage it | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
+| **Ordinary** (fail = defect) | Your bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local` |
 
 Quality suites (`./run.sh quality.medibot` / `quality.finance`) invert too — a fail means
 bias leaked, compliance slipped, or values drifted. Know which column you are in before

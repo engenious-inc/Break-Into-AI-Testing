@@ -39,8 +39,8 @@ renumbered once between cohorts, which is why the lessons are not stored in day 
 
 | Semantics | Exit 100 means | Targets |
 |---|---|---|
-| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
-| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-multiturn`, `mybot`, `reverse`, `mcp-local` |
+| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
+| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local` |
 
 `payflow-rbac`, `payflow-exposure` and `payflow-poisoning` are the inverted suites that
 point at the **application** rather than at a model. Their assertions describe a hardened

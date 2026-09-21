@@ -14,10 +14,11 @@ This workshop is one course in four modules plus a hackathon.
 
 Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.
 
-> **Module 3 is the only one whose providers are not chat models.** PayFlow and FinanceBot
-> use Promptfoo's `http` provider against local multi-agent apps (assert on route +
+> **Module 3 is the only one whose providers are not chat models.** PayFlow and HarborWealth
+> FinanceBot use Promptfoo's `http` provider against local multi-agent apps (assert on route +
 > citations — server must be up: `./run.sh payflow-serve` then `./run.sh payflow`, or
-> `./run.sh financebot-serve` then `./run.sh financebot`).
+> `./run.sh financebot-serve` then `./run.sh financebot`). That `financebot` is not Module 1's
+> `./run.sh finance` (or `./run.sh chat financebot`, which still talks to `prompts/financebot.txt`).
 > MCP track: `mcp-deepwiki/` (remote SUT), `mcp-local/` (stdio SUT — install once,
 > `./run.sh mcp-local`), and `mcp-promptfoo/` (Promptfoo *is* the MCP server for the IDE —
 > see root `.cursor/mcp.json`). Day 8 reuses workshop-local: `./run.sh mcp-abuse` (JSON,

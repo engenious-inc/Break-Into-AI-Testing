@@ -1,4 +1,4 @@
-# Providers 1/2 — Configuration
+# Providers 1/3 — Configuration
 
 > **Day 3** · [session index](../../../../days/03-prompt-engineering-and-local-models.md)
 

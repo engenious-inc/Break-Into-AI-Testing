@@ -19,6 +19,15 @@ was produced* — which specialist was chosen, which documents were retrieved, w
 guard fired, whether a tool failed cleanly. Most real AI defects live there, not in the
 prose.
 
+> **Two things students trip on before they start a server:**
+>
+> - **`finance` is not `financebot`.** `./run.sh finance` is Module 1's **prompt-only**
+>   FinanceBot (`prompts/financebot.txt` + `promptfooconfig.finance.yaml`), which this module
+>   leaves untouched. `./run.sh financebot` is the HarborWealth **app** on `:8001`, below.
+> - **There is no MediBot app, on purpose.** Module 1's MediBot stays a prompt; giving it a
+>   server and a chat UI would clone PayFlow into healthcare and blur the prompt-vs-application
+>   line this module exists to draw. Reach MediBot with `./run.sh medibot` and `./run.sh view`.
+
 ## The app: PayFlow GenAI demo
 
 PayFlow is a fictional fintech product. The demo answers questions about it from a small
@@ -158,7 +167,14 @@ npx promptfoo@latest view
 ## The app: FinanceBot GenAI demo (HarborWealth)
 
 Same pipeline shape as PayFlow, different domain. **HarborWealth** is a fictional retail
-brokerage; **FinanceBot** is its in-app assistant. Specialists and ID prefixes:
+brokerage; **FinanceBot** is its in-app assistant.
+
+> This is **not** Module 1's FinanceBot. That one is prompt-only — `prompts/financebot.txt`
+> run by `./run.sh finance`, still there and unchanged. This one is an application you start,
+> with a corpus and a routing layer, run by `./run.sh financebot`. Same name, two different
+> targets; the `run.sh` word tells you which.
+
+Specialists and ID prefixes:
 
 | Specialist | Prefix | Owns |
 |------------|--------|------|
@@ -167,12 +183,11 @@ brokerage; **FinanceBot** is its in-app assistant. Specialists and ID prefixes:
 | `products` | `PR-*` | Brokerage / IRA / Roth, fund categories, rollover overview |
 | `faq` | `FQ-*` | Support hours, advisor consult steps |
 
-Port **8001** (`FINANCEBOT_PORT`) so both apps can run at once. Module 1's prompt-only
-FinanceBot (`prompts/financebot.txt` + `promptfooconfig.finance.yaml`) is unchanged —
-this is the Module 3 application track.
+Port **8001** (`FINANCEBOT_PORT`) so both apps can run at once. Open
+<http://localhost:8001> for the workshop chat UI, then check health before evaluating.
 
 ```bash
-./run.sh financebot-serve      # terminal 1 — http://localhost:8001
+./run.sh financebot-serve      # terminal 1 — http://localhost:8001 (chat UI)
 ./run.sh financebot-health
 ./run.sh financebot            # ordinary: routing + agency
 ./run.sh financebot-api        # HTTP contract + three planted defects (those three fail on purpose)

@@ -3,9 +3,9 @@
 #
 # Maps a short target name to its Promptfoo config, bakes in free-tier-safe
 # pacing (-j 1 --delay 1000 by default, so a whole room stays under Groq's
-# ~30 req/min limit), and — because these are RED-TEAM suites where a *failing*
-# assertion means the attack landed — translates Promptfoo's exit code into a
-# plain-English verdict. Extra args after the target pass straight through.
+# ~30 req/min limit), and translates Promptfoo's exit code according to each
+# suite's ordinary or inverted semantics. Extra args after the target pass
+# straight through.
 #
 #   ./run.sh medibot                     # MediBot red-team suite
 #   ./run.sh finance --filter-first-n 1  # extra args pass through to promptfoo
@@ -52,7 +52,7 @@ Targets:
   financebot-redteam  FinanceBot generated red team (writes redteam.financebot.yaml)
   financebot-serve    Start the FinanceBot demo app on :8001 (foreground)
   financebot-health   Check the FinanceBot app is answering before you eval
-  chat <bot>          Talk to a bot directly (onboardbot, medibot, financebot, mybot)
+  chat <bot>          Prompt-only chat (onboardbot, medibot, financebot, mybot — not :8001)
   view                Open the results web UI
 
 Examples:
@@ -212,11 +212,11 @@ fi
 
 printf "${BLUE}▶${NC} Running ${BLUE}%s${NC}  ${YELLOW}(-j %s --delay %sms)${NC}\n" "$target" "$JOBS" "$DELAY_MS"
 
-# Ordinary suites (pass = good): PayFlow / FinanceBot app evals and Challenge-3 mybot.
+# Ordinary suites (pass = good): app evals, reverse engineering, and Challenge-3 mybot.
 # Everything else here is inverted (fail = finding). Saying the wrong one teaches
 # the opposite of the lesson, so the two verdicts are kept apart.
 ordinary=0
-if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ] || [ "$target" = "mcp-local" ]; then
+if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ] || [ "$target" = "reverse" ] || [ "$target" = "mcp-local" ]; then
   ordinary=1
 fi
 

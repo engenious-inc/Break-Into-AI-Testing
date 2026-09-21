@@ -4,6 +4,11 @@
 
 Break MediBot and FinanceBot, then hand the repetitive half of the job to an agent.
 
+Both are **prompt-only** — `prompts/medibot.txt` and `prompts/financebot.txt` plus an eval.
+There is no server to start and no chat window: `./run.sh medibot` / `./run.sh finance`, then
+`./run.sh view`. Applications with chat UIs are Module 3, and `./run.sh financebot` (the
+HarborWealth app on `:8001`) is a different target from `./run.sh finance` (this module's bot).
+
 Module 1's runnable artifacts live at the **repo root** (`prompts/`, `tests/`,
 `promptfooconfig.*.yaml`) — this directory is the teaching layer over them, so
 there is exactly one copy of every attack suite. Only lesson 04 ships its own

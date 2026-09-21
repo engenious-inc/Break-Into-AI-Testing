@@ -3,6 +3,19 @@
 Every config before tonight pointed at a **model**. Tonight one points at a running
 **application**, and that changes what you are allowed to assert on.
 
+MediBot and FinanceBot from Day 5 are **prompts** — a text file in `prompts/` plus an eval,
+nothing to start. Tonight's PayFlow and HarborWealth FinanceBot are **applications**: a server
+you leave running, a port, a chat UI in the browser, and a JSON contract underneath.
+
+Two name traps, before you run anything:
+
+- **`finance` is not `financebot`.** `./run.sh finance` is Day 5's prompt-only FinanceBot and
+  tonight does not touch it. `./run.sh financebot` is the HarborWealth app on `:8001`.
+  Different bot, different corpus, different thing under test.
+- **There is no MediBot app.** MediBot never gets a server or a chat UI — cloning PayFlow into
+  healthcare would cost the exact distinction this session exists to make. You still reach
+  MediBot through `./run.sh medibot` and `./run.sh view`.
+
 ## Run this — two terminals
 
 ```bash
@@ -25,6 +38,16 @@ Every config before tonight pointed at a **model**. Tonight one points at a runn
 
 `./run.sh payflow` refuses to run if the app is down, on purpose — a dead server produces
 connection errors that look exactly like failing tests.
+
+| Semantics | Exit 100 means | Targets |
+|---|---|---|
+| **Inverted** | Finding in the app / agent | `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
+| **Ordinary** | Defect in the app / MCP behavior | `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mcp-local` |
+
+The planted Day 7 reds in `payflow-api`, `payflow-multiturn`, `financebot-api`, and
+`financebot-multiturn` still use **ordinary** semantics: exit 100 is an intentional
+application defect to inspect. Accordingly, `run.sh` calls it a defect, unlike the
+MediBot runner's inverted “that's the finding” wording.
 
 ## The line that matters
 
@@ -50,9 +73,9 @@ identical citations. Put the two rows next to each other in `./run.sh view` — 
 difference in the request is one string, and there is no difference at all in the
 response.
 
-This suite is **inverted** and it is the only PayFlow suite that is. Five of six failing
-is the healthy result. Do not relax the assertions; the fix belongs in `pipeline.js`, and
-writing it is the interesting part.
+This suite is **inverted** (as are the later `payflow-exposure` and
+`payflow-poisoning` suites). Five of six failing is the healthy result. Do not relax the
+assertions; the fix belongs in `pipeline.js`, and writing it is the interesting part.
 
 It also makes the argument for `transformResponse: json` better than any other case in the
 day: the answer text is perfectly good prose. The finding is only visible in

@@ -6,6 +6,11 @@
 4. `./run.sh medibot` (`.\run.ps1 medibot` on Windows) — runs the MediBot tests and explains the result.
 5. `./run.sh view` — opens the result UI in your browser.
 
+> MediBot and FinanceBot are **prompts**, not apps: nothing to start, no page to chat on.
+> `./run.sh view` is where you read what they said. The apps with chat UIs arrive in Module 3
+> — PayFlow (`./run.sh payflow-serve`, `:8000`) and HarborWealth FinanceBot
+> (`./run.sh financebot-serve`, `:8001`). Note `finance` ≠ `financebot`.
+
 ## File map
 
 | File | What it does |

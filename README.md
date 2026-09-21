@@ -2,6 +2,8 @@
 
 Hands-on AI bug-bounty workshop. You'll red-team two chatbots — **MediBot** (healthcare triage) and **FinanceBot** (retail brokerage) — using [Promptfoo](https://www.promptfoo.dev). Both are built the way most production AI assistants are built: an open-weight LLM + a guardrail system prompt, served via Groq's free tier. Same attack surface, different domain rules.
 
+Those two are **prompts, not applications** — a text file in `prompts/` plus a Promptfoo eval, with no server to start and no chat window to open. The running applications arrive in Module 3 (PayFlow and HarborWealth FinanceBot) and they are a separate thing. See [Prompts vs applications](#prompts-vs-applications--which-bot-is-which) before you go looking for a MediBot URL.
+
 The default config is **free-tier-safe**: a curated subset (8 cases per suite) run against three Groq models — a non-thinking Qwen (`qwen/qwen3.8-27b`), a hidden-reasoning GPT-OSS (`openai/gpt-oss-120b`), and a visible-CoT GPT-OSS (`openai/gpt-oss-20b`). This stays comfortably under Groq's free-tier rate limit (~30 req/min). To widen the matrix, uncomment the extra Groq models (or the paid `openai:gpt-4o-mini` / `anthropic:messages:claude-haiku-4-5` providers) in the config — but watch the rate limit on the free tier.
 
 <p align="center">
@@ -59,14 +61,37 @@ This repo is one course in four modules plus a hackathon (full map: `modules/REA
   compliance) in `docs/05-quality-challenges.md`.
 - **Module 2 — Advanced Evaluation** (`modules/02-advanced-eval/`) — weights, metrics, CSV data,
   F-score, temperature, and a debugging track.
-- **Module 3 — Testing an Application** (`modules/03-app-testing/`) — the PayFlow GenAI demo:
-  a guard LLM, an orchestrator, and four document specialists behind `POST /chat`. Promptfoo's
+- **Module 3 — Testing an Application** (`modules/03-app-testing/`) — the first modules test
+  prompts; this one tests **applications**. Two of them ship: the PayFlow GenAI demo and the
+  HarborWealth **FinanceBot** demo, each a guard LLM, an orchestrator, and four document
+  specialists behind `POST /chat`, each with a workshop chat UI in the browser. Promptfoo's
   `http` provider points at the running app, so assertions read `output.route` and
   `output.citations` — the routing decision, not just the prose.
 
 New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
 The Claude Code workflow lives in `.claude/` (see `CLAUDE.md`) — in Module 1 it's the path,
 not an optional extra.
+
+### Prompts vs applications — which bot is which
+
+|  | Module 1 — prompt-only | Module 3 — running application |
+|---|---|---|
+| Bots | **MediBot** (healthcare triage), **FinanceBot** (retail brokerage) | **PayFlow** (fintech), **HarborWealth FinanceBot** (brokerage) |
+| What it actually is | `prompts/*.txt` + a Promptfoo eval | a Node app behind `POST /chat`, with a chat UI |
+| How you run it | `./run.sh medibot`, `./run.sh finance` | `./run.sh payflow-serve` (`:8000`), `./run.sh financebot-serve` (`:8001`) |
+| What you assert on | the text the model produced | `output.route`, `output.citations` — *how* the answer was produced |
+
+`finance` and `financebot` are **two different bots**, not two spellings of one.
+`./run.sh finance` is Module 1's prompt-only FinanceBot; `./run.sh financebot` is Module 3's
+HarborWealth app on `:8001`. `./run.sh chat financebot` is still the Module 1 prompt
+(`prompts/financebot.txt`) — a terminal conversation, not the HarborWealth UI. Module 3 does
+not change Module 1's FinanceBot — the prompt, the tests, and the config are all still there,
+untouched.
+
+**MediBot has no chat UI, on purpose.** Giving it one would clone PayFlow into healthcare and
+blur the prompt-vs-application line the course is built on. You talk to MediBot by running its
+eval and reading the results in `./run.sh view` — or `./run.sh chat medibot` for a terminal
+conversation, no browser involved.
 
 ### Start here (reading order)
 1. [Quickstart](docs/01-quickstart.md) — clone, set up your Groq key, run your first eval.
@@ -114,8 +139,10 @@ row, open its suite, and write cases in the same shape.
 ```
 
 Not every session is an eval. **`./run.sh chat <bot>`** opens an ordinary conversation with
-a bot — `/reset` clears the context, `/save <file>` writes the transcript. Day 6 uses it to
-explore a bot whose rules you have not read, which is the one thing a suite cannot teach.
+a **prompt-only** bot (`onboardbot`, `medibot`, `financebot`, `mybot`) — `/reset` clears the
+context, `/save <file>` writes the transcript. That `financebot` is `prompts/financebot.txt`,
+not the HarborWealth app. Day 6 uses it to explore a bot whose rules you have not read, which
+is the one thing a suite cannot teach.
 
 Under the hood it's plain Promptfoo — run it directly if you prefer:
 

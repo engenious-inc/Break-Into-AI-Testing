@@ -1,4 +1,4 @@
-description: "Providers 2/2 — OPTIONAL local model via LM Studio (needs LM Studio running on :1234)"
+description: "Providers 2/3 — OPTIONAL local model via LM Studio (needs LM Studio running on :1234)"
 prompts:
   - "Greet the user and say one sentence about {{topic}}."
 providers:
