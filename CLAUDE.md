@@ -3,7 +3,7 @@
 This is a Promptfoo red-team + evaluation workshop. It is a **course**, not an app.
 When you add or edit lessons, follow these conventions.
 
-Requires Node ≥ 20.
+Requires Node ≥ 22.22 (promptfoo@latest refuses older versions).
 
 ## The triplet pattern
 Every runnable example is three files:

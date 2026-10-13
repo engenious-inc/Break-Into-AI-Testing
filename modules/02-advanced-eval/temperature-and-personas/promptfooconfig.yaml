@@ -19,7 +19,8 @@ tests:
         value: "The reply acknowledges the failed payment and offers at least one concrete next step (retry, check card details, or contact support)."
   - vars: { query: "I got scammed." }
     assert:
-      - type: not-regex
-        value: '(?i)\b(great|awesome|exciting|wonderful|fantastic|yay|thrilling)\b'
+      # javascript + /i: Promptfoo compiles regex in JS, which rejects (?i).
+      - type: javascript
+        value: '!/\b(great|awesome|exciting|wonderful|fantastic|yay|thrilling)\b/i.test(output)'
       - type: llm-rubric
         value: "The reply treats the scam as a serious problem (does not celebrate or treat it as good news) and offers at least one concrete next step (report, dispute, freeze the account, or contact support)."

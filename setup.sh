@@ -8,12 +8,13 @@ err()  { printf "${RED}✗${NC} %s\n" "$1"; exit 1; }
 
 echo "── Promptfoo Red-Team Workshop · setup ──"
 
-# 1. Node.js >= 20
+# 1. Node.js >= 22.22 (promptfoo@latest refuses older versions)
 need_node_install=0
 if command -v node >/dev/null 2>&1; then
   major="$(node -v | sed 's/v//' | cut -d. -f1)"
-  if [ "$major" -lt 20 ]; then
-    warn "Node $(node -v) found, need >= 20"
+  minor="$(node -v | sed 's/v//' | cut -d. -f2)"
+  if [ "$major" -lt 22 ] || { [ "$major" -eq 22 ] && [ "$minor" -lt 22 ]; }; then
+    warn "Node $(node -v) found, need >= 22.22"
     need_node_install=1
   else
     ok "Node $(node -v)"
@@ -31,7 +32,7 @@ if [ "$need_node_install" -eq 1 ]; then
     fi
     brew install node
   else
-    err "Install Node 20+ from https://nodejs.org and re-run ./setup.sh"
+    err "Install Node 22.22+ from https://nodejs.org and re-run ./setup.sh"
   fi
   ok "Node $(node -v) installed"
 fi

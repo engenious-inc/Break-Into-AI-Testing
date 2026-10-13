@@ -7,13 +7,12 @@ function Err($m)  { Write-Host "✗ $m" -ForegroundColor Red; exit 1 }
 
 Write-Host "── Promptfoo Red-Team Workshop · setup ──"
 
-# 1. Node.js >= 20
+# 1. Node.js >= 22.22 (promptfoo@latest refuses older versions)
 $needNode = $false
 $nodeCmd = Get-Command node -ErrorAction SilentlyContinue
 if ($nodeCmd) {
   $ver = (node -v) -replace 'v',''
-  $major = [int]($ver.Split('.')[0])
-  if ($major -lt 20) { Warn "Node v$ver found, need >= 20"; $needNode = $true }
+  if ([version]$ver -lt [version]'22.22.0') { Warn "Node v$ver found, need >= 22.22"; $needNode = $true }
   else { Ok "Node v$ver" }
 } else {
   Warn "Node not found"; $needNode = $true
@@ -21,7 +20,7 @@ if ($nodeCmd) {
 
 if ($needNode) {
   $winget = Get-Command winget -ErrorAction SilentlyContinue
-  if (-not $winget) { Err "Install Node 20+ from https://nodejs.org and re-run .\setup.ps1" }
+  if (-not $winget) { Err "Install Node 22.22+ from https://nodejs.org and re-run .\setup.ps1" }
   Warn "Installing Node via winget…"
   winget install -e --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
   Ok "Node installed — open a NEW PowerShell window and re-run .\setup.ps1"
