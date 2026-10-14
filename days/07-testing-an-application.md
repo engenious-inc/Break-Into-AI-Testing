@@ -9,12 +9,12 @@ you leave running, a port, a chat UI in the browser, and a JSON contract underne
 
 Two name traps, before you run anything:
 
-- **`finance` is not `financebot`.** `./run.sh finance` is Day 5's prompt-only FinanceBot and
+- **`finance` is not `financebot`.** The `finance` target is Day 5's prompt-only FinanceBot and
   tonight does not touch it. `./run.sh financebot` is the HarborWealth app on `:8001`.
   Different bot, different corpus, different thing under test.
 - **There is no MediBot app.** MediBot never gets a server or a chat UI — cloning PayFlow into
   healthcare would cost the exact distinction this session exists to make. You still reach
-  MediBot through `./run.sh medibot` and `./run.sh view`.
+  MediBot through its [Day 5](05-red-teaming.md) commands and `./run.sh view`.
 
 ## Run this — two terminals
 
