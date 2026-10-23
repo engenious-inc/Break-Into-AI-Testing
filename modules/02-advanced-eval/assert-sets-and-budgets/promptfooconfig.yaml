@@ -3,7 +3,12 @@ prompts:
   - "Greet the user in French in one short sentence."
 providers:
   - id: groq:qwen/qwen3.8-27b
-    config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden }
+    # Default: no cost field. To demo `type: cost` without a paid key, add synthetic
+    # per-token rates (USD). Promptfoo multiplies them by Groq's token counts — you
+    # are not billed; the numbers are invented so the cost assertion has a value.
+    # Example that usually fails a tight budget (~18 prompt + ~10 completion tokens):
+    #   config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden, inputCost: 0.0001, outputCost: 0.0002 }
+    config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden, inputCost: 0.0001, outputCost: 0.0002 }
 defaultTest:
   options:
     provider: groq:qwen/qwen3.8-27b
@@ -23,6 +28,7 @@ tests:
             threshold: 2000   # ms — runs on Groq
           - type: javascript
             value: "output.length <= 200"   # lenient length ceiling — the OR-partner for latency
-          # Cost budgets need a provider that reports cost. Groq does not, so this is opt-in:
-          # - type: cost
-          #   threshold: 0.001
+          #Cost budget — needs a cost on the response. Free path: set inputCost/outputCost
+          #on the Groq provider above, uncomment below, re-run with --no-cache.
+          - type: cost
+            threshold: 0.005
