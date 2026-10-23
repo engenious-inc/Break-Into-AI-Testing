@@ -45,7 +45,7 @@ powershell -ExecutionPolicy Bypass -File .\setup.ps1
 
 > If `.\setup.ps1` fails with *"running scripts is disabled on this system"*, use the `-ExecutionPolicy Bypass` invocation shown above (or run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first).
 
-The script will: check Node ≥ 20, install Promptfoo, prompt for your Groq key (and optionally an OpenRouter fallback key — press Enter to skip), write `.env`, and run a smoke test.
+The script will: check Node ≥ 22.22, install Promptfoo, prompt for your Groq key (and optionally an OpenRouter fallback key — press Enter to skip), write `.env`, and run a smoke test.
 
 > **Then confirm you're ready:** run `./preflight.sh` (`.\preflight.ps1` on Windows) — a read-only check of your key, network, and environment. It's safe to re-run anytime, especially the morning of the workshop. See [Check you're ready](#check-youre-ready) below.
 

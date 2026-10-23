@@ -11,12 +11,11 @@ $keyOk = $false
 
 Write-Host "-- Promptfoo Red-Team Workshop . preflight --"
 
-# 1. Node >= 20
+# 1. Node >= 22.22 (promptfoo@latest refuses older versions)
 $node = Get-Command node -ErrorAction SilentlyContinue
 if ($node) {
   $ver = (& node -v) -replace 'v',''
-  $maj = [int]($ver.Split('.')[0])
-  if ($maj -lt 20) { Bad "Node v$ver found, need >= 20 — run .\setup.ps1"; $fail = $true }
+  if ([version]$ver -lt [version]'22.22.0') { Bad "Node v$ver found, need >= 22.22 — run .\setup.ps1"; $fail = $true }
   else { Ok "Node v$ver" }
 } else { Bad "Node not found — run .\setup.ps1"; $fail = $true }
 
