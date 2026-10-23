@@ -274,7 +274,7 @@ else
       printf "  Inverted against the ${BLUE}application${NC} — the assertions describe a hardened PayFlow, so a ${YELLOW}failing${NC} check is a finding in the app itself.\n"
       printf "  One case is a control and passes. Do not relax the others; the fix belongs in pipeline.js.\n\n" ;;
     mcp-abuse)
-      printf "  Inverted against the ${BLUE}MCP server${NC} — the assertions describe a hardened tool inventory, so a ${YELLOW}failing${NC} check is a finding in server.mjs.\n"
+      printf "  Inverted against the ${BLUE}MCP server${NC} — the assertions describe a hardened tool inventory, so a ${YELLOW}failing${NC} check is a finding in server.js.\n"
       printf "  Two cases are controls and pass. Do not relax the others; the path-traversal check does not cover write_note.\n\n" ;;
     mcp-agent)
       printf "  Inverted against the ${BLUE}agent${NC} — Groq is given the workshop-local schemas and decides which tool to call.\n"
@@ -333,7 +333,7 @@ case "$target" in
   mcp-abuse|mcp-agent|mcp-injection)
     case "$ec" in
       0)   printf "${YELLOW}? Exit 0 — nothing failed, which is not what this suite expects.${NC}\n"
-           printf "  Either somebody hardened server.mjs, or Groq refused the tool calls this run.\n" ;;
+           printf "  Either somebody hardened server.js, or Groq refused the tool calls this run.\n" ;;
       100) printf "${GREEN}✓ Exit 100 — the findings are still there. That's the healthy result.${NC}\n"
            printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
       *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"

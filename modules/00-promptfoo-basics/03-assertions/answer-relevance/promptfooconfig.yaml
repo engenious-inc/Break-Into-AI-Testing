@@ -6,15 +6,15 @@ prompts:
   - "Explain photosynthesis in two sentences."
 providers:
   - id: groq:qwen/qwen3.8-27b
-    config: { temperature: 0, max_tokens: 400, reasoning_effort: none, reasoning_format: hidden}
+    config: { temperature: 0, max_tokens: 400, reasoning_effort: high}
 defaultTest:
   options:
-    # text grader on Groq; embeddings run locally (no OPENAI/GOOGLE key required).
+    # text grader on Groq (bigger than Qwen 3.8 27B); embeddings stay local (no paid key).
     provider:
-      text: groq:qwen/qwen3.8-27b
+      text: groq:openai/gpt-oss-120b
       embedding: transformers:feature-extraction:Xenova/all-MiniLM-L6-v2
 tests:
   - assert:
       - type: answer-relevance
-        # MiniLM cosine scores land lower than OpenAI embeddings; 0.5 still fails off-topic answers.
-        threshold: 0.5
+        # Deliberately high so even an on-topic MiniLM score fails the bar (demo of a failing threshold).
+        threshold: 0.95

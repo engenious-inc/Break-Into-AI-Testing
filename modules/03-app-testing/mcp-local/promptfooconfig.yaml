@@ -10,9 +10,9 @@ providers:
       # debug: true
       timeout: 60000
       server:
-        command: node
-        args:
-          - modules/03-app-testing/mcp-local/server.mjs
+        # path is resolved against this config's directory (not process cwd),
+        # so CLI and Promptfoo MCP both spawn the server correctly.
+        path: ./server.js
         name: workshop-local
 
 prompts:

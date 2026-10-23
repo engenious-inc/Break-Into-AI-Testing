@@ -12,7 +12,7 @@ To run the **same** eval from chat via Promptfoo’s IDE MCP server, see
 | | `mcp-deepwiki/` | this lesson (`mcp-local/`) |
 |--|-----------------|---------------------------|
 | Transport | remote `url:` | local `command:` / `args:` |
-| Who runs the server | DeepWiki | Promptfoo (`node …/server.mjs`) |
+| Who runs the server | DeepWiki | Promptfoo (`server.path` → `server.js`) |
 | Best for | output-shape / rubric strategy | deterministic + **guard** asserts |
 | Setup | none | one-time `npm install` in this folder |
 
@@ -48,14 +48,13 @@ providers:
     config:
       enabled: true
       server:
-        command: node
-        args:
-          - modules/03-app-testing/mcp-local/server.mjs
+        path: ./server.js
         name: workshop-local
 ```
 
-Promptfoo starts `server.mjs`, speaks MCP over stdio for the eval, then tears it down.
-Paths in `args` are relative to the **repo root** (always run evals from there).
+Promptfoo starts `server.js` via `server.path` (resolved against this config’s
+directory — works from CLI and from Promptfoo’s IDE MCP, even when process cwd
+is not the repo root).
 
 ## What the server exposes
 
@@ -93,7 +92,7 @@ not a failing assertion.
 
 ## Try it
 
-1. Break the guard in `server.mjs` (comment out the `..` check), re-run, and watch the
+1. Break the guard in `server.js` (comment out the `..` check), re-run, and watch the
    Security case go red — then put the check back.
 2. Add a `multiply` tool and a fourth test with `regex` for the product.
 3. Point `args` at a missing file and read the connection error so you can recognize a

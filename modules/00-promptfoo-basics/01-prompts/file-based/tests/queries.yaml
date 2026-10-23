@@ -1,0 +1,5 @@
+- vars: { query: "What is a Roth IRA?" }
+- vars: { query: "What is diversification?" }
+- vars: { query: "Explain compound interest in simple terms." }
+- vars: { query: "What is the difference between a stock and a bond?" }
+- vars: { query: "What does an ETF do?" }

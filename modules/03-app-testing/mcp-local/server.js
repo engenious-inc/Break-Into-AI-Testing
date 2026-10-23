@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Tiny local MCP server for the workshop.
- * Spawned by Promptfoo via stdio (command/args) — not an HTTP server.
+ * Spawned by Promptfoo via stdio (server.path) — not an HTTP server.
  *
  * Tools:
  *   echo                 — happy-path string return

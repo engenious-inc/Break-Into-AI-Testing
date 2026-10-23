@@ -23,9 +23,8 @@ providers:
       mcp:
         enabled: true
         server:
-          command: node
-          args:
-            - modules/03-app-testing/mcp-local/server.mjs
+          # path resolves against config basePath (repo root for this file)
+          path: modules/03-app-testing/mcp-local/server.js
           name: workshop-local
 
 prompts:

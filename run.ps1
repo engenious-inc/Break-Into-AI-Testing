@@ -359,7 +359,7 @@ if ($target -in @('mcp-abuse', 'mcp-agent', 'mcp-injection')) {
   switch ($ec) {
     0 {
       Write-Host "? Exit 0 - nothing failed, which is not what this suite expects." -ForegroundColor Yellow
-      Write-Host "  Either somebody hardened server.mjs, or Groq refused the tool calls this run."
+      Write-Host "  Either somebody hardened server.js, or Groq refused the tool calls this run."
     }
     100 {
       Write-Host "$([char]0x2713) Exit 100 - the findings are still there. That's the healthy result." -ForegroundColor Green

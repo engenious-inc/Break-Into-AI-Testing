@@ -73,6 +73,9 @@ later; Day 7 only needs validate → list → run → inspect.
 
 ## Cohort exercise (10 minutes)
 
+Instructor / student walkthrough (scripts + checklist):
+[`docs/speaker-card-promptfoo-mcp-demo.md`](../../../docs/speaker-card-promptfoo-mcp-demo.md).
+
 Do this **after** `mcp-local/` is installed (`npm install --prefix modules/03-app-testing/mcp-local`).
 
 1. Ask the agent to **validate** `modules/03-app-testing/mcp-local/promptfooconfig.yaml`.
