@@ -23,6 +23,20 @@ The default config is **free-tier-safe**: a curated subset (8 cases per suite) r
 
 > **New here?** Skim the one-page visual [repo map](docs/repo-map.pdf) — how the prompts, tests, providers, and configs fit together — before you dive in.
 
+## Set up with an assistant
+
+Want guided setup? Paste this into your coding assistant from the repository root. It should take one step at a time and wait for you between steps:
+
+```text
+Help me set up this Promptfoo workshop repository, one step at a time. Read the README and repository instructions first. Identify my operating system and shell, confirm I am at the repository root, and verify Node.js 22.22 or newer. Keep commands platform-specific and pause after each step so I can report its result:
+
+- macOS: use `./setup.sh`; it can install Node with Homebrew if needed.
+- Linux/Unix: use a Bash-compatible terminal and `./setup.sh`; first install Node.js 22.22 or newer because the script does not install Node on these systems.
+- Windows: use PowerShell and `powershell -ExecutionPolicy Bypass -File .\setup.ps1`. If it installs Node with winget, open a new PowerShell window, return to the repository root, and rerun the script.
+
+Never ask me to paste an API key into chat. Tell me to enter the Groq key only into the setup script's terminal prompt or my local `.env` file. Do not overwrite an existing `.env` file. Run `./preflight.sh` on macOS/Linux/Unix or `.\preflight.ps1` on Windows, and help diagnose any failure before proceeding. Once preflight passes, run the first MediBot eval with `./run.sh medibot` or `./run.ps1 medibot`, respectively. Explain that an expected red-team finding is not itself a setup failure. Stop when setup and the first eval are verified; do not edit project files or create a PR.
+```
+
 ## Quickstart (≈ 3 minutes)
 
 You need: a terminal, internet, and a free Groq API key.
@@ -45,7 +59,7 @@ powershell -ExecutionPolicy Bypass -File .\setup.ps1
 
 > If `.\setup.ps1` fails with *"running scripts is disabled on this system"*, use the `-ExecutionPolicy Bypass` invocation shown above (or run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` first).
 
-The script will: check Node ≥ 22.22, install Promptfoo, prompt for your Groq key (and optionally an OpenRouter fallback key — press Enter to skip), write `.env`, and run a smoke test.
+The script will: check Node ≥ 22.22, install Promptfoo, prompt for your Groq key (and optionally an OpenRouter fallback key — press Enter to skip), write `.env`, verify readiness (including the live Groq key), and run a smoke test.
 
 > **Then confirm you're ready:** run `./preflight.sh` (`.\preflight.ps1` on Windows) — a read-only check of your key, network, and environment. It's safe to re-run anytime, especially the morning of the workshop. See [Check you're ready](#check-youre-ready) below.
 
