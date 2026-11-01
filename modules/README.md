@@ -6,10 +6,10 @@ This workshop is one course in four modules plus a hackathon.
 |--------|-------|-------------------------|---------------|
 | 0 — Promptfoo Basics | `modules/00-promptfoo-basics/` | day-02-promptfoo-basics | Day 2 (assertions), **Day 3** (`01-prompts/`, `02-providers/`) |
 | 1 — Red-Team Fundamentals | `modules/01-red-team/` (lessons) over repo root (`prompts/`, `tests/`, `promptfooconfig.*`, `docs/02`,`04`,`05`) | day-01-ai-fundamentals-and-challenges | Day 5 |
-| 2 — Advanced Eval | `modules/02-advanced-eval/` | day-03-promptfoo-advanced | Day 4 — **except `observability/`, which is Day 8** |
+| 2 — Advanced Eval | `modules/02-advanced-eval/` | day-03-promptfoo-advanced | Day 4 — **except `observability/`, which is Day 9** |
 | 3 — Testing an Application | `modules/03-app-testing/` — PayFlow + FinanceBot (+ `promptfooconfig.{payflow,financebot}{,-multiturn,-redteam}.yaml`, `tests/{payflow,financebot}.*.yaml`), [`mcp-deepwiki/`](03-app-testing/mcp-deepwiki/), [`mcp-local/`](03-app-testing/mcp-local/), [`mcp-promptfoo/`](03-app-testing/mcp-promptfoo/) | (new) | Day 7 |
 | — Black box | `prompts/onboardbot.txt` + `./run.sh chat onboardbot` (no `promptfooconfig`) | (new) | Day 6 |
-| — Observability | `modules/02-advanced-eval/observability/` | (new) | Day 8, with Arato.ai + Agenta.ai |
+| — Observability | `modules/02-advanced-eval/observability/` | (new) | Day 9, with Arato.ai + Agenta.ai |
 | Hackathon | `docs/04-challenges.md` | (base repo) | — |
 
 Start at Module 0 if new to Promptfoo; jump to Module 1 to start breaking bots.

@@ -31,6 +31,6 @@ something is wrong with the lesson, not with you.
 
 ## Not tonight
 
-One lesson in this module — the observability one — is **Day 8** material. It needs a
-running service to instrument, which nothing before Day 7 has. Skip it tonight; Day 8
+One lesson in this module — the observability one — is **Day 9** material. It needs a
+running service to instrument, which nothing before Day 7 has. Skip it tonight; Day 9
 links it directly.

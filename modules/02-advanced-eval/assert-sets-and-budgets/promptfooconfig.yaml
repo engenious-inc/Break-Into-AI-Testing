@@ -1,20 +1,21 @@
-description: "Advanced 2 — assert-set (OR via threshold) + latency budget (cost is opt-in)"
+description: "Advanced 2 — assert-set (OR via threshold) + latency/cost budgets across two Groq models"
 prompts:
   - "Greet the user in French in one short sentence."
 providers:
+  # Two Groq models, same synthetic $/token rates — you are not billed; Promptfoo
+  # multiplies rates by each model's token counts so the cost column and `type: cost`
+  # assert have a number. Compare latency, cost, and answer quality side by side.
   - id: groq:qwen/qwen3.8-27b
-    # Default: no cost field. To demo `type: cost` without a paid key, add synthetic
-    # per-token rates (USD). Promptfoo multiplies them by Groq's token counts — you
-    # are not billed; the numbers are invented so the cost assertion has a value.
-    # Example that usually fails a tight budget (~18 prompt + ~10 completion tokens):
-    #   config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden, inputCost: 0.0001, outputCost: 0.0002 }
+    label: qwen-3.8-27b
     config: { temperature: 0, max_tokens: 120, reasoning_effort: none, reasoning_format: hidden, inputCost: 0.0001, outputCost: 0.0002 }
+  - id: groq:openai/gpt-oss-120b
+    label: gpt-oss-120b
+    config: { temperature: 0.5, include_reasoning: false, inputCost: 0.0001, outputCost: 0.0002 }
 defaultTest:
   options:
     provider: groq:qwen/qwen3.8-27b
 tests:
-  - threshold: 0.5
-    assert:
+  - assert:
       - type: icontains
         value: "bonjour"
         weight: 2
@@ -28,7 +29,7 @@ tests:
             threshold: 2000   # ms — runs on Groq
           - type: javascript
             value: "output.length <= 200"   # lenient length ceiling — the OR-partner for latency
-          #Cost budget — needs a cost on the response. Free path: set inputCost/outputCost
-          #on the Groq provider above, uncomment below, re-run with --no-cache.
-          - type: cost
-            threshold: 0.005
+      # Hard budget: outside the assert-set so a miss fails the test (AND, not OR).
+      - type: cost
+        threshold: 0.005
+        metric: Cost

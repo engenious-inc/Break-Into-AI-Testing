@@ -157,10 +157,10 @@ clean, the *exercise* is broken.
 
 ## Going further
 
-- **Observability (Day 8, not today)** —
+- **Observability (Day 9, not today)** —
   [`modules/02-advanced-eval/observability/`](../modules/02-advanced-eval/observability/):
   real Arato.ai REST logging plus OTel-shaped tracing via a zero-dependency custom
-  provider. It sits in Module 2 because it is shaped like one, but it is taught on Day 8
+  provider. It sits in Module 2 because it is shaped like one, but it is taught on Day 9
   with Arato.ai and Agenta.ai — everything above is eval-time quality, this is what a
   *deployed* system reports about itself.
 - **Quality challenges** — [`docs/05-quality-challenges.md`](05-quality-challenges.md):

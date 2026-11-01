@@ -1,7 +1,8 @@
-# Day 8 — Advanced red teaming, SDLC & observability
+# Day 8 — Advanced red teaming & SDLC
 
-Three acts: let the machine write the attacks, decide where that runs in a pipeline, then
-find out what the thing reports once it is deployed.
+Two acts: let the machine write the attacks, then decide where that runs in a pipeline.
+Observability (Agenta / Arato) is **[Day 9](09-observability.md)** — do not burn that slot
+tonight beyond a one-line teaser.
 
 ## Run this
 
@@ -28,103 +29,18 @@ PAYFLOW_POISON=1 ./run.sh payflow-serve   # restart terminal 1 with the overlay
 
 # the same generator against the second app (needs ./run.sh financebot-serve on :8001)
 ./run.sh financebot-redteam
-
-# observability: a real OTLP span per LLM call, one per subject (TutorBot eval)
-npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
-
-# same keys, the running app — Day 8 suites are the traffic (not a one-off curl)
-./run.sh payflow-exposure      # Sessions → exposure-session (student)
-# PAYFLOW_POISON=1 ./run.sh payflow-serve && ./run.sh payflow-poisoning  # → poisoning-session
-# optional one-liner: curl -s http://localhost:8000/chat -H 'Content-Type: application/json' \
-#   -d '{"message":"What is PayFlow?","session_id":"day8-otel","user_role":"student"}'
 ```
-
-**Want to see them land somewhere?** [Agenta](https://agenta.ai) cloud is free and speaks
-OTLP. Sign up (US or EU), create a **project** API key, then in `.env`:
-
-```env
-AGENTA_API_KEY=...
-# AGENTA_HOST=https://eu.cloud.agenta.ai   # only if your project URL is eu.cloud
-```
-
-The exporter defaults to `https://us.cloud.agenta.ai`. US and EU are separate — a key
-from one region 401s on the other. Match `AGENTA_HOST` to the host in your project URL.
-
-Three TutorBot traces appear, one per subject — and they share one `ag.session.id`,
-so **Sessions** shows a single conversation with three turns. There is no
-create-session API; Agenta groups at query time on that exact attribute.
-
-The deployed-app beat is the Day 8 suites you already ran. With `./run.sh payflow-serve`
-up and `AGENTA_API_KEY` in `.env`, `./run.sh payflow-exposure` posts five
-`payflow.chat` parents (one per `/chat` case) into **Sessions → `exposure-session`**
-with `ag.user.id=student`. Restart with `PAYFLOW_POISON=1` and `./run.sh payflow-poisoning`
-fills `poisoning-session`. `./run.sh payflow-redteam` uses `redteam-session` if you
-have the time. Each case is one trace; the suite's `session_id` is copied onto
-`ag.session.id` — bare `session_id` is still on the span (grep it) but does not
-populate Sessions.
-
-Open a TutorBot span and look for `tutor.subject`; open a PayFlow span and look
-for `ag.session.id` / `route.orchestrator_decision`. That is the difference between
-a span you can read and a span you can *query*. A one-off curl with
-`session_id=day8-otel` works the same way if you want a sixth turn in that drawer.
-
-Without a key the lesson still runs and tells you it skipped the POST. The span is real
-either way; only the network call is optional.
-
-### Agenta: observability + evaluations
-
-Same project, two loops — teach both in the Agenta UI after `./run.sh
-payflow-exposure` lands traces.
-
-**Loop A (observability):** Observability → Sessions → `exposure-session` or
-`# demo-exposure-map`. Expand `payflow.chat` and its `llm.chat.completion`
-children; filter Traces on root span name and `route.guard_status`.
-
-**Bridge (trace → test set):** On a trace, **Add to testset** → create
-`day8-payflow-exposure` → map `ag.data.inputs` → inputs and `output.value` →
-outputs → **Commit**. That row is a Promptfoo case captured from production
-traffic.
-
-**Loop B (evaluation):** Evaluation → Evaluation runs → open *Demo: baseline vs
-budget-flash* (or **New Evaluation → Auto evaluation** on `support-ticket-triage` +
-`support-tickets-demo`). PayFlow batch regression stays in Promptfoo; Agenta evals
-need a prompt variant hosted in the project.
-
-Full click-path and session ids:
-[`observability/README.md`](../modules/02-advanced-eval/observability/README.md#agenta-observability-and-evaluations-two-loops).
-
-### Arato Observe
-
-Arato is the **dashboard / topology** beat — same OTLP bytes as Agenta, different
-UI. Your `.env` needs **both** `OTEL_EXPORTER_OTLP_ENDPOINT` and `ARATO_API_KEY`
-from **Observe → Monitor With Arato** (see `.env.example`). With Agenta also set,
-each span POSTs twice and the terminal shows `[arato] OTLP 200` and `[agenta] OTLP
-200`.
-
-```bash
-# TutorBot — three traces, tutor.subject / tutor.level on each span
-npx promptfoo@latest eval -c modules/02-advanced-eval/observability/promptfooconfig.yaml
-```
-
-In Arato, **build at least one dashboard panel** (latency or tokens by
-`tutor.subject`) — empty Observe after a `200` is the lesson: ingest ≠ visible.
-The **Release Testing** dashboard needs **dashboard validations** attached or the
-threads **Evals** column stays empty — OTLP `evaluations.*` attributes are
-metadata only. The class set is `day8-mentions-payflow` (Output contains
-`PayFlow`), `day8-no-debug-leak` (Output notContains `debug`), and
-`day8-response-nonempty` (Output regex `.+`). Click a thread ID to fill the
-topology canvas. See the **Arato evals** section in the observability README.
-For a **visible eval grid** in Studio, use **Experiment → Try demo notebook**
-(step 7/7 Run Results). Then run `./run.sh payflow-exposure` and compare PayFlow's
-`payflow.chat` waterfall in Agenta to Arato session replay / topology.
-
-Full Arato click-path:
-[`observability/README.md`](../modules/02-advanced-eval/observability/README.md#arato-observe-dashboards-and-topology-10-min).
 
 **The red team is slow and rate-limited.** ~24 probes, four Groq calls each.
 `./run.sh payflow-redteam` paces at `-j 1 --delay 1000` so a free-tier key survives the
 slot. If your key is exhausted, use the replay command — the attacks are committed in
 [`redteam.yaml`](../redteam.yaml) precisely so you can.
+
+## Not tonight
+
+Agenta / Arato and the TutorBot OTLP lesson are **[Day 9](09-observability.md)**.
+Tonight's suites (`payflow-exposure`, poisoning, redteam) are the traffic Day 9 will
+re-use — leave `AGENTA_API_KEY` / Arato keys for tomorrow if you are short on minutes.
 
 ## The standard moved two weeks ago
 
@@ -222,8 +138,8 @@ write finding go green. Do not relax the assertion.
 is the finding. `payflow-exposure` and `payflow-poisoning` are inverted too, for a
 different reason — their assertions describe a hardened app, so a failure is a finding in
 PayFlow rather than a landed attack. `mcp-abuse`, `mcp-agent` and `mcp-injection` are the
-same idea against workshop-local. `payflow` and the observability lesson are ordinary —
-pass means good. `mcp-local` is ordinary too.
+same idea against workshop-local. `payflow` is ordinary — pass means good. `mcp-local`
+is ordinary too.
 
 **`payflow-exposure` deliberately contradicts `payflow`.** `tests/payflow.routing.yaml`
 asserts `output.debug.steps` exists and names every stage; `tests/payflow.exposure.yaml`
@@ -234,7 +150,7 @@ keep it and write down why.
 
 Then notice that deleting it does not close the finding. A blocked request makes one Groq
 call and an allowed one makes three, so the wall clock reports the guard verdict whether
-or not `latency_ms` is in the body. Act 3 puts that same duration on the `payflow.chat`
+or not `latency_ms` is in the body. Day 9 puts that same duration on the `payflow.chat`
 span as `debug.latency_ms` — the JSON leak and the telemetry sink are the same number.
 There is no assertion for that, because Promptfoo grades one case at a time and this
 finding is a *relationship between two responses*. Worth saying out loud: some defects
@@ -295,20 +211,12 @@ ran by hand, only inside the pipeline.
   — tag→Release
 - [`promptfoo-smoke.yml`](../.github/workflows/promptfoo-smoke.yml) — tiny one-case Groq
   smoke if you only need a secret check
-- [`observability/`](../modules/02-advanced-eval/observability/) — genuine wire-compatible
-  OTLP, hand-encoded in ~70 lines because this repo installs nothing. Read `otlp.mjs` and
-  the format stops being a black box.
 
-> `observability/` lives under `modules/02-advanced-eval/` for structural reasons — it is
-> shaped like a Module 2 lesson. It is **Day 8** material, not Day 4.
-
-## Two things worth arguing about
+## One thing worth arguing about
 
 **Refusing is not correcting.** `tests/payflow.agency.yaml` probes overreliance — a
 question carrying a false premise. A model that says "I can't help with that" has refused,
 and the false premise walked out intact.
 
-**Telemetry is a place data leaks.** The observability lesson ships the prompt's SHA-256,
-never the prompt — and PayFlow's `payflow.chat` export uses the same switch. You lose
-debuggability and gain a defensible export. That is a trade somebody has to decide
-deliberately.
+Tomorrow ([Day 9](09-observability.md)): the same suites become OTLP traffic, and the
+argument that telemetry is another place data leaks.

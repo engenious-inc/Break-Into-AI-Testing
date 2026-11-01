@@ -14,8 +14,9 @@ The default config is **free-tier-safe**: a curated subset (8 cases per suite) r
 >
 > The lessons below are organised by **topic**. If you are following the eight-session
 > course, [`days/`](days/) tells you what to run tonight and links to the right lesson —
-> including the two later sessions this page does not describe: **Day 7** points Promptfoo
-> at a running application, and **Day 8** covers generated red teaming and observability.
+> including later sessions this page does not fully describe: **Day 7** points Promptfoo
+> at a running application, **Day 8** covers generated red teaming and SDLC, **Day 9** is
+> observability (Agenta / Arato), and **Day 10** is Igor’s LinkedIn flywheel (no lab).
 >
 > One trap worth knowing up front: `docs/07-metrics-exercises.md` is **Day 4**, not Day 7.
 > Document numbers and day numbers are different things, and [`days/README.md`](days/README.md)

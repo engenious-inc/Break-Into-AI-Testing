@@ -42,7 +42,7 @@ jobs:
             echo
             echo "Workshop release for [Break Into AI Testing](https://github.com/${GITHUB_REPOSITORY})."
             echo
-            echo "Session index: \`days/README.md\` — Day 8 covers advanced red teaming, SDLC, and observability."
+            echo "Session index: \`days/README.md\` — Day 8 red team + SDLC; Day 9 observability; Day 10 LinkedIn (Igor)."
             echo
             if [ -n "$prev" ]; then
               echo "### Commits since ${prev}"

@@ -2,25 +2,19 @@
 
 > **Day 4** · [session index](../../../days/04-metrics-and-model-graded.md)
 
-`assert-set` with a `threshold` (OR semantics), plus a latency budget. `type: cost` is
-commented out — Groq returns no cost field by default, so it **errors** rather than fails.
+`assert-set` with a `threshold` (OR semantics), plus latency and cost budgets.
 
-**Free cost-budget demo (no paid key):** set synthetic `inputCost` / `outputCost` on the
-Groq provider (see comments in `promptfooconfig.yaml`), uncomment the `type: cost`
-assert, then:
+**Model + cost comparison (no paid key):** `qwen-3.8-27b` and `gpt-oss-120b` share the
+same synthetic `inputCost` / `outputCost` rates. Promptfoo multiplies those by each
+model's token counts — you are not billed. Compare answers, latency, and the cost
+column side by side; use `--no-cache` so rates are applied fresh:
 
 ```bash
 npx promptfoo@latest eval -c modules/02-advanced-eval/assert-sets-and-budgets/promptfooconfig.yaml --no-cache
 ```
 
-Promptfoo multiplies those rates by Groq's token counts. You are not billed — the rates
-are invented so the assertion has a number. Tighten `threshold` (or raise the rates) to
-force a fail; loosen them to pass.
-
-Default (latency-only) run:
-
-```bash
-npx promptfoo@latest eval -c modules/02-advanced-eval/assert-sets-and-budgets/promptfooconfig.yaml
-```
+Tighten `threshold` (or raise the rates) to force a cost fail; loosen them to pass.
+`type: cost` is a top-level assert (not inside the latency/length assert-set), so
+over-budget fails the whole test.
 
 Always run from the repo root so `.env` is discovered.

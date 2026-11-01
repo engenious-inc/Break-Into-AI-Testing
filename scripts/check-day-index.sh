@@ -3,7 +3,7 @@
 #
 # Without this the day index is a hand-maintained list that silently rots, which is the
 # problem it was created to solve. `modules/02-advanced-eval/observability/` sitting in a
-# Day 4 folder while being Day 8 material went unnoticed for weeks because nothing
+# Day 4 folder while being Day 9 material went unnoticed for weeks because nothing
 # compared the two.
 #
 # A config is "claimed" by a day page if that page mentions either the config path or the

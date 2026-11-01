@@ -1,11 +1,11 @@
 # Observability: real OTLP tracing into Arato.ai
 
-> **Day 8** · [session index](../../../days/08-advanced-redteam-sdlc-observability.md) — it lives in Module 2 because it is *shaped* like a Module 2 lesson, not because it is taught with them
+> **Day 9** · [session index](../../../days/09-observability.md) — it lives in Module 2 because it is *shaped* like a Module 2 lesson, not because it is taught with Day 4
 
-> **This is a Day 8 lesson**, taught with Arato.ai and Agenta.ai — not part of the
+> **This is a Day 9 lesson**, taught with Arato.ai and Agenta.ai — not part of the
 > Day 4 metrics exercises. It lives in Module 2 because it is shaped like a Module 2
 > lesson (single provider, ordinary pass=good assertions), not because it is taught
-> alongside them.
+> alongside them. Day 8 is generated red team + SDLC; Day 10 is Igor only.
 
 Every other lesson in this module asks "did the model answer well?" This one
 asks a different question: once a system like this is *deployed*, what is it
@@ -226,7 +226,7 @@ touching real user traffic, the default is the default for a reason.
 ## The same bytes, from the running app
 
 The eval above instruments a custom Promptfoo provider wrapping TutorBot — that
-is the "what is a span / OTLP is bytes" lesson. Act 3 of Day 8 is the deployed
+is the "what is a span / OTLP is bytes" lesson. The second half of Day 9 is the deployed
 app.
 
 PayFlow's `POST /chat` emits a parent `payflow.chat` span plus one
@@ -237,7 +237,7 @@ is the twin; it is not instrumented yet.
 
 With `./run.sh payflow-serve` running and `AGENTA_API_KEY` in `.env`, the listen
 line prints `[otlp] agenta host=https://us.cloud.agenta.ai` (or `skipped` if the
-key is missing). Then run a Day 8 suite — the tests are the traffic:
+key is missing). Then run a Day 8 suite as traffic — the tests are the traffic:
 
 ```bash
 ./run.sh payflow-exposure
@@ -512,5 +512,4 @@ SDLC shape — observe, capture, evaluate — on traces and on prompts hosted in
 cloud UI.
 
 > Extension lesson — not part of the original `how-to-test-ai` day-03-promptfoo-advanced
-> curriculum. Taught on **Day 8** (Advanced Red Teaming, SDLC Testing + Arato.ai &
-> Agenta.ai).
+> curriculum. Taught on **Day 9** (Observability — Arato.ai & Agenta.ai).

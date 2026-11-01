@@ -11,14 +11,16 @@ tests:
         weight: 1
         metric: Accuracy
       # Exact match (equals) is brittle for open-ended generation — any wording/punctuation
-      # difference fails; shown commented so the keyless default run stays green:
-      # - type: equals
-      #   value: "Comment ça va ?"
-      #   weight: 1
-      #   metric: Accuracy
-      # Embedding-based fuzzy match needs OPENAI_API_KEY (Groq has no embeddings) — opt-in:
-      # - type: similar
-      #   value: "Bonjour, comment ça va ?"
-      #   threshold: 0.7
-      #   weight: 1
-      #   metric: Accuracy
+      # difference fails (demo: expect FAIL vs "Comment allez-vous ?"):
+      - type: equals
+        value: "Comment ça va ?"
+        weight: 1
+        metric: Accuracy
+      # Embedding-based fuzzy match (local transformers — same path as answer-relevance;
+      # default OpenAI embeddings need OPENAI_API_KEY and were credit-exhausted for this demo):
+      - type: similar
+        value: "Comment ça va ?"
+        threshold: 0.4
+        weight: 1
+        metric: Accuracy
+        provider: transformers:feature-extraction:Xenova/all-MiniLM-L6-v2

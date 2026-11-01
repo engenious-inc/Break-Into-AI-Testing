@@ -13,8 +13,10 @@ page tells you what to run tonight and links to the real thing.
 | 5 | Red teaming | [`05-red-teaming.md`](05-red-teaming.md) |
 | 6 | Black box testing | [`06-black-box-testing.md`](06-black-box-testing.md) |
 | 7 | Testing an application, not a model | [`07-testing-an-application.md`](07-testing-an-application.md) |
-| 8 | Advanced red teaming, SDLC & observability | [`08-advanced-redteam-sdlc-observability.md`](08-advanced-redteam-sdlc-observability.md) |
-| — | Hackathon (not a session) | [`hackathon.md`](hackathon.md) |
+| 8 | Advanced red teaming & SDLC | [`08-advanced-redteam-sdlc.md`](08-advanced-redteam-sdlc.md) |
+| 9 | Observability (Agenta & Arato) | [`09-observability.md`](09-observability.md) |
+| 10 | LinkedIn flywheel & close (Igor only) | [`10-linkedin-flywheel.md`](10-linkedin-flywheel.md) |
+| — | Hackathon (not a numbered session) | [`hackathon.md`](hackathon.md) |
 
 ## Numbers that lie
 
@@ -35,12 +37,15 @@ remember one thing from this page, make it this:
 Module numbers are stable and day numbers are not — the sessions have already been
 renumbered once between cohorts, which is why the lessons are not stored in day folders.
 
+`observability/` lives under Module 2 but is taught on **Day 9**, not Day 4. Day 10 has
+no `promptfooconfig` — it is career close with Igor.
+
 ## Pass/fail semantics cheat sheet
 
 | Semantics | Exit 100 means | Targets |
 |---|---|---|
 | **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
-| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local` |
+| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2 (incl. Day 9 observability), `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local` |
 
 `payflow-rbac`, `payflow-exposure` and `payflow-poisoning` are the inverted suites that
 point at the **application** rather than at a model. Their assertions describe a hardened
@@ -58,4 +63,5 @@ not jailbreaks — a fail still means the model behaved badly.
 
 `scripts/check-day-index.sh` fails if any `promptfooconfig*.yaml` in the repo is listed
 under no day, or under more than one. Add a lesson and the check tells you to place it,
-which is the only reason this page can be trusted.
+which is the only reason this page can be trusted. Day 10 is exempt in practice because it
+ships no configs.
