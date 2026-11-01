@@ -6,4 +6,4 @@ output/
 *.log
 .DS_Store
 results.json
-pf-latest.json
+pf-*.json
