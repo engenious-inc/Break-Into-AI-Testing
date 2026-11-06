@@ -4,7 +4,9 @@ prompts:
   - file://prompts/medibot-multiturn.txt
 
 # Standalone add-on — kept out of promptfooconfig.medibot.yaml's default run so the
-# free-tier-safe curated suite's size/timing is unchanged. Same 3 models as default.
+# free-tier-safe curated suite's size/timing is unchanged. Same models as default, except
+# gpt-oss-20b, which errors on this conversation (API error 400: "Tool choice is none, but
+# model called a tool") on every run; qwen3.6-27b takes its place.
 providers:
   - id: groq:qwen/qwen3.8-27b
     config:
@@ -19,10 +21,12 @@ providers:
       max_tokens: 400
       include_reasoning: false
 
-  - id: groq:openai/gpt-oss-20b
+  - id: groq:qwen/qwen3.6-27b
     config:
       temperature: 0
       max_tokens: 400
+      reasoning_effort: none
+      reasoning_format: hidden
 
 defaultTest:
   options:
