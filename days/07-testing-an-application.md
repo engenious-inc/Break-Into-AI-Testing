@@ -16,6 +16,8 @@ Two name traps, before you run anything:
   healthcare would cost the exact distinction this session exists to make. Reach MediBot
   with the Day 5 `medibot` target and `./run.sh view`.
 
+> 💡 **Visual Guide & Mental Model:** See [**PayFlow Story & Architecture Workflow**](../docs/payflow-story-workflow.md) for the 4-step story (Bouncer, Traffic Cop, Detective, Writer) and how evals map to each step.
+
 ## Run this — two terminals
 
 ```bash
@@ -83,6 +85,7 @@ day: the answer text is perfectly good prose. The finding is only visible in
 
 ## Read this
 
+- [**PayFlow Story & Architecture Workflow**](../docs/payflow-story-workflow.md) — the 4-step story, Mermaid diagram, and eval mapping
 - [`modules/03-app-testing/`](../modules/03-app-testing/) — the module overview and the
   PayFlow app itself
 - [`payflow/corpus/`](../modules/03-app-testing/payflow/corpus/) — 20 fixture documents.
