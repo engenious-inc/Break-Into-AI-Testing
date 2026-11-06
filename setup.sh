@@ -80,9 +80,14 @@ else
   ok ".env already exists"
 fi
 
+# Verify credentials and repository readiness before treating an inverted eval exit code as healthy.
+echo "Checking workshop readiness…"
+if ! ./preflight.sh; then
+  err "Setup incomplete — fix the preflight failures above and re-run ./setup.sh"
+fi
+
 # 4. Smoke test
 echo "Running a 1-test smoke check…"
-set -a; . ./.env; set +a
 smoke_exit=0
 npx --yes promptfoo@latest eval -c promptfooconfig.medibot.yaml --filter-first-n 1 --no-cache --no-table --no-progress-bar >/dev/null 2>&1 || smoke_exit=$?
 # promptfoo exits 100 when assertions fail; the workshop is designed so some attacks succeed and others fail per model, so 100 is expected on a healthy setup.
