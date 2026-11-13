@@ -1,10 +1,12 @@
 name: Promptfoo eval & red team
 
 # Instructor classroom demo — live Promptfoo eval + inverted red team in Actions.
-# Not on every PR (Groq free-tier). Actions → this workflow → Run workflow.
+# Not on every PR (Groq free-tier). Manual: Actions → this workflow → Run workflow.
+# Also runs on a weekly cron (Mondays 15:00 UTC) — edit the schedule cron if needed.
 #
 # Needs GROQ_API_KEY under Settings → Secrets and variables → Actions.
-# Missing key fails the gate (this workflow is dispatch-only, so forks stay quiet).
+# Missing key fails the gate. Neither trigger runs on pull requests, and a fork
+# stays quiet until someone enables Actions there.
 #
 # Three jobs after the gate:
 #   ordinary Module 0 eval + inverted MediBot + one PayFlow routing case.
@@ -16,6 +18,9 @@ name: Promptfoo eval & red team
 # Node 22: promptfoo@latest requires >=22.22.0.
 on:
   workflow_dispatch:
+  schedule:
+    # Mondays 15:00 UTC (~7–8am PT). Weekly keeps Groq free-tier quiet between classes.
+    - cron: '0 15 * * 1'
 
 concurrency:
   group: promptfoo-demo-${{ github.ref }}
