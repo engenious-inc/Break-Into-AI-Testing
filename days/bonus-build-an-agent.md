@@ -12,11 +12,16 @@ Start with its README — it walks through the agent before any eval runs.
 From the **repo root**, one at a time (each takes about two minutes on the free tier):
 
 ```bash
-npx promptfoo@latest eval -c modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml
-npx promptfoo@latest eval -c modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml
-npx promptfoo@latest eval -c modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml
-npx promptfoo@latest view
+./run.sh boxoffice-done       # 01-it-said-done
+./run.sh boxoffice-narrate    # 02-narrate-then-comply
+./run.sh boxoffice-memory     # 03-memory-outlives-the-patch
+./run.sh view
 ```
+
+Windows: `.\run.ps1` with the same target names. The configs are
+`modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml`,
+`modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml`, and
+`modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml`.
 
 No server to start, no `npm install`. Only `GROQ_API_KEY`.
 

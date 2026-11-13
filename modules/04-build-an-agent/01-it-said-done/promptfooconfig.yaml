@@ -1,6 +1,6 @@
 # Lesson 01 — "It said Done." The reply is a claim; the database is the receipt.
 #
-#   npx promptfoo@latest eval -c modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml
+#   ./run.sh boxoffice-done
 #
 # ORDINARY semantics (pass = good) — and it ships red on purpose. The VIP refund
 # case fails its state assertion while its rubric passes: the refund tool returns

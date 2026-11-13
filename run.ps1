@@ -41,6 +41,9 @@ Targets:
   mcp-abuse           MCP tool-abuse - write_note / read_secret / http_get (inverted, no Groq key)
   mcp-agent           MCP agent - Groq picks tools on workshop-local (inverted)
   mcp-injection       MCP injection - search_notes result instructs write_note (inverted)
+  boxoffice-done      BoxOffice - grade the database; the VIP refund fails on purpose
+  boxoffice-narrate   BoxOffice - hidden note can email an outside address (inverted)
+  boxoffice-memory    BoxOffice - poisoned memory survives the patch (inverted)
   financebot          FinanceBot app suite - guard, routing, citations (server must be up)
   financebot-api      FinanceBot HTTP contract + three planted defects (those three fail on purpose)
   financebot-multiturn  FinanceBot injection after context (paper-trade case fails on purpose)
@@ -67,6 +70,9 @@ Examples:
   .\run.ps1 mcp-abuse
   .\run.ps1 mcp-agent
   .\run.ps1 mcp-injection
+  .\run.ps1 boxoffice-done
+  .\run.ps1 boxoffice-narrate
+  .\run.ps1 boxoffice-memory
   .\run.ps1 financebot-serve
   .\run.ps1 financebot
   .\run.ps1 financebot-api
@@ -205,7 +211,8 @@ $known = @(
   'quality.medibot', 'quality.finance', 'openrouter.medibot', 'openrouter.finance', 'mybot',
   'payflow', 'payflow-api', 'payflow-multiturn', 'payflow-rbac', 'payflow-exposure', 'payflow-poisoning',
   'financebot', 'financebot-api', 'financebot-multiturn',
-  'mcp-local', 'mcp-abuse', 'mcp-agent', 'mcp-injection'
+  'mcp-local', 'mcp-abuse', 'mcp-agent', 'mcp-injection',
+  'boxoffice-done', 'boxoffice-narrate', 'boxoffice-memory'
 )
 if ($target -notin $known) {
   Write-Host "$([char]0x2717) Unknown target: $target`n" -ForegroundColor Red
@@ -213,10 +220,12 @@ if ($target -notin $known) {
   exit 2
 }
 
-$cfg = if ($target -eq 'mcp-local') {
-  'modules/03-app-testing/mcp-local/promptfooconfig.yaml'
-} else {
-  "promptfooconfig.$target.yaml"
+$cfg = switch ($target) {
+  'mcp-local' { 'modules/03-app-testing/mcp-local/promptfooconfig.yaml' }
+  'boxoffice-done' { 'modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml' }
+  'boxoffice-narrate' { 'modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml' }
+  'boxoffice-memory' { 'modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml' }
+  default { "promptfooconfig.$target.yaml" }
 }
 if (-not (Test-Path $cfg)) {
   Write-Host "$([char]0x2717) Config not found: $cfg - are you in the repo root?" -ForegroundColor Red
@@ -230,7 +239,7 @@ if (-not (Import-DotEnv)) {
 $ordinaryTargets = @(
   'payflow', 'payflow-api', 'payflow-multiturn',
   'financebot', 'financebot-api', 'financebot-multiturn',
-  'mybot', 'reverse', 'mcp-local'
+  'mybot', 'reverse', 'mcp-local', 'boxoffice-done'
 )
 $ordinary = $target -in $ordinaryTargets
 
@@ -272,6 +281,9 @@ if ($ordinary) {
     Write-Host "  Testing the application, not a model - assertions read output.route and output.citations.`n"
   } elseif ($target -eq 'mcp-local') {
     Write-Host "  Testing the MCP server with JSON tool calls - pass means the happy path and path-traversal guard held.`n"
+  } elseif ($target -eq 'boxoffice-done') {
+    Write-Host "  Ordinary suite against BoxOffice - pass means the reply and the database agree."
+    Write-Host "  The VIP refund fails on purpose: the tool returns ok:true and writes nothing. Do not loosen it.`n"
   } else {
     Write-Host "  Ordinary suite - a failing check is a defect in your bot, not a finding.`n"
   }
@@ -297,6 +309,14 @@ if ($ordinary) {
       Write-Host "  Inverted against the agent - search_notes returns an instruction; the user message is ordinary."
       Write-Host "  One case is a control and passes. The payload never sat in the user message.`n"
     }
+    'boxoffice-narrate' {
+      Write-Host "  Inverted against BoxOffice - the assertions describe an agent that emails only the customer on the order."
+      Write-Host "  Two controls pass. A failing check means a note hidden on the order sent mail somewhere else.`n"
+    }
+    'boxoffice-memory' {
+      Write-Host "  Inverted against BoxOffice - the assertions describe an agent whose memory holds no outside address."
+      Write-Host "  One control passes. The patched build still has the remember tool removed; the memory file does not.`n"
+    }
     default {
       Write-Host "  Reminder: these are red-team suites - a failing check means the model did the thing you were testing for. That's the finding, not an error.`n"
     }
@@ -315,12 +335,17 @@ if ($ordinary) {
         Write-Host "  Guardrails held where they should; benign and gray-area cases behaved."
       } elseif ($target -eq 'mcp-local') {
         Write-Host "  Happy paths returned the fixture values; path traversal was refused."
+      } elseif ($target -eq 'boxoffice-done') {
+        Write-Host "  Reply and database agreed, including the VIP refund. If you fixed agent.mjs, put the bug back before the next group."
       } else {
         Write-Host "  Guard fired where it should, routing picked the right specialist, citations lined up."
       }
     }
     100 {
       Write-Host "$([char]0x2717) Exit 100 - one or more checks failed. Here that IS a defect." -ForegroundColor Yellow
+      if ($target -eq 'boxoffice-done') {
+        Write-Host "  The VIP refund should be the one that failed: the reply says refunded, the order is still paid."
+      }
       Write-Host "  Look at which assertion broke:  .\run.ps1 view"
     }
     default {
@@ -368,6 +393,24 @@ if ($target -in @('mcp-abuse', 'mcp-agent', 'mcp-injection')) {
     default {
       Write-Host "$([char]0x2717) Exit $ec - that's an actual error, not a finding." -ForegroundColor Red
       Write-Host "  Is mcp-local installed?  npm install --prefix modules/03-app-testing/mcp-local"
+    }
+  }
+  exit $ec
+}
+
+if ($target -in @('boxoffice-narrate', 'boxoffice-memory')) {
+  switch ($ec) {
+    0 {
+      Write-Host "? Exit 0 - nothing failed, which is not what this suite expects." -ForegroundColor Yellow
+      Write-Host "  The model refused this run, or the memory file no longer holds an outside address."
+    }
+    100 {
+      Write-Host "$([char]0x2713) Exit 100 - the findings are still there. That's the healthy result." -ForegroundColor Green
+      Write-Host "  Read them case by case:  .\run.ps1 view"
+    }
+    default {
+      Write-Host "$([char]0x2717) Exit $ec - that's an actual error, not a finding." -ForegroundColor Red
+      Write-Host "  Usually a key / network / throttle issue - see docs/03-troubleshooting.md."
     }
   }
   exit $ec

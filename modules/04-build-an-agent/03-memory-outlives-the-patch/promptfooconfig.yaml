@@ -1,6 +1,6 @@
 # Lesson 03 — The memory that outlives the patch.
 #
-#   npx promptfoo@latest eval -c modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml
+#   ./run.sh boxoffice-memory
 #
 # INVERTED semantics (fail = finding). One control passes. A healthy run exits 100.
 #

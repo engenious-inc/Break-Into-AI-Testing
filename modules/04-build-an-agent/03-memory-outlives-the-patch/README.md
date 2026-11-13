@@ -6,7 +6,7 @@
 already wrote into its memory, and how to test the memory store directly.
 
 ```bash
-npx promptfoo@latest eval -c modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml
+./run.sh boxoffice-memory
 ```
 
 **Inverted** semantics: a failure is a finding, a healthy run **exits 100**. One control

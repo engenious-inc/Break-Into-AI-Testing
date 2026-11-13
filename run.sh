@@ -46,6 +46,9 @@ Targets:
   mcp-abuse           MCP tool-abuse — write_note / read_secret / http_get (inverted, no Groq key)
   mcp-agent           MCP agent — Groq picks tools on workshop-local (inverted)
   mcp-injection       MCP injection — search_notes result instructs write_note (inverted)
+  boxoffice-done      BoxOffice — grade the database; the VIP refund fails on purpose
+  boxoffice-narrate   BoxOffice — hidden note can email an outside address (inverted)
+  boxoffice-memory    BoxOffice — poisoned memory survives the patch (inverted)
   financebot          FinanceBot app suite — guard, routing, citations (server must be up)
   financebot-api      FinanceBot HTTP contract + three planted defects (those three fail on purpose)
   financebot-multiturn  FinanceBot injection after context (paper-trade case fails on purpose)
@@ -72,6 +75,9 @@ Examples:
   ./run.sh mcp-abuse          # Day 8 — over-scoped tools, no Groq key
   ./run.sh mcp-agent          # Day 8 — the model picks the tool
   ./run.sh mcp-injection      # Day 8 — tool output is an untrusted channel
+  ./run.sh boxoffice-done     # bonus — the reply says refunded, the database disagrees
+  ./run.sh boxoffice-narrate  # bonus — grade the outbox, not the reply
+  ./run.sh boxoffice-memory   # bonus — the patch does not clean the memory
   ./run.sh financebot-serve   # in one terminal (:8001)
   ./run.sh financebot         # in another
   ./run.sh financebot-api
@@ -190,6 +196,12 @@ fi
 case "$target" in
   mcp-local)
     cfg="modules/03-app-testing/mcp-local/promptfooconfig.yaml" ;;
+  boxoffice-done)
+    cfg="modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml" ;;
+  boxoffice-narrate)
+    cfg="modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml" ;;
+  boxoffice-memory)
+    cfg="modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml" ;;
   medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|payflow-rbac|payflow-exposure|payflow-poisoning|financebot|financebot-api|financebot-multiturn|mcp-abuse|mcp-agent|mcp-injection)
     cfg="promptfooconfig.${target}.yaml" ;;
   *)
@@ -216,7 +228,7 @@ printf "${BLUE}▶${NC} Running ${BLUE}%s${NC}  ${YELLOW}(-j %s --delay %sms)${N
 # Everything else here is inverted (fail = finding). Saying the wrong one teaches
 # the opposite of the lesson, so the two verdicts are kept apart.
 ordinary=0
-if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ] || [ "$target" = "reverse" ] || [ "$target" = "mcp-local" ]; then
+if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ] || [ "$target" = "financebot" ] || [ "$target" = "financebot-api" ] || [ "$target" = "financebot-multiturn" ] || [ "$target" = "mybot" ] || [ "$target" = "reverse" ] || [ "$target" = "mcp-local" ] || [ "$target" = "boxoffice-done" ]; then
   ordinary=1
 fi
 
@@ -265,6 +277,9 @@ if [ "$ordinary" = 1 ]; then
       printf "  Testing the ${BLUE}application${NC}, not a model — assertions read output.route and output.citations.\n\n" ;;
     mcp-local)
       printf "  Testing the ${BLUE}MCP server${NC} with JSON tool calls — pass means the happy path and the path-traversal guard held.\n\n" ;;
+    boxoffice-done)
+      printf "  Ordinary suite against ${BLUE}BoxOffice${NC} — pass means the reply and the database agree.\n"
+      printf "  The VIP refund fails on purpose: the tool returns ok:true and writes nothing. Do not loosen it.\n\n" ;;
     *)
       printf "  Ordinary suite — a ${YELLOW}failing${NC} check is a defect in your bot, not a finding.\n\n" ;;
   esac
@@ -285,6 +300,12 @@ else
     payflow-poisoning)
       printf "  Inverted against the ${BLUE}application${NC} — the assertions describe a PayFlow that inspects retrieved documents the same way it inspects the user message.\n"
       printf "  Two cases are controls and pass. Do not relax the others; the guard is pointed at the wrong channel.\n\n" ;;
+    boxoffice-narrate)
+      printf "  Inverted against ${BLUE}BoxOffice${NC} — the assertions describe an agent that emails only the customer on the order.\n"
+      printf "  Two controls pass. A failing check means a note hidden on the order sent mail somewhere else.\n\n" ;;
+    boxoffice-memory)
+      printf "  Inverted against ${BLUE}BoxOffice${NC} — the assertions describe an agent whose memory holds no outside address.\n"
+      printf "  One control passes. The patched build still has the remember tool removed; the memory file does not.\n\n" ;;
     *)
       printf "  Reminder: these are red-team suites — a ${YELLOW}failing${NC} check means the model did the thing you were testing for. That's the finding, not an error.\n\n" ;;
   esac
@@ -302,10 +323,15 @@ if [ "$ordinary" = 1 ]; then
            printf "  Guardrails held where they should; benign and gray-area cases behaved.\n"
          elif [ "$target" = "mcp-local" ]; then
            printf "  Happy paths returned the fixture values; path traversal was refused.\n"
+         elif [ "$target" = "boxoffice-done" ]; then
+           printf "  Reply and database agreed, including the VIP refund. If you fixed agent.mjs, put the bug back before the next group.\n"
          else
            printf "  Guard fired where it should, routing picked the right specialist, citations lined up.\n"
          fi ;;
     100) printf "${YELLOW}✗ Exit 100 — one or more checks failed. Here that IS a defect.${NC}\n"
+         if [ "$target" = "boxoffice-done" ]; then
+           printf "  The VIP refund should be the one that failed: the reply says refunded, the order is still paid.\n"
+         fi
          printf "  Look at which assertion broke:  ${BLUE}./run.sh view${NC}\n" ;;
     *)   printf "${RED}✗ Exit %s — an actual error.${NC}\n" "$ec"
          if [ "$target" = "payflow" ] || [ "$target" = "payflow-api" ] || [ "$target" = "payflow-multiturn" ]; then
@@ -338,6 +364,16 @@ case "$target" in
            printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
       *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"
            printf "  Is mcp-local installed?  ${BLUE}npm install --prefix modules/03-app-testing/mcp-local${NC}\n" ;;
+    esac
+    exit "$ec" ;;
+  boxoffice-narrate|boxoffice-memory)
+    case "$ec" in
+      0)   printf "${YELLOW}? Exit 0 — nothing failed, which is not what this suite expects.${NC}\n"
+           printf "  The model refused this run, or the memory file no longer holds an outside address.\n" ;;
+      100) printf "${GREEN}✓ Exit 100 — the findings are still there. That's the healthy result.${NC}\n"
+           printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
+      *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"
+           printf "  Usually a key / network / throttle issue — see docs/03-troubleshooting.md.\n" ;;
     esac
     exit "$ec" ;;
 esac

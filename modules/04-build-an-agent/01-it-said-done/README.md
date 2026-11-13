@@ -6,7 +6,7 @@
 software, and how to grade the outcome instead.
 
 ```bash
-npx promptfoo@latest eval -c modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml
+./run.sh boxoffice-done
 ```
 
 Ordinary semantics: pass = good. **Case 4 ships red on purpose.** Do not loosen it.

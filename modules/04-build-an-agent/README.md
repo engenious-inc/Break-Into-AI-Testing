@@ -66,11 +66,14 @@ output: {
 Run each from the **repo root** (never `cd` into the lesson — `.env` will not load):
 
 ```bash
-npx promptfoo@latest eval -c modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml
-npx promptfoo@latest eval -c modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml
-npx promptfoo@latest eval -c modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml
-npx promptfoo@latest view
+./run.sh boxoffice-done
+./run.sh boxoffice-narrate
+./run.sh boxoffice-memory
+./run.sh view
 ```
+
+`./run.sh` prints the verdict. Exit 100 on `boxoffice-done` is the planted VIP refund.
+Exit 100 on the other two means a finding landed. Windows: `.\run.ps1` and the same names.
 
 Each lesson takes about two minutes on the free tier.
 

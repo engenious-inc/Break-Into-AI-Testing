@@ -6,7 +6,7 @@
 how to grade the action channel separately from the narration channel.
 
 ```bash
-npx promptfoo@latest eval -c modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml
+./run.sh boxoffice-narrate
 ```
 
 **Inverted** semantics: assertions describe the safe agent, a failure is a finding, and a
