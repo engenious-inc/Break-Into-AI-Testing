@@ -1,0 +1,48 @@
+# Lesson 01 — "It said Done." The reply is a claim; the database is the receipt.
+#
+#   npx promptfoo@latest eval -c modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml
+#
+# ORDINARY semantics (pass = good) — and it ships red on purpose. The VIP refund
+# case fails its state assertion while its rubric passes: the refund tool returns
+# ok:true for orders over $500 without writing anything. Do not loosen it.
+#
+# Single Groq model, two provider entries: the healthy agent, and the same agent with
+# the payment gateway down (faults: [refund]). Each test picks one with `providers:`.
+
+description: 'Module 4 / 01 — BoxOffice: grade the database, not the reply'
+
+prompts:
+  - '{{query}}'
+
+providers:
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      faults: []
+      maxSteps: 6
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice-gateway-down
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      faults: [refund]
+      maxSteps: 6
+
+# The grader is NOT the agent's model. Groq rate-limits per model, and the agent loop
+# spends Qwen's per-minute token budget; a grader on the same model then hits a 429 and
+# Promptfoo backs off until Groq's daily reset (hours). A different grader model also
+# avoids a model grading its own work.
+defaultTest:
+  options:
+    provider:
+      id: groq:openai/gpt-oss-120b
+      config: { temperature: 0, max_tokens: 1000, include_reasoning: false }
+
+tests:
+  - file://tests/cases.yaml

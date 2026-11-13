@@ -53,7 +53,7 @@ and `.../comparing-models/` (three Groq models each) and
 `modules/02-advanced-eval/temperature-and-personas/` (one model at two temperatures).
 
 ## Lessons that fail on purpose
-Outside Module 1's inverted scoring, five lessons ship red by design:
+Outside Module 1's inverted scoring, six lessons ship red by design:
 `02-providers/comparing-models/` fails 2 of 6 because `groq:openai/gpt-oss-20b` emits its
 chain of thought (`"Thinking: ..."`) in the visible answer. `payflow-api` and
 `financebot-api` fail their planted Day 7 cases (text asserts pass; route / citation /
@@ -61,6 +61,9 @@ agency asserts fail). `payflow-multiturn` fails the turn-5 injection case becaus
 guard classifies only the transcript above `--- CURRENT MESSAGE ---`.
 `financebot-multiturn` fails the paper-trade-after-context case because the guard
 ALLOWs a HarborWealth-framed simulated order and the answerer invents DEMO-4417.
+`modules/04-build-an-agent/01-it-said-done/` fails its VIP-refund case because the
+BoxOffice `refund` tool returns `ok: true` for orders over $500 without writing state
+(the reply rubric passes; the database check fails).
 Do not "fix" them by loosening the assertion — the failure is the lesson. If you add
 another deliberately-failing lesson, say so in the module README so a red run is never
 mistaken for a broken repo.
@@ -75,8 +78,8 @@ landed. A healthy inverted run **exits 100**. This is expected, not an error.
 
 | Semantics | Targets |
 |---|---|
-| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
-| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local` |
+| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection`, Module 4 `02-narrate-then-comply`, `03-memory-outlives-the-patch` |
+| **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local`, Module 4 `01-it-said-done` |
 
 `./run.sh` prints the matching verdict. Quality suites invert even though they are not
 jailbreaks — see `docs/05-quality-challenges.md`.
@@ -97,6 +100,10 @@ keep default live-eval request volume low.
 - `modules/02-advanced-eval/` — Module 2 (weights, metrics, CSV, F-score, debugging)
 - `modules/03-app-testing/` — Module 3 (PayFlow + FinanceBot `http` apps, plus an MCP track:
   `mcp-deepwiki/`, `mcp-local/`, `mcp-promptfoo/`)
+- `modules/04-build-an-agent/` — Module 4 (bonus session): `boxoffice/agent.mjs` is a
+ Groq tool-calling agent *and* a custom provider returning `reply`, `tool_calls`, and
+ final state. Single model per lesson; the grader must be a **different** Groq model
+ than the agent (shared per-model rate limits otherwise stall Promptfoo for hours)
 - `.claude/` — the Claude Code workflow (`red-teamer` + Module 3 `payflow-guide` /
   `financebot-guide` agents, new-eval-suite + run-and-summarize skills). In Module 1 these are the
   student's path, not optional authoring aids; Modules 0 and 2 use them only for

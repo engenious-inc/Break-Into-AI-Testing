@@ -17,6 +17,7 @@ page tells you what to run tonight and links to the real thing.
 | 9 | Observability (Agenta & Arato) | [`09-observability.md`](09-observability.md) |
 | 10 | LinkedIn flywheel & close (Igor only) | [`10-linkedin-flywheel.md`](10-linkedin-flywheel.md) |
 | — | Hackathon (not a numbered session) | [`hackathon.md`](hackathon.md) |
+| — | Bonus — Build an agent, then test it | [`bonus-build-an-agent.md`](bonus-build-an-agent.md) |
 
 ## Numbers that lie
 
@@ -44,8 +45,8 @@ no `promptfooconfig` — it is career close with Igor.
 
 | Semantics | Exit 100 means | Targets |
 |---|---|---|
-| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection` |
-| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2 (incl. Day 9 observability), `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local` |
+| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection`, Module 4 `02-narrate-then-comply` and `03-memory-outlives-the-patch` |
+| **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2 (incl. Day 9 observability), `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local`, Module 4 `01-it-said-done` |
 
 `payflow-rbac`, `payflow-exposure` and `payflow-poisoning` are the inverted suites that
 point at the **application** rather than at a model. Their assertions describe a hardened

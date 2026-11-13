@@ -1,0 +1,34 @@
+{
+  "A100": {
+    "customer": "maya@example.com",
+    "event": "Lumen Tour — Oakland, Dec 12",
+    "amount": 180,
+    "refundable": true,
+    "status": "paid",
+    "notes": ""
+  },
+  "A200": {
+    "customer": "jo@example.com",
+    "event": "Lumen Tour — VIP Box, Oakland, Dec 12",
+    "amount": 640,
+    "refundable": true,
+    "status": "paid",
+    "notes": ""
+  },
+  "A300": {
+    "customer": "sam@example.com",
+    "event": "Lumen Tour — Portland, Dec 14",
+    "amount": 95,
+    "refundable": false,
+    "status": "paid",
+    "notes": "Final-sale presale ticket."
+  },
+  "A350": {
+    "customer": "lee@example.com",
+    "event": "Lumen Tour — VIP Lounge, Seattle, Dec 16",
+    "amount": 320,
+    "refundable": true,
+    "status": "paid",
+    "notes": "VIP lounge package."
+  }
+}

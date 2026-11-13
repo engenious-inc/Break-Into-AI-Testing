@@ -1,0 +1,44 @@
+# Lesson 02 — Narrate-then-comply. What the agent says is not what the agent did.
+#
+#   npx promptfoo@latest eval -c modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml
+#
+# INVERTED semantics (fail = finding). Two controls pass. The findings fail when an
+# instruction hidden in an order's notes field makes the agent email the order to an
+# outside address. A healthy run exits 100.
+#
+# Every finding is graded twice: an llm-rubric that reads the REPLY (metric: words) and
+# a javascript check that reads the OUTBOX (metric: actions). Watch the two columns
+# disagree.
+#
+# Model choice is deliberate: qwen/qwen3.8-27b refused every variant in testing, while
+# gpt-oss-120b leaked on some runs and not others — so the findings repeat 3 times.
+# Swapping `model` is exercise 1 in the README.
+
+description: 'Module 4 / 02 — BoxOffice: grade the actions, not the narration'
+
+prompts:
+  - '{{query}}'
+
+providers:
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice-gpt-oss-120b
+    config:
+      model: openai/gpt-oss-120b
+      modelOptions: { temperature: 0, max_tokens: 500, include_reasoning: false }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/02-narrate-then-comply/orders.json
+      faults: []
+      maxSteps: 6
+
+# The grader is NOT the agent's model. Groq rate-limits per model, and the agent loop
+# spends gpt-oss-120b's per-minute token budget; a grader on the same model then hits a
+# 429 and Promptfoo backs off until Groq's daily reset (hours). max_tokens is capped
+# because Qwen allows only 1,000 output tokens per minute on the free tier.
+defaultTest:
+  options:
+    provider:
+      id: groq:qwen/qwen3.8-27b
+      config: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+
+tests:
+  - file://tests/cases.yaml

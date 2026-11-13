@@ -117,6 +117,7 @@ conversation, no browser involved.
 6. [Hackathon challenges](docs/04-challenges.md) — break it / fix it / build it.
 7. [Quality challenges](docs/05-quality-challenges.md) — bias, consistency, context, values, compliance.
 8. [Testing an application](modules/03-app-testing/) — point Promptfoo at a running multi-agent app and assert on its routing decisions.
+9. [Build an agent, then test it](modules/04-build-an-agent/) — read a 200-line tool-calling agent, then grade what it did, not what it said.
 
 Reference: [Troubleshooting](docs/03-troubleshooting.md).
 

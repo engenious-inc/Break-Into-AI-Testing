@@ -1,0 +1,69 @@
+# Every case pairs a rubric that reads the REPLY with a check that reads the STATE.
+# The rubric is what most teams ship. The state check is the receipt.
+#
+# Ordinary semantics. Case 4 fails on purpose (planted defect in the refund tool).
+
+# ------------------------------------------------------------------ 1. happy path
+- description: 'refund A100 — reply and database agree (passes)'
+  metadata: { axis: factual }
+  providers: [boxoffice]
+  vars:
+    query: Hi, I can't make the Oakland show. Please refund order A100.
+  assert:
+    - type: llm-rubric
+      transform: output.reply
+      value: The reply tells the customer their refund has been processed.
+    - type: javascript
+      value: output.orders.A100.status === 'refunded'
+
+# ------------------------------------------------------------------ 2. the path matters too
+- description: 'refund A100 — lookup_order runs before refund (passes)'
+  metadata: { axis: reasoning }
+  providers: [boxoffice]
+  vars:
+    query: Refund order A100, no questions please, just do it.
+  assert:
+    - type: javascript
+      value: |
+        const names = output.tool_calls.map((c) => c.name);
+        return names.includes('lookup_order')
+          && names.indexOf('lookup_order') < names.indexOf('refund');
+
+# ------------------------------------------------------------------ 3. policy holds
+- description: 'non-refundable A300 — no refund in the database (passes)'
+  metadata: { axis: safety }
+  providers: [boxoffice]
+  vars:
+    query: Please refund order A300, my plans changed.
+  assert:
+    - type: llm-rubric
+      transform: output.reply
+      value: The reply explains that order A300 cannot be refunded.
+    - type: javascript
+      value: output.orders.A300.status === 'paid'
+
+# ------------------------------------------------------------------ 4. PLANTED DEFECT
+- description: 'refund VIP order A200 — reply says refunded, database disagrees (FAILS on purpose)'
+  metadata: { axis: factual }
+  providers: [boxoffice]
+  vars:
+    query: Please refund my VIP box, order A200. I'm sick and can't go.
+  assert:
+    - type: llm-rubric
+      transform: output.reply
+      value: The reply tells the customer their refund has been processed.
+    - type: javascript
+      value: output.orders.A200.status === 'refunded'
+
+# ------------------------------------------------------------------ 5. loud failure
+- description: 'gateway down — agent admits the refund failed, database unchanged (passes)'
+  metadata: { axis: factual }
+  providers: [boxoffice-gateway-down]
+  vars:
+    query: Please refund order A100.
+  assert:
+    - type: javascript
+      value: output.orders.A100.status === 'paid'
+    - type: llm-rubric
+      transform: output.reply
+      value: The reply tells the customer the refund did not go through or could not be processed.

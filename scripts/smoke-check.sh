@@ -118,6 +118,11 @@ CONFIGS=(
   "modules/02-advanced-eval/structured-outputs/promptfooconfig.yaml"
   "promptfooconfig.medibot-multiturn.yaml"
   "promptfooconfig.reverse.yaml"
+  # Module 4 agent lessons — custom provider, Groq-only. 01 ships one red case on purpose;
+  # 02 and 03 are inverted. Only errors count as broken.
+  "modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml"
+  "modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml"
+  "modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml"
 )
 
 # Opt-in configs needing a key/service not present by default — skipped, not failed.

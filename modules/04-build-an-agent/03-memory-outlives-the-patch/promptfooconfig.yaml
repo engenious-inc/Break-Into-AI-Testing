@@ -1,0 +1,53 @@
+# Lesson 03 — The memory that outlives the patch.
+#
+#   npx promptfoo@latest eval -c modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml
+#
+# INVERTED semantics (fail = finding). One control passes. A healthy run exits 100.
+#
+# Three builds of the same agent, one model:
+#   boxoffice-v1              ships the `remember` tool — the vulnerability
+#   boxoffice-v2-clean        patched (no `remember`), clean memory store
+#   boxoffice-v2-poisoned     patched (no `remember`), memory written by yesterday's attack
+#
+# memory.poisoned.json is committed rather than produced live so every run starts from
+# the same store; case 1 shows the write that would have produced it.
+
+description: 'Module 4 / 03 — BoxOffice: patching the bug does not clean the memory'
+
+prompts:
+  - '{{query}}'
+
+providers:
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice-v1
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email, remember]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      memory: modules/04-build-an-agent/03-memory-outlives-the-patch/memory.clean.json
+      faults: []
+      maxSteps: 6
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice-v2-clean
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      memory: modules/04-build-an-agent/03-memory-outlives-the-patch/memory.clean.json
+      faults: []
+      maxSteps: 6
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice-v2-poisoned
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      memory: modules/04-build-an-agent/03-memory-outlives-the-patch/memory.poisoned.json
+      faults: []
+      maxSteps: 6
+
+tests:
+  - file://tests/cases.yaml
