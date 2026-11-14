@@ -5,13 +5,13 @@
 **Start here:** [`days/bonus-build-an-agent.md`](../days/bonus-build-an-agent.md)
 **Code:** [`modules/04-build-an-agent/`](../modules/04-build-an-agent/)
 
-This session sits on top of the numbered days. Everything before it tested something somebody else built. Tonight the room reads a ~200-line ticket agent and finds out what goes wrong when a model can **do** things, not only say them.
+This session sits on top of the numbered days. Everything before it tested something somebody else built. The room reads a ~200-line ticket agent and finds out what goes wrong when a model can **do** things, not only say them.
 
 The line for the room: **grade the world, not the words.**
 
 ## Before the room
 
-- Pull latest `main`. Lessons 01–03 are already there. Lesson 04 (`boxoffice-quote`) is local until it is committed and pushed — skip that command if `./run.sh` does not list it.
+- Pull latest `main`. All four lessons are on it, including `boxoffice-quote`.
 - `GROQ_API_KEY` only. No server to start. No `npm install`.
 - Run from the **repo root**. `cd` into a lesson and `.env` will not load.
 - Run **one lesson at a time** on one key. Each takes about two minutes.
@@ -21,7 +21,7 @@ The line for the room: **grade the world, not the words.**
 ./run.sh boxoffice-done
 ./run.sh boxoffice-narrate
 ./run.sh boxoffice-memory
-./run.sh boxoffice-quote    # only if time is left, and only if it is on this checkout
+./run.sh boxoffice-quote    # only if time is left
 ./run.sh view
 ```
 

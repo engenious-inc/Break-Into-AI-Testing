@@ -66,7 +66,7 @@ The script will: check Node ≥ 22.22, install Promptfoo, prompt for your Groq k
 
 ## Curriculum
 
-This repo is one course in four modules plus a hackathon (full map: `modules/README.md`):
+This repo is one course in five modules plus a hackathon (full map: `modules/README.md`):
 
 - **Module 0 — Promptfoo Basics** (`modules/00-promptfoo-basics/`) — prompts, providers, assertions.
 - **Module 1 — Red-Team Fundamentals** (`modules/01-red-team/` over repo root + `docs/02`,`04`,`05`) —
@@ -82,6 +82,10 @@ This repo is one course in four modules plus a hackathon (full map: `modules/REA
   specialists behind `POST /chat`, each with a workshop chat UI in the browser. Promptfoo's
   `http` provider points at the running app, so assertions read `output.route` and
   `output.citations` — the routing decision, not just the prose.
+- **Module 4 — Build an agent, then test it** (`modules/04-build-an-agent/`) — a bonus session.
+  Read BoxOffice, a ~200-line tool-calling agent, then grade what it did. Run sheet:
+  [`days/bonus-build-an-agent.md`](days/bonus-build-an-agent.md). Host brief:
+  [`docs/host-brief-bonus-build-an-agent.md`](docs/host-brief-bonus-build-an-agent.md).
 
 New to Promptfoo? Start at Module 0. Here to break things? Jump to Module 1.
 The Claude Code workflow lives in `.claude/` (see `CLAUDE.md`) — in Module 1 it's the path,
