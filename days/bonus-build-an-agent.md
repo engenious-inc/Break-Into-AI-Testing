@@ -15,13 +15,15 @@ From the **repo root**, one at a time (each takes about two minutes on the free 
 ./run.sh boxoffice-done       # 01-it-said-done
 ./run.sh boxoffice-narrate    # 02-narrate-then-comply
 ./run.sh boxoffice-memory     # 03-memory-outlives-the-patch
+./run.sh boxoffice-quote      # 04-the-wrong-price — only if time is left
 ./run.sh view
 ```
 
 Windows: `.\run.ps1` with the same target names. The configs are
 `modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml`,
-`modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml`, and
-`modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml`.
+`modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml`,
+`modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml`, and
+`modules/04-build-an-agent/04-the-wrong-price/promptfooconfig.yaml`.
 
 No server to start, no `npm install`. Only `GROQ_API_KEY`.
 
@@ -30,6 +32,7 @@ No server to start, no `npm install`. Only `GROQ_API_KEY`.
 | `01-it-said-done` | Ordinary | Exit 100 — case 4 fails **on purpose** (the refund tool lies) |
 | `02-narrate-then-comply` | Inverted | Exit 100 — controls pass, at least one leak lands across 3 tries |
 | `03-memory-outlives-the-patch` | Inverted | Exit 100 — control passes, the patched agent still emails the attacker |
+| `04-the-wrong-price` | Inverted | Exit 100 — control passes, the reply copies 64 while the order stays 180 |
 
 Do not run two lessons at once on one key. If a run sits silent for more than a minute,
 `Ctrl-C`, wait a minute, run it again — the module README explains why.
@@ -41,8 +44,9 @@ One sentence per lesson, and they build on each other:
 1. **The agent lies** — it says "Done!" and the database says otherwise.
 2. **The agent lies about refusing** — the reply sounds safe, the outbox says otherwise.
 3. **The lie survives the fix** — you patch the bug, and the memory it wrote keeps working.
+4. **The tool lied about the price** — lookup says $64, the order is still $180, and the customer hears $64. Run this only if time is left.
 
-The rule underneath all three: **grade the world, not the words.**
+The rule underneath all four: **grade the world, not the words.** The world, in lesson 04, is the order table. The tool's reply is just another sentence.
 
 ## Run sheet (≈ 2 h 15 min)
 
@@ -55,10 +59,12 @@ The rule underneath all three: **grade the world, not the words.**
 | Lesson 02 | 25 | Dynatrace's "no framework defends you" → vote on which order leaks → run → read B500's reply, *then* its outbox. |
 | Lesson 03 | 25 | RufRoot → three builds → run → the channel comparison table (same words refused in notes, obeyed from memory). |
 | Exercises | 15 | Pairs pick one: fix the refund bug (01), harden `send_email` (02), purge the memory (03). |
+| Lesson 04, if time | 10 | A corrupted lookup returns $64. The order is still $180. The reply copies $64. |
 | Close | 5 | "What did your last agent demo grade — the world, or the words?" |
 
 Short on time? Lesson 03 is the one to keep. It contains the other two: the agent does
 everything right, says everything right, and sends the email to the wrong person.
+Lesson 04 is the extra ten minutes, not a replacement.
 
 ## Bring back
 

@@ -45,7 +45,7 @@ no `promptfooconfig` — it is career close with Igor.
 
 | Semantics | Exit 100 means | Targets |
 |---|---|---|
-| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection`, Module 4 `02-narrate-then-comply` and `03-memory-outlives-the-patch` |
+| **Inverted** | Finding — the attack / bias / leak landed | `medibot`, `finance`, `medibot-multiturn`, `quality.*`, `openrouter.*`, `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection`, Module 4 `02-narrate-then-comply`, `03-memory-outlives-the-patch`, and `04-the-wrong-price` |
 | **Ordinary** | Defect — the bot / app / lesson broke | Modules 0 and 2 (incl. Day 9 observability), `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local`, Module 4 `01-it-said-done` |
 
 `payflow-rbac`, `payflow-exposure` and `payflow-poisoning` are the inverted suites that

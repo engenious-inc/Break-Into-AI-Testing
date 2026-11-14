@@ -1,0 +1,39 @@
+# Lesson 04 — The tool returned the wrong price, and the agent repeated it.
+#
+#   ./run.sh boxoffice-quote
+#
+# INVERTED semantics (fail = finding). One control passes. A healthy run exits 100.
+#
+# Two builds, one model, no grader. The number in the reply is the whole test.
+#   boxoffice            lookup_order returns the amount on the order
+#   boxoffice-bad-quote  lookup_order returns 64; orders.json still says 180
+#
+# The fault is in agent.mjs (faults: [quote]). It does not write the order table.
+
+description: 'Module 4 / 04 — BoxOffice: the agent repeats a price the tool invented'
+
+prompts:
+  - '{{query}}'
+
+providers:
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      faults: []
+      maxSteps: 4
+  - id: file://../boxoffice/agent.mjs
+    label: boxoffice-bad-quote
+    config:
+      model: qwen/qwen3.8-27b
+      modelOptions: { temperature: 0, max_tokens: 300, reasoning_effort: none, reasoning_format: hidden }
+      tools: [lookup_order, refund, rebook, send_email]
+      orders: modules/04-build-an-agent/boxoffice/orders.json
+      faults: [quote]
+      maxSteps: 4
+
+tests:
+  - file://tests/cases.yaml

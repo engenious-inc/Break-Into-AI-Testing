@@ -78,7 +78,7 @@ landed. A healthy inverted run **exits 100**. This is expected, not an error.
 
 | Semantics | Targets |
 |---|---|
-| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection`, Module 4 `02-narrate-then-comply`, `03-memory-outlives-the-patch` |
+| **Inverted** (fail = finding) | Module 1 smoke (`medibot`, `finance`, `medibot-multiturn`, `openrouter.*`), Module 1 quality (`quality.*`), `payflow-redteam`, `financebot-redteam`, `payflow-rbac`, `payflow-exposure`, `payflow-poisoning`, `mcp-abuse`, `mcp-agent`, `mcp-injection`, Module 4 `02-narrate-then-comply`, `03-memory-outlives-the-patch`, `04-the-wrong-price` |
 | **Ordinary** (fail = defect) | Modules 0 and 2, `payflow`, `payflow-api`, `payflow-multiturn`, `financebot`, `financebot-api`, `financebot-multiturn`, `mybot`, `reverse`, `mcp-local`, Module 4 `01-it-said-done` |
 
 `./run.sh` prints the matching verdict. Quality suites invert even though they are not

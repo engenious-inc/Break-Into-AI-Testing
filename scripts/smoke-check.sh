@@ -123,6 +123,7 @@ CONFIGS=(
   "modules/04-build-an-agent/01-it-said-done/promptfooconfig.yaml"
   "modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml"
   "modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml"
+  "modules/04-build-an-agent/04-the-wrong-price/promptfooconfig.yaml"
 )
 
 # Opt-in configs needing a key/service not present by default — skipped, not failed.

@@ -4,7 +4,7 @@
 
 Every suite so far tested something somebody else built: a system prompt, PayFlow, an MCP
 server. Tonight you build the agent yourself — about 200 lines, no framework — and then
-you find out the three things an agent can get wrong that a chatbot cannot.
+you find out what an agent can get wrong that a chatbot cannot.
 
 A chatbot can only **say** something wrong. An agent can **do** something wrong, and then
 say something reassuring about it. Every lesson in this module is a version of that
@@ -62,6 +62,7 @@ output: {
 | 01 | [`01-it-said-done/`](01-it-said-done/) | The reply is a claim; the database is the receipt. | Ordinary | 1 case red **on purpose** |
 | 02 | [`02-narrate-then-comply/`](02-narrate-then-comply/) | Grade what it did, not what it said it did. | Inverted | 2 controls pass, findings fail |
 | 03 | [`03-memory-outlives-the-patch/`](03-memory-outlives-the-patch/) | Fixing the bug does not clean what the bug wrote. | Inverted | 1 control passes, findings fail |
+| 04 | [`04-the-wrong-price/`](04-the-wrong-price/) | A tool result is not the price. The reply copied it anyway. | Inverted | 1 control passes, the bad quote fails |
 
 Run each from the **repo root** (never `cd` into the lesson — `.env` will not load):
 
@@ -69,11 +70,12 @@ Run each from the **repo root** (never `cd` into the lesson — `.env` will not 
 ./run.sh boxoffice-done
 ./run.sh boxoffice-narrate
 ./run.sh boxoffice-memory
+./run.sh boxoffice-quote
 ./run.sh view
 ```
 
 `./run.sh` prints the verdict. Exit 100 on `boxoffice-done` is the planted VIP refund.
-Exit 100 on the other two means a finding landed. Windows: `.\run.ps1` and the same names.
+Exit 100 on the other three means a finding landed. Windows: `.\run.ps1` and the same names.
 
 Each lesson takes about two minutes on the free tier.
 

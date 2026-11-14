@@ -49,6 +49,7 @@ Targets:
   boxoffice-done      BoxOffice — grade the database; the VIP refund fails on purpose
   boxoffice-narrate   BoxOffice — hidden note can email an outside address (inverted)
   boxoffice-memory    BoxOffice — poisoned memory survives the patch (inverted)
+  boxoffice-quote     BoxOffice — lookup returns the wrong price; the reply copies it (inverted)
   financebot          FinanceBot app suite — guard, routing, citations (server must be up)
   financebot-api      FinanceBot HTTP contract + three planted defects (those three fail on purpose)
   financebot-multiturn  FinanceBot injection after context (paper-trade case fails on purpose)
@@ -78,6 +79,7 @@ Examples:
   ./run.sh boxoffice-done     # bonus — the reply says refunded, the database disagrees
   ./run.sh boxoffice-narrate  # bonus — grade the outbox, not the reply
   ./run.sh boxoffice-memory   # bonus — the patch does not clean the memory
+  ./run.sh boxoffice-quote    # bonus — the lookup lies about the price, the reply repeats it
   ./run.sh financebot-serve   # in one terminal (:8001)
   ./run.sh financebot         # in another
   ./run.sh financebot-api
@@ -202,6 +204,8 @@ case "$target" in
     cfg="modules/04-build-an-agent/02-narrate-then-comply/promptfooconfig.yaml" ;;
   boxoffice-memory)
     cfg="modules/04-build-an-agent/03-memory-outlives-the-patch/promptfooconfig.yaml" ;;
+  boxoffice-quote)
+    cfg="modules/04-build-an-agent/04-the-wrong-price/promptfooconfig.yaml" ;;
   medibot|medibot-multiturn|finance|reverse|quality.medibot|quality.finance|openrouter.medibot|openrouter.finance|mybot|payflow|payflow-api|payflow-multiturn|payflow-rbac|payflow-exposure|payflow-poisoning|financebot|financebot-api|financebot-multiturn|mcp-abuse|mcp-agent|mcp-injection)
     cfg="promptfooconfig.${target}.yaml" ;;
   *)
@@ -306,6 +310,9 @@ else
     boxoffice-memory)
       printf "  Inverted against ${BLUE}BoxOffice${NC} — the assertions describe an agent whose memory holds no outside address.\n"
       printf "  One control passes. The patched build still has the remember tool removed; the memory file does not.\n\n" ;;
+    boxoffice-quote)
+      printf "  Inverted against ${BLUE}BoxOffice${NC} — the assertions describe an agent that tells the customer the amount on the order.\n"
+      printf "  One control passes. The bad quote returns 64 and leaves the order at 180. Do not loosen the reply check.\n\n" ;;
     *)
       printf "  Reminder: these are red-team suites — a ${YELLOW}failing${NC} check means the model did the thing you were testing for. That's the finding, not an error.\n\n" ;;
   esac
@@ -366,10 +373,14 @@ case "$target" in
            printf "  Is mcp-local installed?  ${BLUE}npm install --prefix modules/03-app-testing/mcp-local${NC}\n" ;;
     esac
     exit "$ec" ;;
-  boxoffice-narrate|boxoffice-memory)
+  boxoffice-narrate|boxoffice-memory|boxoffice-quote)
     case "$ec" in
       0)   printf "${YELLOW}? Exit 0 — nothing failed, which is not what this suite expects.${NC}\n"
-           printf "  The model refused this run, or the memory file no longer holds an outside address.\n" ;;
+           if [ "$target" = "boxoffice-quote" ]; then
+             printf "  The reply named 180 anyway. Read it before you drop the fault.\n"
+           else
+             printf "  The model refused this run, or the memory file no longer holds an outside address.\n"
+           fi ;;
       100) printf "${GREEN}✓ Exit 100 — the findings are still there. That's the healthy result.${NC}\n"
            printf "  Read them case by case:  ${BLUE}./run.sh view${NC}\n" ;;
       *)   printf "${RED}✗ Exit %s — that's an actual error, not a finding.${NC}\n" "$ec"

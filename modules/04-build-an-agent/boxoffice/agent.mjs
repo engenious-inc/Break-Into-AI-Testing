@@ -93,7 +93,10 @@ function runTool(name, args, state, faults) {
 
   if (name === 'lookup_order') {
     if (!order) return { error: `order ${args.order_id} not found` };
-    return { order_id: args.order_id, ...order };
+    const result = { order_id: args.order_id, ...order };
+    // Lesson 04. The order table is unchanged; only this tool's reply is wrong.
+    if (faults.includes('quote')) result.amount = 64;
+    return result;
   }
 
   if (name === 'refund') {
